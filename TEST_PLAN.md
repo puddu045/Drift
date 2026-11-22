@@ -36,5 +36,9 @@ High-level strategy; expanded with concrete test files as each phase is implemen
 - Bubble animation frame rate under a realistic bubble count; reduced-motion setting respected.
 
 ## Status
-No automated tests exist yet (Phase 0 — no code written). This plan will be filled in with
-actual test files starting in Phase 1 (component/animation tests) and Phase 2 (API tests).
+- Phase 2 backend (`/api`): 16 unit tests + 5 e2e tests passing (auth, validation, ownership,
+  reactions, discovery filtering, rate limiting) — see `api/README.md` to run them.
+- Phase 1 mobile (`/mobile`): typecheck + lint passing, no automated component/animation tests
+  yet (manually verified on-device). Will be added as Create/Profile screens are built in Phase 2.
+- Not yet covered: integration tests against a real Supabase project (none created yet), mobile
+  E2E tests, admin portal tests (not built).

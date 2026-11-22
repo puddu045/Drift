@@ -7,7 +7,7 @@ See `DECISIONS.md` for the approved stack choices this document implements.
 ```
 ┌─────────────────┐      ┌──────────────────────┐      ┌───────────────┐
 │  Mobile app      │◄────►│  Custom API           │◄────►│  Supabase      │
-│  (Expo / RN / TS)│      │  (NestJS/Fastify, TS) │      │  Postgres/Auth │
+│  (Expo / RN / TS)│      │  (NestJS, Express, TS)│      │  Postgres/Auth │
 └─────────────────┘      └──────────────────────┘      │  Realtime/     │
          ▲                         ▲                    │  Storage       │
          │ Supabase client SDK      │ Prisma             └───────────────┘
@@ -34,9 +34,11 @@ See `DECISIONS.md` for the approved stack choices this document implements.
 
 ## 2. Data model (entities)
 
-Core entities, aligned with the brief, adjusted for the approved consent model:
+Implemented in `/api/prisma/schema.prisma`. Core entities, aligned with the brief, adjusted for
+the approved consent model:
 
-- `User`, `AuthIdentity` (Supabase-managed identity linkage), `UserProfile`, `UserPreferences`
+- `User` (no separate `AuthIdentity` table — Supabase Auth owns identity; see DECISIONS.md),
+  `UserProfile`, `UserPreferences`
 - `Interest`, `UserInterest`
 - `Thought`, `ThoughtReaction`, `ThoughtReply` (flat, `thoughtId` FK only — no parent-reply nesting)
 - `ConnectionRequest` (status: pending/accepted/declined/withdrawn, optional `introMessage` text,
@@ -100,8 +102,17 @@ logs (AuditLog, ModerationAction).
 - Expo EAS for iOS/Android builds and OTA updates.
 - Plan assumes this scales by upgrading tiers, not by re-architecting, as usage grows.
 
-## 7. Open technical questions (non-blocking, to resolve during Phase 2)
+## 7. Open technical questions (non-blocking, to resolve during Phase 3)
 - Exact realtime authorization pattern (RLS vs. custom channel scoping) — will prototype against
   the messaging use case first since it's the highest-stakes for privacy.
 - Push notification provider (Expo push service initially, since it's free and integrates
   directly with EAS).
+
+## 8. Implementation status
+Phase 2 backend (`/api`) is built and tested: Supabase JWT verification with lazy user
+provisioning, profile CRUD, thought create/discover/react/reply/report, and rate limiting — all
+verified against a local Postgres with real HTTP requests (unit + e2e tests, see `api/README.md`).
+No real Supabase project exists yet, so auth has only been tested against locally-signed test
+tokens, not live Supabase-issued ones — that's the first thing to verify once a Supabase project
+is created. Connections, messaging, Destiny, notifications, blocking, and the admin portal are
+Phase 3/4 and not yet built.

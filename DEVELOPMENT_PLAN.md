@@ -7,7 +7,7 @@ Status key: ✅ done · 🔜 next · ⏳ later
 - Captured product, UX, privacy, connection, technical, budget decisions (`DECISIONS.md`).
 - Produced `PRODUCT_REQUIREMENTS.md`, `ARCHITECTURE.md`, `DESIGN_SYSTEM.md`.
 
-## Phase 1 — Design Foundation 🔜 (in progress)
+## Phase 1 — Design Foundation ✅
 - ✅ Expo + TypeScript project scaffold at `/mobile`, using Expo Router (`src/app`), Reanimated,
   and Gesture Handler, per `ARCHITECTURE.md`.
 - ✅ Design tokens implemented (`src/theme`): Midnight Dreamscape palette, typography, spacing.
@@ -18,18 +18,23 @@ Status key: ✅ done · 🔜 next · ⏳ later
 - ✅ Navigation shell: Universe/Destiny/Create/Connections/Profile tabs — Universe is fully
   built, the other four are labeled placeholders pending their phase.
 - ✅ Typecheck, lint, and a Metro bundle export all pass clean.
-- 🔜 Not yet done: text/number input fields, in-browser/device visual QA (no simulator in this
-  environment — needs a run on an actual iOS/Android target or Expo Go), final typography pick,
-  light-mode variant.
-- Review checkpoint with user before moving to backend work.
+- ✅ Visually verified on a real device (Expo Go) — bubbles drift and the tap-to-expand overlay
+  work as intended. User approved moving to Phase 2.
+- Still not done (not blocking): text/number input fields, final typography pick, light-mode
+  variant — will come up naturally once Create/Profile screens are built against real data.
 
-## Phase 2 — Core Backend ⏳
-- Supabase project setup (Postgres, Auth, Storage, Realtime) + Prisma schema matching
-  `ARCHITECTURE.md` §2.
-- Custom NestJS/Fastify API: auth session validation, profile CRUD, thought create/discover/
-  react/reply/report, rate limiting basics.
-- Wire mobile app's composer, universe, and thought detail screens to real data.
-- Seed data for local development (clearly labeled as sample/test content).
+## Phase 2 — Core Backend ✅ (backend) / 🔜 (wiring mobile to it)
+- ✅ Prisma schema matching `ARCHITECTURE.md` §2, migrated against a local Postgres (no real
+  Supabase project created yet — see DECISIONS.md "still open").
+- ✅ Custom NestJS API (`/api`): Supabase JWT verification with lazy user provisioning, profile
+  CRUD, thought create/discover/react/reply/report, rate limiting (60 req/min).
+- ✅ Unit tests (mocked Prisma) + e2e tests (real HTTP requests against a test database) +
+  lint, all passing. Verified by hand with signed test tokens: auth guard, validation errors,
+  ownership checks, rate-limit 429s, soft delete, username conflicts.
+- ✅ Seed script with clearly-labeled sample thoughts for local development.
+- 🔜 Not yet done: creating the real Supabase project; wiring the mobile app's Universe/Create/
+  Profile screens to this API instead of sample data; Supabase client setup in the mobile app
+  for session management.
 
 ## Phase 3 — Connections ⏳
 - Connection request lifecycle (send/accept/decline/withdraw/remove), one-shot intro message.

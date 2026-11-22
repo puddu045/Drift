@@ -8,9 +8,11 @@ unlock private messaging only after mutual consent. Not a dating app — a space
 human connection, built around thoughts rather than appearance.
 
 ## Project status
-Phase 0 (Discovery & Planning) complete. Phase 1 (Design Foundation) is in progress: the Expo
-app scaffold, design system, and a working bubble-universe prototype live in [`/mobile`](./mobile)
-— see `DEVELOPMENT_PLAN.md` for exactly what's built versus still pending.
+Phase 0 (Discovery & Planning) and Phase 1 (Design Foundation) are complete — the Expo app in
+[`/mobile`](./mobile) has a working, on-device-verified bubble-universe prototype. Phase 2 (Core
+Backend) is built in [`/api`](./api): Supabase-auth-verified NestJS API for profiles and thoughts,
+tested end to end. See `DEVELOPMENT_PLAN.md` for exactly what's built versus still pending —
+next up is creating a real Supabase project and wiring the mobile app to this API.
 
 ## Project documents
 - [`DECISIONS.md`](./DECISIONS.md) — approved product/technical decisions (check here before
@@ -25,9 +27,9 @@ app scaffold, design system, and a working bubble-universe prototype live in [`/
 
 ## Tech stack (approved)
 - **Mobile**: React Native + Expo + TypeScript.
-- **Backend**: Supabase (Postgres, Auth, Realtime, Storage) + a thin custom NestJS/Fastify
-  TypeScript API for business logic (consent, moderation, admin, rate limiting).
-- **Admin portal**: Next.js + TypeScript.
+- **Backend**: Supabase (Postgres, Auth, Realtime, Storage) + a thin custom NestJS TypeScript
+  API for business logic (consent, moderation, admin, rate limiting).
+- **Admin portal**: Next.js + TypeScript (not built yet).
 - **Database**: PostgreSQL via Prisma.
 
 ## Running the mobile app
@@ -36,9 +38,12 @@ cd mobile
 npm install
 npm start
 ```
-Then press `i`/`a` for a simulator, or scan the QR code with Expo Go on a physical device.
-There's no backend yet — the Universe screen shows sample thoughts only.
+Then press `i`/`a` for a simulator, or scan the QR code with Expo Go on a physical device. The
+Universe screen still shows sample thoughts — it isn't wired to the API yet.
+
+## Running the backend
+See [`api/README.md`](./api/README.md) — needs a local Postgres.
 
 ## Next step
-Visual QA of the Phase 1 prototype on an actual device/simulator (not available in the
-container this was built in), then moving on to Phase 2 (Core Backend) once reviewed.
+Create a real Supabase project, then wire the mobile app's Universe/Create/Profile screens to
+the `/api` backend instead of sample data.

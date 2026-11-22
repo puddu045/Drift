@@ -33,9 +33,41 @@ These are minor/routine calls made to avoid over-asking (per project Rule 3). Sa
 - **Read receipts / typing indicators / voice notes / photos / video calls / disappearing or editable messages / translation**: none in MVP messaging; each is a distinct future ask, not bundled in automatically.
 - **End-to-end encryption**: not implemented in MVP; messaging is server-authorized and encrypted in transit/at rest (TLS + database encryption), but not E2E. This will be stated accurately in any privacy policy — never claimed as E2E unless actually built.
 
+## Implementation notes (Phase 2 — backend)
+
+Routine technical refinements made while building `/api`, recorded so they aren't re-derived or
+accidentally reversed later:
+
+- **No `AuthIdentity` table.** Supabase Auth owns sign-up/sign-in and its own internal
+  `auth.users`/`auth.identities` tables; we don't mirror them. Our `User.id` is always the same
+  UUID as the Supabase-verified JWT's `sub` claim, and the local `User`/`UserProfile` row is
+  created lazily the first time we see a valid token for that id (`UsersService.ensureUser`).
+  This avoids a cross-schema Postgres trigger and keeps the schema portable.
+- **Prisma 7, not an older Prisma.** Prisma 7 requires a driver adapter (`@prisma/adapter-pg`)
+  and moved the database connection string out of `schema.prisma` into `prisma.config.ts` — a
+  breaking change from what most Prisma docs/training data describe. Generated client lives at
+  `api/src/generated/prisma` (inside `src/` so the Nest build's `rootDir` picks it up), gitignored.
+- **JWT verification**: `@nestjs/authentication`'s `JwtBearerProvider` against Supabase's JWKS
+  endpoint (modern projects) or `SUPABASE_JWT_SECRET` (legacy shared-secret projects) — whichever
+  env var is set. Role for admin RBAC (Phase 4) will come from the JWT's `app_metadata.role`
+  (server-only-writable), never `user_metadata`.
+- **NestJS version**: significantly newer than typical training data — ESM-only, Vitest instead
+  of Jest, `@nestjs/authentication`/`@nestjs/authorization` as the first-party auth packages
+  (not hand-rolled Passport/JWT), Zod + `StandardSchemaValidationPipe` for validation instead of
+  class-validator DTOs. See `api/AGENTS.md` and `api/.claude/skills/` before changing auth,
+  validation, or data-layer code.
+- **No `@nestjs/observe` telemetry.** The Nest scaffold wires up a third-party observability SaaS
+  by default; removed since no one asked for it and it would otherwise start reporting data
+  without an explicit decision to do so.
+- **Local Postgres for development**, pointed at by `api/.env` (gitignored); production/staging
+  points `DATABASE_URL` at the real Supabase project's Postgres once one exists (not created yet).
+
 ## Still open (to revisit later, not blocking MVP start)
 
 - Final app name/trademark/domain check.
 - Final typography choice (will propose once real screens exist).
 - Staging environment specifics.
+- Creating the real Supabase project (needed before the backend's auth can be tested against
+  live Supabase-issued tokens rather than local test tokens, and before mobile can connect to
+  a real backend at all).
 - Legal review of privacy policy / Online Safety Act / App Store & Play policy compliance (flagged as needing professional legal review, not something to self-certify).
