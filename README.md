@@ -8,9 +8,9 @@ unlock private messaging only after mutual consent. Not a dating app — a space
 human connection, built around thoughts rather than appearance.
 
 ## Project status
-Phase 0 (Discovery & Planning) complete. No application code yet — this phase produced the
-approved product/technical plan. See the documents below before starting any implementation
-work.
+Phase 0 (Discovery & Planning) complete. Phase 1 (Design Foundation) is in progress: the Expo
+app scaffold, design system, and a working bubble-universe prototype live in [`/mobile`](./mobile)
+— see `DEVELOPMENT_PLAN.md` for exactly what's built versus still pending.
 
 ## Project documents
 - [`DECISIONS.md`](./DECISIONS.md) — approved product/technical decisions (check here before
@@ -30,6 +30,15 @@ work.
 - **Admin portal**: Next.js + TypeScript.
 - **Database**: PostgreSQL via Prisma.
 
+## Running the mobile app
+```
+cd mobile
+npm install
+npm start
+```
+Then press `i`/`a` for a simulator, or scan the QR code with Expo Go on a physical device.
+There's no backend yet — the Universe screen shows sample thoughts only.
+
 ## Next step
-Phase 1 (Design Foundation): Expo project scaffold, design system implementation, and a
-bubble-animation prototype using sample data — pending your go-ahead.
+Visual QA of the Phase 1 prototype on an actual device/simulator (not available in the
+container this was built in), then moving on to Phase 2 (Core Backend) once reviewed.

@@ -6,15 +6,21 @@ Status key: ✅ done · 🔜 next · ⏳ later
 - Inspected repository (confirmed empty/greenfield).
 - Captured product, UX, privacy, connection, technical, budget decisions (`DECISIONS.md`).
 - Produced `PRODUCT_REQUIREMENTS.md`, `ARCHITECTURE.md`, `DESIGN_SYSTEM.md`.
-- **Gate: waiting on user approval of this plan before any implementation begins.**
 
-## Phase 1 — Design Foundation 🔜
-- Expo + TypeScript project scaffold (mobile app skeleton, no backend calls yet).
-- Design system implementation: color tokens, typography, spacing, base components
-  (button, input, card, mood tag, bubble shell).
-- Bubble animation prototype (2D drifting, tap-to-expand) with mock/sample thought data only —
-  clearly labeled sample content, no real backend yet.
-- Navigation shell (Universe/Destiny/Create/Connections/Profile tabs).
+## Phase 1 — Design Foundation 🔜 (in progress)
+- ✅ Expo + TypeScript project scaffold at `/mobile`, using Expo Router (`src/app`), Reanimated,
+  and Gesture Handler, per `ARCHITECTURE.md`.
+- ✅ Design tokens implemented (`src/theme`): Midnight Dreamscape palette, typography, spacing.
+- ✅ Base components: `Button`, `Card`, `MoodTag`, `ScreenContainer`, `PlaceholderScreen`.
+- ✅ Bubble universe prototype (`src/features/universe`): 2D drifting bubbles over sample
+  thoughts, tap-to-expand detail overlay with reactions/reply/connect UI (visual only, not
+  wired to a backend yet), reduced-motion support. Sample data is clearly labeled as such.
+- ✅ Navigation shell: Universe/Destiny/Create/Connections/Profile tabs — Universe is fully
+  built, the other four are labeled placeholders pending their phase.
+- ✅ Typecheck, lint, and a Metro bundle export all pass clean.
+- 🔜 Not yet done: text/number input fields, in-browser/device visual QA (no simulator in this
+  environment — needs a run on an actual iOS/Android target or Expo Go), final typography pick,
+  light-mode variant.
 - Review checkpoint with user before moving to backend work.
 
 ## Phase 2 — Core Backend ⏳
