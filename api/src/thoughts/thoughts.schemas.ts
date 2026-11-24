@@ -28,7 +28,7 @@ export const createReplySchema = z.object({
 });
 export type CreateReply = z.infer<typeof createReplySchema>;
 
-export const reportTargetTypeSchema = z.enum(['thought', 'reply', 'profile']);
+export const reportTargetTypeSchema = z.enum(['thought', 'reply', 'profile', 'message']);
 
 export const createReportSchema = z.object({
   targetType: reportTargetTypeSchema,

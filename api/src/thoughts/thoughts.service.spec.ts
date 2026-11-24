@@ -2,6 +2,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { vi } from 'vitest';
 
+import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ThoughtsService } from './thoughts.service.js';
 
@@ -18,12 +19,17 @@ describe('ThoughtsService', () => {
     block: { findMany: vi.fn() },
     report: { create: vi.fn() },
   };
+  const notifications = { create: vi.fn() };
   let service: ThoughtsService;
 
   beforeEach(async () => {
     vi.resetAllMocks();
     const moduleRef = await Test.createTestingModule({
-      providers: [ThoughtsService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        ThoughtsService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: NotificationsService, useValue: notifications },
+      ],
     }).compile();
     service = moduleRef.get(ThoughtsService);
   });

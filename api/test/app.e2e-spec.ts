@@ -6,9 +6,15 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 
-process.env.DATABASE_URL ??= 'postgresql://drift:drift_dev_password@localhost:5432/drift_test';
-process.env.SUPABASE_URL ??= 'http://localhost:9999';
-process.env.SUPABASE_JWT_SECRET ??= 'e2e-test-secret-not-for-production-use';
+// Forced, not `??=`: a real .env (pointing at a live Supabase project with
+// JWKS signing keys) would otherwise take precedence and these HS256 test
+// tokens would fail verification against a JWKS instead of a shared secret.
+process.env.DATABASE_URL = 'postgresql://drift:drift_dev_password@localhost:5432/drift_test';
+process.env.SUPABASE_URL = 'http://localhost:9999';
+process.env.SUPABASE_JWT_SECRET = 'e2e-test-secret-not-for-production-use';
+// Empty, not deleted: dotenv only fills in *missing* keys, so an empty
+// string here (still "set") stops it refilling this from a real .env.
+process.env.SUPABASE_JWKS_URL = '';
 
 function signTestToken(sub: string) {
   const b64url = (input: string) => Buffer.from(input).toString('base64url');

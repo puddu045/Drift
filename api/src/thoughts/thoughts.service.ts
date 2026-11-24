@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
+import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   CreateReply,
@@ -13,7 +14,10 @@ type ReactionType = import('zod').infer<typeof reactionTypeSchema>;
 
 @Injectable()
 export class ThoughtsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async create(authorId: string, data: CreateThought) {
     return this.prisma.thought.create({
@@ -88,6 +92,9 @@ export class ThoughtsService {
       return { reacted: false };
     }
     await this.prisma.thoughtReaction.create({ data: { thoughtId, userId, type } });
+    if (thought.authorId !== userId) {
+      await this.notifications.create(thought.authorId, 'reaction', { thoughtId, type });
+    }
     return { reacted: true };
   }
 
@@ -95,9 +102,13 @@ export class ThoughtsService {
     const thought = await this.prisma.thought.findUnique({ where: { id: thoughtId } });
     if (!thought || thought.deletedAt) throw new NotFoundException('Thought not found');
 
-    return this.prisma.thoughtReply.create({
+    const reply = await this.prisma.thoughtReply.create({
       data: { thoughtId, authorId: userId, text: data.text },
     });
+    if (thought.authorId !== userId) {
+      await this.notifications.create(thought.authorId, 'reply', { thoughtId, replyId: reply.id });
+    }
+    return reply;
   }
 
   async report(reporterId: string, data: CreateReport) {
@@ -109,6 +120,7 @@ export class ThoughtsService {
         ...(data.targetType === 'thought' ? { thoughtId: data.targetId } : {}),
         ...(data.targetType === 'reply' ? { replyId: data.targetId } : {}),
         ...(data.targetType === 'profile' ? { reportedUserId: data.targetId } : {}),
+        ...(data.targetType === 'message' ? { messageId: data.targetId } : {}),
       },
     });
   }
