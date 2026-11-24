@@ -7,6 +7,10 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        // No icon set yet (see DESIGN_SYSTEM.md — minimal nav, text-only tabs
+        // for now); without this, the default tab bar tries to render a
+        // built-in icon and shows a broken glyph box instead.
+        tabBarIcon: () => null,
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
