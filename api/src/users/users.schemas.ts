@@ -13,7 +13,17 @@ export const upsertProfileSchema = z.object({
   bio: z.string().trim().max(280).optional(),
   country: z.string().trim().length(2).optional(),
   relationshipIntent: relationshipIntentSchema.optional(),
+  photoUrl: z.url().optional(),
 });
 export type UpsertProfile = z.infer<typeof upsertProfileSchema>;
 
 export const usernameParamSchema = z.string().trim().min(1);
+
+export const updatePreferencesSchema = z.object({
+  showIdentityOnContent: z.boolean().optional(),
+  showCountry: z.boolean().optional(),
+  showActivity: z.boolean().optional(),
+  discoverable: z.boolean().optional(),
+  allowConnectionRequests: z.boolean().optional(),
+});
+export type UpdatePreferences = z.infer<typeof updatePreferencesSchema>;

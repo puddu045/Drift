@@ -61,10 +61,15 @@ export class ConnectionsService {
   }
 
   async listIncoming(userId: string) {
-    return this.prisma.connectionRequest.findMany({
+    const requests = await this.prisma.connectionRequest.findMany({
       where: { recipientId: userId, status: 'pending' },
       orderBy: { createdAt: 'desc' },
+      include: { sender: { select: { profile: { select: { displayName: true, photoUrl: true } } } } },
     });
+    // Unlike anonymous thought/reply authorship, a connection request always
+    // shows the sender's identity — you can't meaningfully decide whether to
+    // accept a request from a total stranger with zero information.
+    return requests.map(({ sender, ...request }) => ({ ...request, senderProfile: sender.profile }));
   }
 
   async listOutgoing(userId: string) {

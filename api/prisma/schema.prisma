@@ -146,6 +146,8 @@ model UserPreferences {
   showCountry               Boolean @default(false)
   showActivity              Boolean @default(false)
   discoverable              Boolean @default(true)
+  // Default off — see DECISIONS.md #1 (anonymous by default, user-controlled reveal).
+  showIdentityOnContent     Boolean @default(false)
   allowConnectionRequests   Boolean @default(true)
   notifyReactions           Boolean @default(true)
   notifyReplies             Boolean @default(true)

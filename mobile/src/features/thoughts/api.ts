@@ -8,12 +8,15 @@ export type Thought = {
   createdAt: string;
 };
 
+export type AuthorIdentity = { displayName: string; photoUrl: string | null } | null;
+
 export type Reply = {
   id: string;
   thoughtId: string;
   authorId: string;
   text: string;
   createdAt: string;
+  author: AuthorIdentity;
 };
 
 export type ThoughtDetail = Thought & {
@@ -21,10 +24,11 @@ export type ThoughtDetail = Thought & {
   isPublic: boolean;
   replies: Reply[];
   _count: { reactions: number };
+  author: AuthorIdentity;
 };
 
 export type ReactionType = 'heart' | 'relate' | 'beautiful' | 'thoughtful' | 'hug';
-export type ReportTargetType = 'thought' | 'reply' | 'profile';
+export type ReportTargetType = 'thought' | 'reply' | 'profile' | 'message';
 
 export function listThoughts(cursor?: string) {
   const query = cursor ? `?cursor=${encodeURIComponent(cursor)}` : '';

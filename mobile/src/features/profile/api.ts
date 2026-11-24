@@ -1,4 +1,5 @@
 import { api } from '@/lib/api';
+import { MoodId } from '@/theme';
 
 export type RelationshipIntent = 'friendship' | 'romance' | 'open' | 'just_sharing';
 
@@ -12,6 +13,7 @@ export type Profile = {
   relationshipIntent: RelationshipIntent;
   createdAt: string;
   updatedAt: string;
+  showIdentityOnContent: boolean;
 };
 
 export type UpsertProfileInput = {
@@ -20,6 +22,7 @@ export type UpsertProfileInput = {
   bio?: string;
   country?: string;
   relationshipIntent?: RelationshipIntent;
+  photoUrl?: string;
 };
 
 export function getOwnProfile() {
@@ -42,4 +45,22 @@ export type PublicProfile = {
 
 export function getPublicProfile(userId: string) {
   return api.get<PublicProfile>(`/profiles/${userId}`);
+}
+
+export type AuthoredThought = { id: string; text: string; mood: MoodId; createdAt: string };
+
+export function getPublicThoughtsByAuthor(userId: string) {
+  return api.get<AuthoredThought[]>(`/profiles/${userId}/thoughts`);
+}
+
+export type UpdatePreferencesInput = {
+  showIdentityOnContent?: boolean;
+  showCountry?: boolean;
+  showActivity?: boolean;
+  discoverable?: boolean;
+  allowConnectionRequests?: boolean;
+};
+
+export function updatePreferences(input: UpdatePreferencesInput) {
+  return api.patch<void>('/profiles/me/preferences', input);
 }

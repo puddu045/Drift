@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
 
+import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { MoodTag } from '@/components/MoodTag';
 import { blockUser } from '@/features/blocks/api';
@@ -36,6 +38,7 @@ type Props = {
 };
 
 export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
+  const router = useRouter();
   const { session } = useSession();
   const [detail, setDetail] = useState<ThoughtDetail | null>(null);
   const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
@@ -101,10 +104,27 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
     onDeleted(); // Reuse the same "remove from view and close" behavior as delete.
   };
 
+  // Only navigable when the author opted to reveal identity — an anonymous
+  // author's userId must never become a way to look up their profile.
+  const onViewAuthor = (authorId: string, author: { displayName: string; photoUrl: string | null } | null) => {
+    if (!author) return;
+    router.push({ pathname: '/user/[userId]', params: { userId: authorId } });
+  };
+
   return (
     <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(150)} style={styles.backdrop}>
       <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
       <Animated.View entering={ZoomIn.duration(220)} exiting={ZoomOut.duration(160)} style={styles.card}>
+        {detail && (
+          <Pressable
+            style={styles.authorRow}
+            onPress={() => onViewAuthor(detail.authorId, detail.author)}
+            disabled={!detail.author}
+          >
+            <Avatar name={detail.author?.displayName} photoUrl={detail.author?.photoUrl} size={28} />
+            <Text style={styles.authorName}>{detail.author?.displayName ?? 'Anonymous'}</Text>
+          </Pressable>
+        )}
         <MoodTag mood={thought.mood} />
         <Text style={styles.text}>{thought.text}</Text>
 
@@ -129,9 +149,17 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
               <Text style={styles.emptyReplies}>No replies yet.</Text>
             ) : (
               detail.replies.map((reply) => (
-                <Text key={reply.id} style={styles.reply}>
-                  {reply.text}
-                </Text>
+                <View key={reply.id} style={styles.replyItem}>
+                  <Pressable
+                    style={styles.authorRow}
+                    onPress={() => onViewAuthor(reply.authorId, reply.author)}
+                    disabled={!reply.author}
+                  >
+                    <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={22} />
+                    <Text style={styles.replyAuthorName}>{reply.author?.displayName ?? 'Anonymous'}</Text>
+                  </Pressable>
+                  <Text style={styles.reply}>{reply.text}</Text>
+                </View>
               ))
             )}
           </View>
@@ -209,6 +237,25 @@ const styles = StyleSheet.create({
     fontSize: typography.size.lg,
     color: colors.textPrimary,
     lineHeight: 28,
+  },
+  authorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  authorName: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    color: colors.textPrimary,
+  },
+  replyItem: {
+    gap: spacing.xs,
+  },
+  replyAuthorName: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.xs,
+    color: colors.textSecondary,
   },
   reactionRow: {
     flexDirection: 'row',

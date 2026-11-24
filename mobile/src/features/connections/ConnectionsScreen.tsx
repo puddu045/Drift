@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 
+import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ScreenContainer } from '@/components/ScreenContainer';
@@ -67,6 +68,13 @@ export function ConnectionsScreen() {
           <Text style={styles.sectionLabel}>Requests</Text>
           {requests.map((request) => (
             <Card key={request.id} style={styles.requestCard}>
+              <View style={styles.authorRow}>
+                <Avatar
+                  name={request.senderProfile?.displayName}
+                  photoUrl={request.senderProfile?.photoUrl}
+                />
+                <Text style={styles.requestName}>{request.senderProfile?.displayName ?? 'Someone'}</Text>
+              </View>
               {request.introMessage && <Text style={styles.intro}>“{request.introMessage}”</Text>}
               <View style={styles.requestActions}>
                 <Button label="Accept" onPress={() => onAccept(request.id)} style={styles.actionButton} />
@@ -98,7 +106,8 @@ export function ConnectionsScreen() {
                 })
               }
             >
-              <Card style={styles.connectionCard}>
+              <Card style={[styles.connectionCard, styles.authorRow]}>
+                <Avatar name={names[item.otherUserId]} />
                 <Text style={styles.connectionLabel}>{names[item.otherUserId] ?? 'Someone'}</Text>
               </Card>
             </Pressable>
@@ -140,6 +149,17 @@ const styles = StyleSheet.create({
   requestCard: {
     marginBottom: spacing.sm,
     gap: spacing.sm,
+  },
+  authorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  requestName: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
+    color: colors.textPrimary,
   },
   intro: {
     fontFamily: typography.fontFamily,

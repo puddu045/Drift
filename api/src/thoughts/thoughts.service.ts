@@ -64,7 +64,32 @@ export class ThoughtsService {
     if (!thought.isPublic && thought.authorId !== viewerId) {
       throw new NotFoundException('Thought not found');
     }
-    return thought;
+
+    const identities = await this.identityMap([thought.authorId, ...thought.replies.map((r) => r.authorId)]);
+    return {
+      ...thought,
+      author: identities.get(thought.authorId) ?? null,
+      replies: thought.replies.map((reply) => ({ ...reply, author: identities.get(reply.authorId) ?? null })),
+    };
+  }
+
+  /**
+   * Display name/photo for authors who opted in (DECISIONS.md #1 — anonymous by
+   * default, user-controlled reveal). Omitted authors stay anonymous to callers.
+   */
+  private async identityMap(authorIds: string[]) {
+    const uniqueIds = [...new Set(authorIds)];
+    const revealed = await this.prisma.userPreferences.findMany({
+      where: { userId: { in: uniqueIds }, showIdentityOnContent: true },
+      select: { userId: true },
+    });
+    if (revealed.length === 0) return new Map<string, { displayName: string; photoUrl: string | null }>();
+
+    const profiles = await this.prisma.userProfile.findMany({
+      where: { userId: { in: revealed.map((r) => r.userId) } },
+      select: { userId: true, displayName: true, photoUrl: true },
+    });
+    return new Map(profiles.map((p) => [p.userId, { displayName: p.displayName, photoUrl: p.photoUrl }]));
   }
 
   async deleteOwn(userId: string, thoughtId: string) {
@@ -108,7 +133,8 @@ export class ThoughtsService {
     if (thought.authorId !== userId) {
       await this.notifications.create(thought.authorId, 'reply', { thoughtId, replyId: reply.id });
     }
-    return reply;
+    const identities = await this.identityMap([userId]);
+    return { ...reply, author: identities.get(userId) ?? null };
   }
 
   async report(reporterId: string, data: CreateReport) {

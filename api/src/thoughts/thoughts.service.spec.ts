@@ -18,12 +18,16 @@ describe('ThoughtsService', () => {
     thoughtReply: { create: vi.fn() },
     block: { findMany: vi.fn() },
     report: { create: vi.fn() },
+    userPreferences: { findMany: vi.fn() },
+    userProfile: { findMany: vi.fn() },
   };
   const notifications = { create: vi.fn() };
   let service: ThoughtsService;
 
   beforeEach(async () => {
     vi.resetAllMocks();
+    prisma.userPreferences.findMany.mockResolvedValue([]);
+    prisma.userProfile.findMany.mockResolvedValue([]);
     const moduleRef = await Test.createTestingModule({
       providers: [
         ThoughtsService,
@@ -98,6 +102,7 @@ describe('ThoughtsService', () => {
         authorId: 'author-1',
         isPublic: false,
         deletedAt: null,
+        replies: [],
       });
       await expect(service.getOne('author-1', 't1')).resolves.toMatchObject({ id: 't1' });
     });

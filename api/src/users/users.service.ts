@@ -1,7 +1,7 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service.js';
-import { UpsertProfile } from './users.schemas.js';
+import { UpdatePreferences, UpsertProfile } from './users.schemas.js';
 
 @Injectable()
 export class UsersService {
@@ -21,8 +21,12 @@ export class UsersService {
   }
 
   async getOwnProfile(userId: string) {
-    const profile = await this.prisma.userProfile.findUnique({ where: { userId } });
-    return profile;
+    const [profile, preferences] = await Promise.all([
+      this.prisma.userProfile.findUnique({ where: { userId } }),
+      this.prisma.userPreferences.findUnique({ where: { userId } }),
+    ]);
+    if (!profile) return null;
+    return { ...profile, showIdentityOnContent: preferences?.showIdentityOnContent ?? false };
   }
 
   async upsertProfile(userId: string, data: UpsertProfile) {
@@ -58,5 +62,34 @@ export class UsersService {
       relationshipIntent: profile.relationshipIntent,
       country: preferences?.showCountry ? profile.country : null,
     };
+  }
+
+  async updatePreferences(userId: string, data: UpdatePreferences) {
+    return this.prisma.userPreferences.upsert({
+      where: { userId },
+      update: data,
+      create: { userId, languages: [], ...data },
+    });
+  }
+
+  /** Another user's public thoughts, for the "view their profile" screen. */
+  async listPublicThoughtsByAuthor(viewerId: string, authorId: string) {
+    const blocked = await this.prisma.block.findFirst({
+      where: {
+        OR: [
+          { blockerId: viewerId, blockedId: authorId },
+          { blockerId: authorId, blockedId: viewerId },
+        ],
+      },
+      select: { id: true },
+    });
+    if (blocked) throw new ForbiddenException('Not available');
+
+    return this.prisma.thought.findMany({
+      where: { authorId, isPublic: true, deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      select: { id: true, text: true, mood: true, createdAt: true },
+    });
   }
 }

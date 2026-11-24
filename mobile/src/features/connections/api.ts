@@ -7,6 +7,9 @@ export type ConnectionRequest = {
   status: 'pending' | 'accepted' | 'declined' | 'withdrawn';
   introMessage: string | null;
   createdAt: string;
+  // Always shown for requests, unlike anonymous thought/reply authorship —
+  // see ConnectionsService.listIncoming for why.
+  senderProfile: { displayName: string; photoUrl: string | null } | null;
 };
 
 export type Connection = {
