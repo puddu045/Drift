@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { moodColors, radius, spacing, typography } from '@/theme';
+import { colors, moodColors, radius, spacing, typography } from '@/theme';
 import { Thought } from '@/features/thoughts/api';
 
 import { BubbleLayout } from './useBubbleLayout';
@@ -85,19 +85,19 @@ const styles = StyleSheet.create({
   bubble: {
     borderRadius: radius.lg * 3,
     borderWidth: 1.5,
-    backgroundColor: 'rgba(169, 201, 245, 0.10)',
+    backgroundColor: 'rgba(255, 255, 255, 0.55)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.md,
-    shadowColor: '#A9C9F5',
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 0 },
+    shadowColor: colors.textPrimary,
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
   },
   text: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
-    color: '#F8F9FD',
+    color: colors.textPrimary,
     textAlign: 'center',
   },
 });

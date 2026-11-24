@@ -6,20 +6,29 @@ See `DECISIONS.md` (#14) for the approved palette direction.
 Premium, minimal, calm, dreamy, slightly magical. Avoid: heavy gradients, clutter, excessive
 icons, heavy shadows, childish illustration, aggressive gamification.
 
-## 2. Color palette — "Midnight Dreamscape"
+## 2. Color palette — "Soft Dawn"
+
+Replaced "Midnight Dreamscape" (2026-11-24) — the dark navy palette read as too dull once seen
+live on a device. Soft Dawn is a full light/warm theme instead.
 
 | Token | Hex | Use |
 |---|---|---|
-| `color.navy` | `#101A35` | Primary background (dark mode base) |
-| `color.deepBlue` | `#24365E` | Secondary surfaces, cards |
-| `color.pastelBlue` | `#A9C9F5` | Accents, calm mood tag |
-| `color.lavender` | `#C8B7F0` | Accents, deep/reflective mood tag |
-| `color.softPink` | `#F2C7DA` | Accents, love mood tag |
-| `color.peach` | `#F4D1BD` | Accents, hopeful mood tag |
-| `color.offWhite` | `#F8F9FD` | Primary text on dark surfaces, light-mode background |
+| `palette.warmWhite` | `#FFFBF7` | Primary background |
+| `palette.navy` | `#15213B` | Primary text, the palette's dark anchor tone (also used as dark text on any light mood badge, regardless of overall theme) |
+| `palette.blush` | `#F6D6E0` | Accent, love mood tag |
+| `palette.apricot` | `#F8C9A7` | Primary accent (buttons), happy/hopeful mood tag |
+| `palette.lilac` | `#D8C9F0` | Accent, deep/curious mood tag |
+| `palette.paleSky` | `#BFE1F6` | Accent, reflective/random/lonely mood tag |
 
-Exact mood-color mapping and a light-mode variant will be finalized once real screens exist
-(Phase 1), using this palette as the fixed starting point.
+Derived tokens (`src/theme/colors.ts`): `background` = warmWhite, `surface` (cards) = a soft
+blush-white tint, `textPrimary`/`textSecondary` = navy at full/62% opacity, `accent` = apricot,
+`onAccent` (text drawn on top of the accent color) = navy.
+
+The two other directions considered are kept here for reference in case this needs revisiting:
+- **Midnight Dreamscape** (original, replaced): navy `#101A35`, deep blue `#24365E`, pastel blue
+  `#A9C9F5`, lavender `#C8B7F0`, soft pink `#F2C7DA`, peach `#F4D1BD`, off-white `#F8F9FD`.
+- **Deep Aurora** (never used): a darker/moodier alternative — space navy `#0B1026`, indigo
+  `#2E2B5F`, aurora teal `#4FD1C5`, soft violet `#B39DDB`, warm coral `#F4A896`.
 
 ## 3. Typography
 - UI text: a clean, highly legible sans-serif (e.g. Inter or similar) — final pick proposed once

@@ -20,7 +20,7 @@ Do not re-ask about anything recorded here unless the user explicitly reopens it
 | 11 | Admin portal | Next.js + TypeScript (unchanged from original brief). |
 | 12 | Hosting/budget | Low-cost / free-tier: Supabase free tier, Expo EAS for builds, a cheap/free host (Railway/Render/Fly.io class) for the custom API. |
 | 13 | Monetization | No payments built in MVP, but data model/feature flags are structured so premium add-ons can be layered in later without a rework. |
-| 14 | Visual palette | "Midnight Dreamscape": navy `#101A35`, deep blue `#24365E`, pastel blue `#A9C9F5`, lavender `#C8B7F0`, soft pink `#F2C7DA`, peach `#F4D1BD`, off-white `#F8F9FD`. |
+| 14 | Visual palette | ~~"Midnight Dreamscape"~~ **"Soft Dawn"** (changed 2026-11-24, see below): a light/warm theme — warm white `#FFFBF7` background, navy `#15213B` text, blush `#F6D6E0` / apricot `#F8C9A7` / lilac `#D8C9F0` / pale sky `#BFE1F6` accents. Original dark navy choice read as too dull once seen on a real device. |
 | 15 | Repository state | Confirmed empty at discovery — Drift is a greenfield build, nothing existing to preserve. |
 
 ## Working assumptions (not yet explicitly asked — flagged for easy override)
@@ -32,6 +32,17 @@ These are minor/routine calls made to avoid over-asking (per project Rule 3). Sa
 - **Navigation structure**: Bottom tabs — Universe, Destiny, Create, Connections (includes messaging), Profile — matching the brief's suggestion.
 - **Read receipts / typing indicators / voice notes / photos / video calls / disappearing or editable messages / translation**: none in MVP messaging; each is a distinct future ask, not bundled in automatically.
 - **End-to-end encryption**: not implemented in MVP; messaging is server-authorized and encrypted in transit/at rest (TLS + database encryption), but not E2E. This will be stated accurately in any privacy policy — never claimed as E2E unless actually built.
+
+## Implementation notes (mobile theming)
+
+- `palette.navy` is the designated "dark anchor" tone of whichever palette is active, used for
+  text on mood badges (always a light pastel background in every palette considered so far) —
+  independent of the app's overall light/dark theme. `colors.textPrimary` is a separate token
+  for general body text and happens to equal `palette.navy` under Soft Dawn, but the two aren't
+  interchangeable: a future dark palette would diverge them again.
+- `colors.onAccent` is the text color to use on top of `colors.accent` (e.g. primary button
+  labels) — added when switching to Soft Dawn because the old assumption ("primary button text
+  = the background color") only worked by coincidence on a dark theme and broke on a light one.
 
 ## Implementation notes (Phase 2 — backend)
 

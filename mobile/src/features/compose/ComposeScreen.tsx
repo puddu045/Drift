@@ -6,7 +6,7 @@ import { Button } from '@/components/Button';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { createThought } from '@/features/thoughts/api';
 import { ApiError } from '@/lib/api';
-import { colors, MoodId, moodColors, radius, spacing, typography } from '@/theme';
+import { colors, MoodId, moodColors, palette, radius, spacing, typography } from '@/theme';
 
 const MOODS: { id: MoodId; label: string }[] = [
   { id: 'love', label: 'Love' },
@@ -148,7 +148,9 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
-    color: '#101A35',
+    // Mood options are always a light pastel, so this stays the palette's
+    // dark anchor tone regardless of the app's overall theme.
+    color: palette.navy,
   },
   privacyRow: {
     flexDirection: 'row',

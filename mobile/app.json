@@ -6,14 +6,14 @@
     "scheme": "drift",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
-    "backgroundColor": "#101A35",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#FFFBF7",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#101A35",
+        "backgroundColor": "#FFFBF7",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { moodColors, MoodId, radius, spacing, typography } from '@/theme';
+import { moodColors, MoodId, palette, radius, spacing, typography } from '@/theme';
 
 const moodLabels: Record<MoodId, string> = {
   love: 'Love',
@@ -32,6 +32,8 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
-    color: '#101A35',
+    // Mood badges are always a light pastel in every palette, so this stays
+    // the palette's dark anchor tone regardless of the app's overall theme.
+    color: palette.navy,
   },
 });

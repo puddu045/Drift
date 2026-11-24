@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.weight.semibold,
   },
   labelPrimary: {
-    color: colors.background,
+    color: colors.onAccent,
   },
   labelGhost: {
     color: colors.textPrimary,
