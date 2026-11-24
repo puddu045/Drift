@@ -17,6 +17,7 @@ function RootNavigator() {
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="notifications" />
     </Stack>
   );
 }

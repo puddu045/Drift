@@ -4,6 +4,8 @@ import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanima
 
 import { Button } from '@/components/Button';
 import { MoodTag } from '@/components/MoodTag';
+import { blockUser } from '@/features/blocks/api';
+import { sendConnectionRequest } from '@/features/connections/api';
 import { useSession } from '@/features/auth/SessionProvider';
 import {
   deleteThought,
@@ -14,6 +16,7 @@ import {
   ThoughtDetail,
   toggleReaction,
 } from '@/features/thoughts/api';
+import { ApiError } from '@/lib/api';
 import { colors, radius, spacing, typography } from '@/theme';
 
 const REACTIONS: { type: Parameters<typeof toggleReaction>[1]; label: string }[] = [
@@ -39,6 +42,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
   const [replyText, setReplyText] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
   const [reporting, setReporting] = useState(false);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,6 +83,22 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
   const onDelete = async () => {
     await deleteThought(thought.id);
     onDeleted();
+  };
+
+  const onConnect = async () => {
+    if (!detail) return;
+    try {
+      await sendConnectionRequest(detail.authorId);
+      setActionMessage('Connection request sent.');
+    } catch (err) {
+      setActionMessage(err instanceof ApiError ? err.message : 'Could not send a request.');
+    }
+  };
+
+  const onBlock = async () => {
+    if (!detail) return;
+    await blockUser(detail.authorId);
+    onDeleted(); // Reuse the same "remove from view and close" behavior as delete.
   };
 
   return (
@@ -129,6 +149,8 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
           <Button label="Send" onPress={onSendReply} disabled={sendingReply || !replyText.trim()} />
         </View>
 
+        {actionMessage && <Text style={styles.actionMessage}>{actionMessage}</Text>}
+
         {reporting ? (
           <View style={styles.reportReasons}>
             {REPORT_REASONS.map((reason) => (
@@ -142,7 +164,11 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
             {isOwnThought ? (
               <Button label="Delete" variant="ghost" onPress={onDelete} style={styles.actionButton} />
             ) : (
-              <Button label="Report" variant="ghost" onPress={() => setReporting(true)} style={styles.actionButton} />
+              <>
+                <Button label="Connect" onPress={onConnect} style={styles.actionButton} />
+                <Button label="Report" variant="ghost" onPress={() => setReporting(true)} style={styles.actionButton} />
+                <Button label="Block" variant="ghost" onPress={onBlock} style={styles.actionButton} />
+              </>
             )}
           </View>
         )}
@@ -247,9 +273,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.danger,
   },
+  actionMessage: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.xs,
+    color: colors.textSecondary,
+  },
   actions: {
     flexDirection: 'row',
     gap: spacing.sm,
+    flexWrap: 'wrap',
   },
   actionButton: {
     flex: 1,

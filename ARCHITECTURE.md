@@ -117,9 +117,8 @@ confirmed working on a physical device: real sign-up, posting real thoughts, and
 the live Universe feed — API running on the user's own machine against the real Supabase
 Postgres, phone on the same Wi-Fi.
 
-Connections, messaging, Destiny, notifications, blocking, and the admin portal are Phase 3/4 and
-not yet built. A real deployment (vs. running the API on a personal machine) is still needed for
-anything beyond active development — see DECISIONS.md "still open".
-
-Connections, messaging, Destiny, notifications, blocking, and the admin portal are Phase 3/4
-and not yet built.
+Phase 3 (connections, messaging, Destiny, in-app notifications, blocks) is also built and
+verified by hand — see DEVELOPMENT_PLAN.md for specifics and known gaps (mute, push delivery,
+moderation queue UI). Only the admin portal (Phase 4) remains unbuilt. A real deployment (vs.
+running the API on a personal machine) is still needed for anything beyond active development —
+see DECISIONS.md "still open".

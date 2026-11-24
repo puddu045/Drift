@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, Text, ViewStyle } from 'react-native';
 
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -6,7 +6,7 @@ type Props = {
   label: string;
   onPress: () => void;
   variant?: 'primary' | 'ghost';
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   disabled?: boolean;
 };
 

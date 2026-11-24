@@ -29,3 +29,17 @@ export function getOwnProfile() {
 export function upsertOwnProfile(input: UpsertProfileInput) {
   return api.patch<Profile>('/profiles/me', input);
 }
+
+export type PublicProfile = {
+  userId: string;
+  displayName: string;
+  username: string;
+  photoUrl: string | null;
+  bio: string | null;
+  relationshipIntent: RelationshipIntent;
+  country: string | null;
+};
+
+export function getPublicProfile(userId: string) {
+  return api.get<PublicProfile>(`/profiles/${userId}`);
+}

@@ -1,10 +1,10 @@
 import { PropsWithChildren } from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors } from '@/theme';
 
-type Props = PropsWithChildren<{ style?: ViewStyle; edges?: ('top' | 'bottom')[] }>;
+type Props = PropsWithChildren<{ style?: StyleProp<ViewStyle>; edges?: ('top' | 'bottom')[] }>;
 
 export function ScreenContainer({ children, style, edges = ['top', 'bottom'] }: Props) {
   return (

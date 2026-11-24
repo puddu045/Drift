@@ -50,13 +50,22 @@ Status key: ✅ done · 🔜 next · ⏳ later
 (Connections: requests, private messaging, notifications, block/mute, Destiny) whenever
 approved.
 
-## Phase 3 — Connections ⏳
-- Connection request lifecycle (send/accept/decline/withdraw/remove), one-shot intro message.
-- Private messaging (conversations, messages, pagination, delivery state) gated on accepted
-  connections.
-- Push + in-app notifications for reactions, replies, requests, acceptances, messages.
-- Block/mute, reporting flows end-to-end into the moderation queue.
-- Destiny mode (simplified daily assignment).
+## Phase 3 — Connections ✅
+- ✅ Backend (`/api`): connection request lifecycle (send/accept/decline/withdraw/remove, one-
+  shot intro message, blocks re-requests after a decline), messaging (gated on an active
+  connection, checked per call), in-app notifications (+ best-effort Expo push if a device token
+  is registered — no mobile capture flow for that yet, scope cut), Destiny (idempotent daily
+  pick), blocks (now also severs any existing connection, caught during manual testing).
+- ✅ Mobile (`/mobile`): Connections tab (incoming requests with accept/decline, connection list)
+  with a nested chat screen; Destiny tab; Connect/Report/Block actions on thought detail;
+  minimal Notifications screen (reachable from Profile).
+- ✅ Verified by hand: full request → accept → message flow, Destiny idempotency, block
+  severing an existing connection. Typecheck, lint, unit + e2e tests, and a Metro bundle export
+  all pass clean.
+- Not done: mute (separate from block — not built), moderation queue UI (that's Phase 4's admin
+  portal), actual push notification delivery (needs a mobile permission/token-capture flow),
+  visual verification of the Phase 3 mobile screens on a device (code-complete, not yet seen
+  running).
 
 ## Phase 4 — Admin and Safety ⏳
 - Admin portal (Next.js): dashboard, user management, moderation queue, audit log, feature flags.

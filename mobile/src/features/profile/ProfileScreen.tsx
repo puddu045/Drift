@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import { Button } from '@/components/Button';
 import { ScreenContainer } from '@/components/ScreenContainer';
@@ -11,6 +12,7 @@ import { ApiError } from '@/lib/api';
 import { colors, spacing, typography } from '@/theme';
 
 export function ProfileScreen() {
+  const router = useRouter();
   const { session } = useSession();
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
@@ -73,6 +75,7 @@ export function ProfileScreen() {
           onPress={onSave}
           disabled={saving || !displayName.trim() || !username.trim()}
         />
+        <Button label="Notifications" variant="ghost" onPress={() => router.push('/notifications')} />
         <Button label="Sign out" variant="ghost" onPress={() => supabase.auth.signOut()} />
       </ScrollView>
     </ScreenContainer>
