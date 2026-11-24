@@ -8,11 +8,12 @@ unlock private messaging only after mutual consent. Not a dating app — a space
 human connection, built around thoughts rather than appearance.
 
 ## Project status
-Phase 0 (Discovery & Planning) and Phase 1 (Design Foundation) are complete — the Expo app in
-[`/mobile`](./mobile) has a working, on-device-verified bubble-universe prototype. Phase 2 (Core
-Backend) is built in [`/api`](./api): Supabase-auth-verified NestJS API for profiles and thoughts,
-tested end to end. See `DEVELOPMENT_PLAN.md` for exactly what's built versus still pending —
-next up is creating a real Supabase project and wiring the mobile app to this API.
+Phase 0, 1 and 2 are complete. [`/api`](./api) is a Supabase-auth-verified NestJS backend for
+profiles and thoughts, tested against a real Supabase project. [`/mobile`](./mobile) is wired to
+it: real sign-in, a real Universe feed, posting real thoughts, reactions/replies/report/delete.
+Not yet verified: the wired app running live on a phone, since the backend only runs reachable
+from the container this was built in right now — see `DECISIONS.md` "still open" for the two
+ways to fix that. See `DEVELOPMENT_PLAN.md` for exactly what's built versus still pending.
 
 ## Project documents
 - [`DECISIONS.md`](./DECISIONS.md) — approved product/technical decisions (check here before
@@ -38,12 +39,13 @@ cd mobile
 npm install
 npm start
 ```
-Then press `i`/`a` for a simulator, or scan the QR code with Expo Go on a physical device. The
-Universe screen still shows sample thoughts — it isn't wired to the API yet.
+Then press `i`/`a` for a simulator, or scan the QR code with Expo Go on a physical device. You'll
+need a real account (the app has a minimal email/password sign-in/sign-up screen) and the API
+running somewhere your device/simulator can reach — see `api/README.md` and `mobile/.env`.
 
 ## Running the backend
 See [`api/README.md`](./api/README.md) — needs a local Postgres.
 
 ## Next step
-Create a real Supabase project, then wire the mobile app's Universe/Create/Profile screens to
-the `/api` backend instead of sample data.
+Get the wired app actually running on a device: either run the API on the same network as the
+test device, or deploy it (see `DECISIONS.md` "still open" for the trade-off).

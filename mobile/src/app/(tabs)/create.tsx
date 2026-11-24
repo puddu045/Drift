@@ -1,10 +1,5 @@
-import { PlaceholderScreen } from '@/components/PlaceholderScreen';
+import { ComposeScreen } from '@/features/compose/ComposeScreen';
 
 export default function CreateTab() {
-  return (
-    <PlaceholderScreen
-      title="Release a thought"
-      description="The thought composer (text, mood, privacy) is built in Phase 2."
-    />
-  );
+  return <ComposeScreen />;
 }

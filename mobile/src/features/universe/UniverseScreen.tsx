@@ -1,8 +1,10 @@
 import { useCallback, useState } from 'react';
-import { LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 
 import { ScreenContainer } from '@/components/ScreenContainer';
-import { sampleThoughts, SampleThought } from '@/data/sampleThoughts';
+import { ApiError } from '@/lib/api';
+import { listThoughts, Thought } from '@/features/thoughts/api';
 import { colors, spacing, typography } from '@/theme';
 
 import { Bubble } from './Bubble';
@@ -12,15 +14,40 @@ import { useReducedMotion } from './useReducedMotion';
 
 export function UniverseScreen() {
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const [selected, setSelected] = useState<SampleThought | null>(null);
+  const [selected, setSelected] = useState<Thought | null>(null);
+  const [thoughts, setThoughts] = useState<Thought[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
 
-  const layouts = useBubbleLayout(sampleThoughts.length, size.width, size.height);
+  const layouts = useBubbleLayout(thoughts.length, size.width, size.height);
 
   const onLayout = useCallback((event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
     setSize({ width, height });
   }, []);
+
+  // Refetch whenever the Universe tab regains focus (e.g. after posting a new
+  // thought from Create), not just once on mount.
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      setLoading(true);
+      listThoughts()
+        .then((result) => {
+          if (!cancelled) setThoughts(result.thoughts);
+        })
+        .catch((err: unknown) => {
+          if (!cancelled) setError(err instanceof ApiError ? err.message : 'Could not load thoughts.');
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+      return () => {
+        cancelled = true;
+      };
+    }, []),
+  );
 
   return (
     <ScreenContainer edges={['top']}>
@@ -30,8 +57,18 @@ export function UniverseScreen() {
       </View>
 
       <View style={styles.field} onLayout={onLayout}>
+        {loading && thoughts.length === 0 && (
+          <View style={styles.centered}>
+            <ActivityIndicator color={colors.accent} />
+          </View>
+        )}
+        {error && (
+          <View style={styles.centered}>
+            <Text style={styles.subtitle}>{error}</Text>
+          </View>
+        )}
         {layouts.length > 0 &&
-          sampleThoughts.map((thought, i) => (
+          thoughts.map((thought, i) => (
             <Bubble
               key={thought.id}
               thought={thought}
@@ -44,7 +81,14 @@ export function UniverseScreen() {
       </View>
 
       {selected && (
-        <ThoughtDetailOverlay thought={selected} onClose={() => setSelected(null)} />
+        <ThoughtDetailOverlay
+          thought={selected}
+          onClose={() => setSelected(null)}
+          onDeleted={() => {
+            setThoughts((prev) => prev.filter((t) => t.id !== selected.id));
+            setSelected(null);
+          }}
+        />
       )}
     </ScreenContainer>
   );
@@ -70,5 +114,14 @@ const styles = StyleSheet.create({
   },
   field: {
     flex: 1,
+  },
+  centered: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

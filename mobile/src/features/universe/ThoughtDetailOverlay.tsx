@@ -1,48 +1,151 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
 
 import { Button } from '@/components/Button';
 import { MoodTag } from '@/components/MoodTag';
-import { SampleThought } from '@/data/sampleThoughts';
+import { useSession } from '@/features/auth/SessionProvider';
+import {
+  deleteThought,
+  getThought,
+  reportTarget,
+  replyToThought,
+  Thought,
+  ThoughtDetail,
+  toggleReaction,
+} from '@/features/thoughts/api';
 import { colors, radius, spacing, typography } from '@/theme';
 
-// Reactions and reply/connect actions are visual-only in this prototype —
-// not wired to a backend yet (see /DEVELOPMENT_PLAN.md, Phase 2/3).
-const REACTIONS = ['Heart', 'Relate', 'Beautiful', 'Thoughtful', 'Hug'];
+const REACTIONS: { type: Parameters<typeof toggleReaction>[1]; label: string }[] = [
+  { type: 'heart', label: 'Heart' },
+  { type: 'relate', label: 'Relate' },
+  { type: 'beautiful', label: 'Beautiful' },
+  { type: 'thoughtful', label: 'Thoughtful' },
+  { type: 'hug', label: 'Hug' },
+];
+
+const REPORT_REASONS = ['Spam', 'Harassment', 'Harmful content', 'Other'];
 
 type Props = {
-  thought: SampleThought;
+  thought: Thought;
   onClose: () => void;
+  onDeleted: () => void;
 };
 
-export function ThoughtDetailOverlay({ thought, onClose }: Props) {
+export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
+  const { session } = useSession();
+  const [detail, setDetail] = useState<ThoughtDetail | null>(null);
+  const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
+  const [replyText, setReplyText] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+  const [reporting, setReporting] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getThought(thought.id).then((result) => {
+      if (!cancelled) setDetail(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [thought.id]);
+
+  const isOwnThought = detail?.authorId === session?.user.id;
+
+  const onReact = async (type: (typeof REACTIONS)[number]['type']) => {
+    const { reacted } = await toggleReaction(thought.id, type);
+    setMyReactions((prev) => {
+      const next = new Set(prev);
+      if (reacted) next.add(type);
+      else next.delete(type);
+      return next;
+    });
+  };
+
+  const onSendReply = async () => {
+    if (!replyText.trim()) return;
+    setSendingReply(true);
+    const reply = await replyToThought(thought.id, replyText.trim());
+    setSendingReply(false);
+    setReplyText('');
+    setDetail((prev) => (prev ? { ...prev, replies: [...prev.replies, reply] } : prev));
+  };
+
+  const onReport = async (reason: string) => {
+    await reportTarget('thought', thought.id, reason);
+    setReporting(false);
+  };
+
+  const onDelete = async () => {
+    await deleteThought(thought.id);
+    onDeleted();
+  };
+
   return (
-    <Animated.View
-      entering={FadeIn.duration(180)}
-      exiting={FadeOut.duration(150)}
-      style={styles.backdrop}
-    >
+    <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(150)} style={styles.backdrop}>
       <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
-      <Animated.View
-        entering={ZoomIn.duration(220)}
-        exiting={ZoomOut.duration(160)}
-        style={styles.card}
-      >
+      <Animated.View entering={ZoomIn.duration(220)} exiting={ZoomOut.duration(160)} style={styles.card}>
         <MoodTag mood={thought.mood} />
         <Text style={styles.text}>{thought.text}</Text>
 
         <View style={styles.reactionRow}>
           {REACTIONS.map((reaction) => (
-            <Pressable key={reaction} style={styles.reactionPill} accessibilityLabel={reaction}>
-              <Text style={styles.reactionLabel}>{reaction}</Text>
+            <Pressable
+              key={reaction.type}
+              style={[styles.reactionPill, myReactions.has(reaction.type) && styles.reactionPillActive]}
+              onPress={() => onReact(reaction.type)}
+              accessibilityLabel={reaction.label}
+            >
+              <Text style={styles.reactionLabel}>{reaction.label}</Text>
             </Pressable>
           ))}
         </View>
 
-        <View style={styles.actions}>
-          <Button label="Reply" variant="ghost" onPress={onClose} style={styles.actionButton} />
-          <Button label="Connect" onPress={onClose} style={styles.actionButton} />
+        {!detail ? (
+          <ActivityIndicator color={colors.accent} />
+        ) : (
+          <View style={styles.replies}>
+            {detail.replies.length === 0 ? (
+              <Text style={styles.emptyReplies}>No replies yet.</Text>
+            ) : (
+              detail.replies.map((reply) => (
+                <Text key={reply.id} style={styles.reply}>
+                  {reply.text}
+                </Text>
+              ))
+            )}
+          </View>
+        )}
+
+        <View style={styles.replyRow}>
+          <TextInput
+            style={styles.replyInput}
+            value={replyText}
+            onChangeText={setReplyText}
+            placeholder="Write a reply..."
+            placeholderTextColor={colors.textSecondary}
+            maxLength={280}
+          />
+          <Button label="Send" onPress={onSendReply} disabled={sendingReply || !replyText.trim()} />
         </View>
+
+        {reporting ? (
+          <View style={styles.reportReasons}>
+            {REPORT_REASONS.map((reason) => (
+              <Pressable key={reason} style={styles.reportReasonPill} onPress={() => onReport(reason)}>
+                <Text style={styles.reactionLabel}>{reason}</Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.actions}>
+            {isOwnThought ? (
+              <Button label="Delete" variant="ghost" onPress={onDelete} style={styles.actionButton} />
+            ) : (
+              <Button label="Report" variant="ghost" onPress={() => setReporting(true)} style={styles.actionButton} />
+            )}
+          </View>
+        )}
 
         <Pressable onPress={onClose} accessibilityLabel="Close thought">
           <Text style={styles.close}>Let it drift away</Text>
@@ -67,6 +170,7 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     maxWidth: 360,
+    maxHeight: '80%',
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
@@ -92,10 +196,56 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  reactionPillActive: {
+    borderColor: colors.accent,
+    backgroundColor: 'rgba(169, 201, 245, 0.16)',
+  },
   reactionLabel: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xs,
     color: colors.textSecondary,
+  },
+  replies: {
+    gap: spacing.xs,
+  },
+  emptyReplies: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.sm,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
+  },
+  reply: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.sm,
+    color: colors.textPrimary,
+  },
+  replyRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    alignItems: 'center',
+  },
+  replyInput: {
+    flex: 1,
+    minHeight: 40,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.sm,
+    color: colors.textPrimary,
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.sm,
+  },
+  reportReasons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  reportReasonPill: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.danger,
   },
   actions: {
     flexDirection: 'row',

@@ -1,10 +1,5 @@
-import { PlaceholderScreen } from '@/components/PlaceholderScreen';
+import { ProfileScreen } from '@/features/profile/ProfileScreen';
 
 export default function ProfileTab() {
-  return (
-    <PlaceholderScreen
-      title="Profile"
-      description="Your pseudonymous identity and privacy controls are built in Phase 2."
-    />
-  );
+  return <ProfileScreen />;
 }

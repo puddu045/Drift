@@ -83,3 +83,9 @@ accidentally reversed later:
 - Whether to re-enable "Confirm email" on the Supabase project before real users sign up
   (currently off for test convenience — see above).
 - Legal review of privacy policy / Online Safety Act / App Store & Play policy compliance (flagged as needing professional legal review, not something to self-certify).
+- **How to test the wired mobile app against a live backend.** The API currently only runs
+  reachable from the cloud container this was built in, not from a phone. Two options: (a) run
+  the API locally on your own machine (same Wi-Fi as your phone), pointed at either a local
+  Postgres or the real Supabase project's Postgres; (b) deploy it to the low-cost host chosen
+  in decision #12 (Railway/Render/Fly.io class). (a) is faster to try right now; (b) is the
+  real target eventually. Not yet decided which to do next.

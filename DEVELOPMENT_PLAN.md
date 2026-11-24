@@ -23,7 +23,7 @@ Status key: ✅ done · 🔜 next · ⏳ later
 - Still not done (not blocking): text/number input fields, final typography pick, light-mode
   variant — will come up naturally once Create/Profile screens are built against real data.
 
-## Phase 2 — Core Backend ✅ (backend + real Supabase) / 🔜 (wiring mobile to it)
+## Phase 2 — Core Backend ✅
 - ✅ Prisma schema matching `ARCHITECTURE.md` §2, migrated against a local Postgres.
 - ✅ Custom NestJS API (`/api`): Supabase JWT verification with lazy user provisioning, profile
   CRUD, thought create/discover/react/reply/report, rate limiting (60 req/min).
@@ -33,9 +33,16 @@ Status key: ✅ done · 🔜 next · ⏳ later
 - ✅ Seed script with clearly-labeled sample thoughts for local development.
 - ✅ Real Supabase project created and auth verified end-to-end against it with a genuine
   Supabase-issued token (not just local test tokens) — see DECISIONS.md.
-- 🔜 Not yet done: wiring the mobile app's Universe/Create/Profile screens to this API instead
-  of sample data; Supabase client setup in the mobile app for session management; deciding
-  whether to re-enable "Confirm email" on the Supabase project before real signups.
+- ✅ Mobile app wired to the API (`/mobile`): Supabase client with session persistence, a
+  minimal email/password auth screen (not the full onboarding flow — see code comment),
+  Universe fetching real thoughts, Create posting real thoughts, thought detail overlay with
+  real reactions/replies/report/delete, Profile view/edit. Typecheck, lint, and a Metro bundle
+  export all pass clean.
+- 🔜 Not yet visually verified on a device — this backend only runs reachable from this
+  container right now, not from the phone this has been tested on. Needs either running the
+  API on the user's own machine (same network as their phone) or a real deployment before that
+  check can happen. Also still open: deciding whether to re-enable "Confirm email" on the
+  Supabase project before real signups.
 
 ## Phase 3 — Connections ⏳
 - Connection request lifecycle (send/accept/decline/withdraw/remove), one-shot intro message.

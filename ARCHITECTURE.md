@@ -109,10 +109,16 @@ logs (AuditLog, ModerationAction).
   directly with EAS).
 
 ## 8. Implementation status
-Phase 2 backend (`/api`) is built and tested: Supabase JWT verification with lazy user
-provisioning, profile CRUD, thought create/discover/react/reply/report, and rate limiting — all
-verified against a local Postgres with real HTTP requests (unit + e2e tests, see `api/README.md`).
-A real Supabase project now exists and auth has been verified end-to-end against it with a real
-Supabase-issued token (see DECISIONS.md), not just locally-signed test tokens. Connections,
-messaging, Destiny, notifications, blocking, and the admin portal are Phase 3/4 and not yet built.
-The mobile app still isn't wired to this backend — Universe still shows sample data.
+Phase 2 is built end to end: backend (`/api` — Supabase JWT verification with lazy user
+provisioning, profile CRUD, thought create/discover/react/reply/report, rate limiting) and
+mobile (`/mobile` — Supabase client, minimal auth screen, Universe/Create/Profile/thought-detail
+wired to real data). A real Supabase project exists and auth has been verified end-to-end
+against it with a real Supabase-issued token (see DECISIONS.md).
+
+Not yet verified: the wired mobile app running against the backend on an actual device — the
+backend currently only runs reachable from the sandboxed container this was built in, not from
+a phone on a different network. That needs either the API running on the same network as the
+test device, or a real deployment (see DECISIONS.md "still open").
+
+Connections, messaging, Destiny, notifications, blocking, and the admin portal are Phase 3/4
+and not yet built.

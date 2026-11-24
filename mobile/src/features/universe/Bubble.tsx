@@ -10,12 +10,12 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { moodColors, radius, spacing, typography } from '@/theme';
-import { SampleThought } from '@/data/sampleThoughts';
+import { Thought } from '@/features/thoughts/api';
 
 import { BubbleLayout } from './useBubbleLayout';
 
 type Props = {
-  thought: SampleThought;
+  thought: Thought;
   layout: BubbleLayout;
   reduceMotion: boolean;
   paused: boolean;
