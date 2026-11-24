@@ -11,9 +11,11 @@ import { InterestsEditModal } from '@/components/InterestsEditModal';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { TextField } from '@/components/TextField';
 import { useSession } from '@/features/auth/SessionProvider';
+import { listMuted, unmuteUser } from '@/features/mutes/api';
 import {
   getMyInterestIds,
   getOwnProfile,
+  getPublicProfile,
   Interest,
   listInterests,
   setMyInterests,
@@ -66,6 +68,7 @@ export function ProfileScreen() {
   const [allInterests, setAllInterests] = useState<Interest[]>([]);
   const [myInterestIds, setMyInterestIds] = useState<string[]>([]);
   const [editingInterests, setEditingInterests] = useState(false);
+  const [mutedUsers, setMutedUsers] = useState<{ userId: string; name: string }[]>([]);
 
   // First-time setup fields — a profile can't be created without these two.
   const [setupName, setSetupName] = useState('');
@@ -89,7 +92,26 @@ export function ProfileScreen() {
       .finally(() => setLoading(false));
     listInterests().then(setAllInterests).catch(() => {});
     getMyInterestIds().then(setMyInterestIds).catch(() => {});
+    listMuted()
+      .then((mutes) => {
+        setMutedUsers(mutes.map((m) => ({ userId: m.mutedId, name: 'Muted user' })));
+        mutes.forEach((m) => {
+          getPublicProfile(m.mutedId)
+            .then((profile) =>
+              setMutedUsers((prev) =>
+                prev.map((u) => (u.userId === m.mutedId ? { ...u, name: profile.displayName } : u)),
+              ),
+            )
+            .catch(() => {});
+        });
+      })
+      .catch(() => {});
   }, []);
+
+  const onUnmute = async (userId: string) => {
+    setMutedUsers((prev) => prev.filter((u) => u.userId !== userId));
+    await unmuteUser(userId);
+  };
 
   const onCreateProfile = async () => {
     if (!setupName.trim() || !setupUsername.trim()) return;
@@ -285,6 +307,20 @@ export function ProfileScreen() {
           <Switch value={showIdentity} onValueChange={onToggleIdentity} />
         </View>
 
+        {mutedUsers.length > 0 && (
+          <View style={styles.mutedSection}>
+            <Text style={styles.fieldLabel}>Muted</Text>
+            {mutedUsers.map((u) => (
+              <View key={u.userId} style={styles.fieldRow}>
+                <Text style={styles.fieldValue}>{u.name}</Text>
+                <Pressable onPress={() => onUnmute(u.userId)} accessibilityLabel={`Unmute ${u.name}`}>
+                  <Text style={styles.editLink}>Unmute</Text>
+                </Pressable>
+              </View>
+            ))}
+          </View>
+        )}
+
         {error && <Text style={styles.error}>{error}</Text>}
 
         <Button label="Sign out" variant="ghost" onPress={() => supabase.auth.signOut()} />
@@ -409,6 +445,9 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
     color: colors.textSecondary,
+  },
+  mutedSection: {
+    gap: spacing.xs,
   },
   error: {
     fontFamily: typography.fontFamily,

@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
+import { MutesService } from '../mutes/mutes.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
@@ -17,6 +18,7 @@ export class ThoughtsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly mutes: MutesService,
   ) {}
 
   async create(authorId: string, data: CreateThought) {
@@ -30,11 +32,14 @@ export class ThoughtsService {
    * A user's own thoughts never appear here; see listMine for those.
    */
   async discover(viewerId: string, query: DiscoverQuery) {
-    const blocks = await this.prisma.block.findMany({
-      where: { OR: [{ blockerId: viewerId }, { blockedId: viewerId }] },
-      select: { blockerId: true, blockedId: true },
-    });
-    const excludedAuthorIds = new Set<string>([viewerId]);
+    const [blocks, mutedIds] = await Promise.all([
+      this.prisma.block.findMany({
+        where: { OR: [{ blockerId: viewerId }, { blockedId: viewerId }] },
+        select: { blockerId: true, blockedId: true },
+      }),
+      this.mutes.mutedAuthorIds(viewerId),
+    ]);
+    const excludedAuthorIds = new Set<string>([viewerId, ...mutedIds]);
     for (const block of blocks) {
       excludedAuthorIds.add(block.blockerId === viewerId ? block.blockedId : block.blockerId);
     }
@@ -67,18 +72,23 @@ export class ThoughtsService {
 
   /** Other people's thoughts the user has reacted to or replied on, for "My Interactions". */
   async listInteractions(userId: string) {
-    const [reactions, replies] = await Promise.all([
+    const [reactions, replies, mutedIds] = await Promise.all([
       this.prisma.thoughtReaction.findMany({ where: { userId }, select: { thoughtId: true } }),
       this.prisma.thoughtReply.findMany({
         where: { authorId: userId, deletedAt: null },
         select: { thoughtId: true },
       }),
+      this.mutes.mutedAuthorIds(userId),
     ]);
     const thoughtIds = [...new Set([...reactions, ...replies].map((r) => r.thoughtId))];
     if (thoughtIds.length === 0) return [];
 
     return this.prisma.thought.findMany({
-      where: { id: { in: thoughtIds }, authorId: { not: userId }, deletedAt: null },
+      where: {
+        id: { in: thoughtIds },
+        authorId: { notIn: [userId, ...mutedIds] },
+        deletedAt: null,
+      },
       orderBy: { createdAt: 'desc' },
       take: 200,
       select: { id: true, text: true, mood: true, createdAt: true },

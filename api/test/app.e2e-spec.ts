@@ -202,3 +202,73 @@ describe('Interests (e2e)', () => {
       .expect(400);
   });
 });
+
+describe('Mutes (e2e)', () => {
+  let app: INestApplication<App>;
+
+  beforeAll(async () => {
+    const { AppModule } = await import('../src/app.module.js');
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(ThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
+    app = moduleRef.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('hides a muted author\'s public thought from discovery, and un-hides it after unmuting', async () => {
+    const viewerId = randomUUID();
+    const mutedAuthorId = randomUUID();
+    const viewer = signTestToken(viewerId);
+    const mutedAuthor = signTestToken(mutedAuthorId);
+
+    const created = await request(app.getHttpServer())
+      .post('/thoughts')
+      .set('Authorization', `Bearer ${mutedAuthor}`)
+      .send({ text: 'Should disappear once muted.', mood: 'curious' })
+      .expect(201);
+
+    const beforeMute = await request(app.getHttpServer())
+      .get('/thoughts')
+      .set('Authorization', `Bearer ${viewer}`)
+      .expect(200);
+    expect(beforeMute.body.thoughts.map((t: { id: string }) => t.id)).toContain(created.body.id);
+
+    await request(app.getHttpServer())
+      .post('/mutes')
+      .set('Authorization', `Bearer ${viewer}`)
+      .send({ userId: mutedAuthorId })
+      .expect(200);
+
+    const whileMuted = await request(app.getHttpServer())
+      .get('/thoughts')
+      .set('Authorization', `Bearer ${viewer}`)
+      .expect(200);
+    expect(whileMuted.body.thoughts.map((t: { id: string }) => t.id)).not.toContain(created.body.id);
+
+    await request(app.getHttpServer())
+      .delete(`/mutes/${mutedAuthorId}`)
+      .set('Authorization', `Bearer ${viewer}`)
+      .expect(204);
+
+    const afterUnmute = await request(app.getHttpServer())
+      .get('/thoughts')
+      .set('Authorization', `Bearer ${viewer}`)
+      .expect(200);
+    expect(afterUnmute.body.thoughts.map((t: { id: string }) => t.id)).toContain(created.body.id);
+  });
+
+  it('rejects muting yourself', async () => {
+    const userId = randomUUID();
+    const token = signTestToken(userId);
+    await request(app.getHttpServer())
+      .post('/mutes')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ userId })
+      .expect(400);
+  });
+});

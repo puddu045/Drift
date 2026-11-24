@@ -115,6 +115,8 @@ model User {
 
   blocksMade        Block[]            @relation("BlocksMade")
   blocksReceived    Block[]            @relation("BlocksReceived")
+  mutesMade         Mute[]             @relation("MutesMade")
+  mutesReceived     Mute[]             @relation("MutesReceived")
   reportsMade       Report[]           @relation("ReportsMade")
   moderationActions ModerationAction[] @relation("ModerationActionsTaken")
 
@@ -341,6 +343,22 @@ model Block {
 
   @@unique([blockerId, blockedId])
   @@map("blocks")
+}
+
+// Unlike Block, muting is silent (the muted user is never told) and one-way:
+// it only hides the muted user's thoughts from the muter's feeds. It doesn't
+// sever connections or block messaging/connection requests.
+model Mute {
+  id        String   @id @default(uuid()) @db.Uuid
+  muterId   String   @db.Uuid
+  mutedId   String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  muter User @relation("MutesMade", fields: [muterId], references: [id], onDelete: Cascade)
+  muted User @relation("MutesReceived", fields: [mutedId], references: [id], onDelete: Cascade)
+
+  @@unique([muterId, mutedId])
+  @@map("mutes")
 }
 
 model Report {

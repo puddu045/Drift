@@ -8,6 +8,7 @@ import { MoodTag } from '@/components/MoodTag';
 import { blockUser } from '@/features/blocks/api';
 import { sendConnectionRequest } from '@/features/connections/api';
 import { useSession } from '@/features/auth/SessionProvider';
+import { muteUser } from '@/features/mutes/api';
 import { UserProfileModal } from '@/features/profile/UserProfileModal';
 import {
   deleteThought,
@@ -101,6 +102,12 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
     if (!detail) return;
     await blockUser(detail.authorId);
     onDeleted(); // Reuse the same "remove from view and close" behavior as delete.
+  };
+
+  const onMute = async () => {
+    if (!detail) return;
+    await muteUser(detail.authorId);
+    setActionMessage('Muted — you won’t see their thoughts anymore.');
   };
 
   // Only viewable when the author opted to reveal identity — an anonymous
@@ -201,6 +208,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
             ) : (
               <>
                 <Button label="Connect" onPress={onConnect} style={styles.actionButton} />
+                <Button label="Mute" variant="ghost" onPress={onMute} style={styles.actionButton} />
                 <Button label="Block" variant="ghost" onPress={onBlock} style={styles.actionButton} />
               </>
             )}

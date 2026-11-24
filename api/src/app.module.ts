@@ -12,6 +12,7 @@ import { DestinyModule } from './destiny/destiny.module.js';
 import { DevicesModule } from './devices/devices.module.js';
 import { InterestsModule } from './interests/interests.module.js';
 import { MessagesModule } from './messages/messages.module.js';
+import { MutesModule } from './mutes/mutes.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { ThoughtsModule } from './thoughts/thoughts.module.js';
@@ -34,6 +35,7 @@ import { UsersModule } from './users/users.module.js';
     DestinyModule,
     DevicesModule,
     InterestsModule,
+    MutesModule,
   ],
   controllers: [AppController],
   providers: [

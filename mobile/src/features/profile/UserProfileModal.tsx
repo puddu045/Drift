@@ -7,6 +7,7 @@ import { Card } from '@/components/Card';
 import { MoodTag } from '@/components/MoodTag';
 import { useSession } from '@/features/auth/SessionProvider';
 import { sendConnectionRequest } from '@/features/connections/api';
+import { muteUser } from '@/features/mutes/api';
 import { reportTarget } from '@/features/thoughts/api';
 import { REPORT_REASONS } from '@/features/thoughts/reportReasons';
 import { ApiError } from '@/lib/api';
@@ -49,6 +50,11 @@ export function UserProfileModal({ userId, onClose }: Props) {
     await reportTarget('profile', userId, reason);
     setReporting(false);
     setActionMessage('Report sent.');
+  };
+
+  const onMute = async () => {
+    await muteUser(userId);
+    setActionMessage('Muted — you won’t see their thoughts anymore.');
   };
 
   return (
@@ -105,6 +111,7 @@ export function UserProfileModal({ userId, onClose }: Props) {
                   ) : (
                     <View style={styles.actions}>
                       <Button label="Connect" onPress={onConnect} style={styles.actionButton} />
+                      <Button label="Mute" variant="ghost" onPress={onMute} style={styles.actionButton} />
                       <Button
                         label="Report"
                         variant="ghost"
@@ -213,6 +220,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: spacing.sm,
+    flexWrap: 'wrap',
   },
   actionButton: {
     flex: 1,

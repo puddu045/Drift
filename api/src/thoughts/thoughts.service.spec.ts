@@ -2,6 +2,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { vi } from 'vitest';
 
+import { MutesService } from '../mutes/mutes.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ThoughtsService } from './thoughts.service.js';
@@ -22,17 +23,20 @@ describe('ThoughtsService', () => {
     userProfile: { findMany: vi.fn() },
   };
   const notifications = { create: vi.fn() };
+  const mutes = { mutedAuthorIds: vi.fn() };
   let service: ThoughtsService;
 
   beforeEach(async () => {
     vi.resetAllMocks();
     prisma.userPreferences.findMany.mockResolvedValue([]);
     prisma.userProfile.findMany.mockResolvedValue([]);
+    mutes.mutedAuthorIds.mockResolvedValue([]);
     const moduleRef = await Test.createTestingModule({
       providers: [
         ThoughtsService,
         { provide: PrismaService, useValue: prisma },
         { provide: NotificationsService, useValue: notifications },
+        { provide: MutesService, useValue: mutes },
       ],
     }).compile();
     service = moduleRef.get(ThoughtsService);
@@ -141,6 +145,22 @@ describe('ThoughtsService', () => {
         }),
       );
     });
+
+    it('excludes muted authors', async () => {
+      prisma.block.findMany.mockResolvedValue([]);
+      mutes.mutedAuthorIds.mockResolvedValue(['muted-1']);
+      prisma.thought.findMany.mockResolvedValue([]);
+
+      await service.discover('viewer', { limit: 20 });
+
+      expect(prisma.thought.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            authorId: { notIn: expect.arrayContaining(['muted-1']) },
+          }),
+        }),
+      );
+    });
   });
 
   describe('listMine', () => {
@@ -178,7 +198,22 @@ describe('ThoughtsService', () => {
 
       expect(prisma.thought.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { id: { in: ['t1', 't2', 't3'] }, authorId: { not: 'user-1' }, deletedAt: null },
+          where: { id: { in: ['t1', 't2', 't3'] }, authorId: { notIn: ['user-1'] }, deletedAt: null },
+        }),
+      );
+    });
+
+    it('also excludes muted authors', async () => {
+      prisma.thoughtReaction.findMany.mockResolvedValue([{ thoughtId: 't1' }]);
+      prisma.thoughtReply.findMany.mockResolvedValue([]);
+      mutes.mutedAuthorIds.mockResolvedValue(['muted-1']);
+      prisma.thought.findMany.mockResolvedValue([]);
+
+      await service.listInteractions('user-1');
+
+      expect(prisma.thought.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: { in: ['t1'] }, authorId: { notIn: ['user-1', 'muted-1'] }, deletedAt: null },
         }),
       );
     });
