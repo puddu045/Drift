@@ -14,7 +14,7 @@ import type { AuthenticatedUser } from '../auth/current-user.js';
 @Policy()
 export class AdminPolicy implements PolicyBefore<AuthenticatedUser> {
   before(user: AuthenticatedUser | null) {
-    return user?.role === 'admin';
+    return user?.role === 'admin' && user.aal === 'aal2';
   }
 
   manage(_user: AuthenticatedUser | null) {

@@ -16,7 +16,7 @@ process.env.SUPABASE_JWT_SECRET = 'e2e-test-secret-not-for-production-use';
 // string here (still "set") stops it refilling this from a real .env.
 process.env.SUPABASE_JWKS_URL = '';
 
-function signTestToken(sub: string, options?: { role?: 'admin' }) {
+function signTestToken(sub: string, options?: { role?: 'admin'; aal?: 'aal1' | 'aal2' }) {
   const b64url = (input: string) => Buffer.from(input).toString('base64url');
   const header = { alg: 'HS256', typ: 'JWT' };
   const now = Math.floor(Date.now() / 1000);
@@ -27,6 +27,10 @@ function signTestToken(sub: string, options?: { role?: 'admin' }) {
     iat: now,
     exp: now + 3600,
     ...(options?.role ? { app_metadata: { role: options.role } } : {}),
+    // Real admin sessions reach aal2 by the time they call anything — default
+    // to that whenever a role is given, so tests that don't care about MFA
+    // specifically don't need to pass it; override with `aal` to test it.
+    ...(options?.role ? { aal: options.aal ?? 'aal2' } : options?.aal ? { aal: options.aal } : {}),
   };
   const unsigned = `${b64url(JSON.stringify(header))}.${b64url(JSON.stringify(payload))}`;
   const signature = createHmac('sha256', process.env.SUPABASE_JWT_SECRET!)
@@ -303,6 +307,11 @@ describe('Admin (e2e)', () => {
     await request(app.getHttpServer()).get('/admin/users').expect(401);
   });
 
+  it('forbids an admin-role token that hasn\'t cleared MFA (aal1)', async () => {
+    const token = signTestToken(randomUUID(), { role: 'admin', aal: 'aal1' });
+    await request(app.getHttpServer()).get('/admin/users').set('Authorization', `Bearer ${token}`).expect(403);
+  });
+
   it('lets an admin list and search users', async () => {
     const admin = signTestToken(randomUUID(), { role: 'admin' });
     const targetId = randomUUID();
@@ -407,5 +416,19 @@ describe('Admin (e2e)', () => {
       .delete(`/admin/feature-flags/${key}`)
       .set('Authorization', `Bearer ${admin}`)
       .expect(204);
+  });
+
+  it('serves dashboard stats only to an admin', async () => {
+    const admin = signTestToken(randomUUID(), { role: 'admin' });
+    const user = signTestToken(randomUUID());
+
+    await request(app.getHttpServer()).get('/admin/dashboard').set('Authorization', `Bearer ${user}`).expect(403);
+
+    const { body } = await request(app.getHttpServer())
+      .get('/admin/dashboard')
+      .set('Authorization', `Bearer ${admin}`)
+      .expect(200);
+    expect(body).toHaveProperty('totalUsers');
+    expect(body).toHaveProperty('openReports');
   });
 });

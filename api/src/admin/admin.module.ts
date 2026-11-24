@@ -3,6 +3,8 @@ import { AuthorizationModule } from '@nestjs/authorization';
 
 import { AdminAuditLogController } from './admin-audit-log.controller.js';
 import { AdminAuditLogService } from './admin-audit-log.service.js';
+import { AdminDashboardController } from './admin-dashboard.controller.js';
+import { AdminDashboardService } from './admin-dashboard.service.js';
 import { AdminFeatureFlagsController } from './admin-feature-flags.controller.js';
 import { AdminFeatureFlagsService } from './admin-feature-flags.service.js';
 import { AdminReportsController } from './admin-reports.controller.js';
@@ -24,7 +26,15 @@ import { AdminPolicy } from './admin.policy.js';
     AdminReportsController,
     AdminAuditLogController,
     AdminFeatureFlagsController,
+    AdminDashboardController,
   ],
-  providers: [AdminPolicy, AdminUsersService, AdminReportsService, AdminAuditLogService, AdminFeatureFlagsService],
+  providers: [
+    AdminPolicy,
+    AdminUsersService,
+    AdminReportsService,
+    AdminAuditLogService,
+    AdminFeatureFlagsService,
+    AdminDashboardService,
+  ],
 })
 export class AdminModule {}

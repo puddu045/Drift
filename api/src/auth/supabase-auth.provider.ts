@@ -45,6 +45,10 @@ export class SupabaseAuthProvider extends JwtBearerProvider<AuthenticatedUser> {
     const appMetadata = claims.app_metadata as { role?: string } | undefined;
     const user = await this.users.ensureUser(claims.sub);
     if (user.status !== 'active') return null;
-    return { id: user.id, role: appMetadata?.role === 'admin' ? 'admin' : 'user' };
+    return {
+      id: user.id,
+      role: appMetadata?.role === 'admin' ? 'admin' : 'user',
+      aal: typeof claims.aal === 'string' ? claims.aal : null,
+    };
   }
 }

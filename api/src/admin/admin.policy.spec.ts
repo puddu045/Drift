@@ -3,12 +3,16 @@ import { AdminPolicy } from './admin.policy.js';
 describe('AdminPolicy', () => {
   const policy = new AdminPolicy();
 
-  it('allows an admin through before()', () => {
-    expect(policy.before({ id: 'u1', role: 'admin' })).toBe(true);
+  it('allows an admin at aal2 through before()', () => {
+    expect(policy.before({ id: 'u1', role: 'admin', aal: 'aal2' })).toBe(true);
   });
 
-  it('denies a regular user', () => {
-    expect(policy.before({ id: 'u1', role: 'user' })).toBe(false);
+  it('denies an admin who hasn\'t completed MFA (aal1)', () => {
+    expect(policy.before({ id: 'u1', role: 'admin', aal: 'aal1' })).toBe(false);
+  });
+
+  it('denies a regular user even at aal2', () => {
+    expect(policy.before({ id: 'u1', role: 'user', aal: 'aal2' })).toBe(false);
   });
 
   it('denies a guest', () => {
