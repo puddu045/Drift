@@ -65,6 +65,26 @@ export class ThoughtsService {
     });
   }
 
+  /** Other people's thoughts the user has reacted to or replied on, for "My Interactions". */
+  async listInteractions(userId: string) {
+    const [reactions, replies] = await Promise.all([
+      this.prisma.thoughtReaction.findMany({ where: { userId }, select: { thoughtId: true } }),
+      this.prisma.thoughtReply.findMany({
+        where: { authorId: userId, deletedAt: null },
+        select: { thoughtId: true },
+      }),
+    ]);
+    const thoughtIds = [...new Set([...reactions, ...replies].map((r) => r.thoughtId))];
+    if (thoughtIds.length === 0) return [];
+
+    return this.prisma.thought.findMany({
+      where: { id: { in: thoughtIds }, authorId: { not: userId }, deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+      select: { id: true, text: true, mood: true, createdAt: true },
+    });
+  }
+
   async getOne(viewerId: string, thoughtId: string) {
     const thought = await this.prisma.thought.findUnique({
       where: { id: thoughtId },

@@ -14,8 +14,8 @@ describe('ThoughtsService', () => {
       findUnique: vi.fn(),
       update: vi.fn(),
     },
-    thoughtReaction: { findUnique: vi.fn(), create: vi.fn(), delete: vi.fn() },
-    thoughtReply: { create: vi.fn() },
+    thoughtReaction: { findUnique: vi.fn(), create: vi.fn(), delete: vi.fn(), findMany: vi.fn() },
+    thoughtReply: { create: vi.fn(), findMany: vi.fn() },
     block: { findMany: vi.fn() },
     report: { create: vi.fn() },
     userPreferences: { findMany: vi.fn() },
@@ -153,6 +153,32 @@ describe('ThoughtsService', () => {
         expect.objectContaining({
           where: { authorId: 'author-1', deletedAt: null },
           orderBy: { createdAt: 'desc' },
+        }),
+      );
+    });
+  });
+
+  describe('listInteractions', () => {
+    it('returns nothing without querying thoughts when there are no reactions or replies', async () => {
+      prisma.thoughtReaction.findMany.mockResolvedValue([]);
+      prisma.thoughtReply.findMany.mockResolvedValue([]);
+
+      const result = await service.listInteractions('user-1');
+
+      expect(result).toEqual([]);
+      expect(prisma.thought.findMany).not.toHaveBeenCalled();
+    });
+
+    it('fetches the deduped union of reacted-to and replied-to thoughts, excluding the caller\'s own', async () => {
+      prisma.thoughtReaction.findMany.mockResolvedValue([{ thoughtId: 't1' }, { thoughtId: 't2' }]);
+      prisma.thoughtReply.findMany.mockResolvedValue([{ thoughtId: 't2' }, { thoughtId: 't3' }]);
+      prisma.thought.findMany.mockResolvedValue([]);
+
+      await service.listInteractions('user-1');
+
+      expect(prisma.thought.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: { in: ['t1', 't2', 't3'] }, authorId: { not: 'user-1' }, deletedAt: null },
         }),
       );
     });

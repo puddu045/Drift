@@ -39,7 +39,6 @@ export default function TabLayout() {
         }}
       >
         <Tabs.Screen name="index" options={{ title: 'Universe', tabBarIcon: tabIcon('planet-outline') }} />
-        <Tabs.Screen name="mine" options={{ title: 'Mine', tabBarIcon: tabIcon('albums-outline') }} />
         <Tabs.Screen name="destiny" options={{ title: 'Destiny', tabBarIcon: tabIcon('star-outline') }} />
         <Tabs.Screen
           name="create"

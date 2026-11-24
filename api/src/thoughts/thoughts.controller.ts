@@ -40,6 +40,11 @@ export class ThoughtsController {
     return this.thoughts.listMine(user.id);
   }
 
+  @Get('interactions')
+  listInteractions(@CurrentUser() user: AuthenticatedUser) {
+    return this.thoughts.listInteractions(user.id);
+  }
+
   @Get(':id')
   getOne(@CurrentUser() user: AuthenticatedUser, @Param('id', { schema: idParamSchema }) id: string) {
     return this.thoughts.getOne(user.id, id);

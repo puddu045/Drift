@@ -40,6 +40,11 @@ export function listMyThoughts() {
   return api.get<Thought[]>('/thoughts/mine');
 }
 
+/** Other people's thoughts the caller has reacted to or replied on. */
+export function listInteractions() {
+  return api.get<Thought[]>('/thoughts/interactions');
+}
+
 export function createThought(input: { text: string; mood: MoodId; isPublic?: boolean }) {
   return api.post<Thought>('/thoughts', input);
 }
