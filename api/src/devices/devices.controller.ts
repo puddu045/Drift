@@ -4,7 +4,7 @@ import { CurrentUser } from '@nestjs/authentication';
 import type { AuthenticatedUser } from '../auth/current-user.js';
 import { DevicesService } from './devices.service.js';
 import type { RegisterDevice } from './devices.schemas.js';
-import { registerDeviceSchema } from './devices.schemas.js';
+import { registerDeviceSchema, tokenParamSchema } from './devices.schemas.js';
 
 @Controller('device-tokens')
 export class DevicesController {
@@ -18,7 +18,7 @@ export class DevicesController {
 
   @Delete(':token')
   @HttpCode(204)
-  unregister(@CurrentUser() user: AuthenticatedUser, @Param('token') token: string) {
+  unregister(@CurrentUser() user: AuthenticatedUser, @Param('token', { schema: tokenParamSchema }) token: string) {
     return this.devices.unregister(user.id, token);
   }
 }

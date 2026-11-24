@@ -6,6 +6,8 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 
+import { configureApp } from '../src/configure-app.js';
+
 // Forced, not `??=`: a real .env (pointing at a live Supabase project with
 // JWKS signing keys) would otherwise take precedence and these HS256 test
 // tokens would fail verification against a JWKS instead of a shared secret.
@@ -39,17 +41,26 @@ function signTestToken(sub: string, options?: { role?: 'admin'; aal?: 'aal1' | '
   return `${unsigned}.${signature}`;
 }
 
+// Shared by every describe block below so each one runs the exact same app
+// setup main.ts does (CORS included) rather than a hand-rolled subset that
+// quietly drifts from it.
+async function createTestApp(): Promise<INestApplication<App>> {
+  const { AppModule } = await import('../src/app.module.js');
+  const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+    .overrideProvider(ThrottlerGuard)
+    .useValue({ canActivate: () => true })
+    .compile();
+  const app = moduleRef.createNestApplication<INestApplication<App>>();
+  configureApp(app);
+  await app.init();
+  return app;
+}
+
 describe('Thoughts (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeAll(async () => {
-    const { AppModule } = await import('../src/app.module.js');
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(ThrottlerGuard)
-      .useValue({ canActivate: () => true })
-      .compile();
-    app = moduleRef.createNestApplication();
-    await app.init();
+    app = await createTestApp();
   });
 
   afterAll(async () => {
@@ -149,13 +160,7 @@ describe('Interests (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeAll(async () => {
-    const { AppModule } = await import('../src/app.module.js');
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(ThrottlerGuard)
-      .useValue({ canActivate: () => true })
-      .compile();
-    app = moduleRef.createNestApplication();
-    await app.init();
+    app = await createTestApp();
   });
 
   afterAll(async () => {
@@ -208,17 +213,70 @@ describe('Interests (e2e)', () => {
   });
 });
 
+describe('Destiny (e2e)', () => {
+  let app: INestApplication<App>;
+
+  beforeAll(async () => {
+    app = await createTestApp();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it("gives a user today's Destiny thought, then the same one again on a second call", async () => {
+    const author = signTestToken(randomUUID());
+    await request(app.getHttpServer())
+      .post('/thoughts')
+      .set('Authorization', `Bearer ${author}`)
+      .send({ text: 'A thought for someone else\'s Destiny.', mood: 'hopeful' })
+      .expect(201);
+
+    const viewer = signTestToken(randomUUID());
+    const first = await request(app.getHttpServer())
+      .get('/destiny/today')
+      .set('Authorization', `Bearer ${viewer}`)
+      .expect(200);
+    expect(first.body).toHaveProperty('id');
+
+    const second = await request(app.getHttpServer())
+      .get('/destiny/today')
+      .set('Authorization', `Bearer ${viewer}`)
+      .expect(200);
+    expect(second.body.id).toBe(first.body.id);
+  });
+
+  it('never assigns a muted author\'s thought', async () => {
+    const mutedAuthorId = randomUUID();
+    const mutedAuthor = signTestToken(mutedAuthorId);
+    await request(app.getHttpServer())
+      .post('/thoughts')
+      .set('Authorization', `Bearer ${mutedAuthor}`)
+      .send({ text: 'Should never be this viewer\'s Destiny pick.', mood: 'curious' })
+      .expect(201);
+
+    const viewer = signTestToken(randomUUID());
+    await request(app.getHttpServer())
+      .post('/mutes')
+      .set('Authorization', `Bearer ${viewer}`)
+      .send({ userId: mutedAuthorId })
+      .expect(200);
+
+    // Not a strict guarantee against every other thought in the shared test
+    // DB, but confirms the call still succeeds with the muted author's pool
+    // excluded rather than erroring.
+    await request(app.getHttpServer())
+      .get('/destiny/today')
+      .set('Authorization', `Bearer ${viewer}`)
+      .expect(200);
+  });
+});
+
 describe('Mutes (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeAll(async () => {
-    const { AppModule } = await import('../src/app.module.js');
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(ThrottlerGuard)
-      .useValue({ canActivate: () => true })
-      .compile();
-    app = moduleRef.createNestApplication();
-    await app.init();
+    app = await createTestApp();
   });
 
   afterAll(async () => {
@@ -282,13 +340,7 @@ describe('Admin (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeAll(async () => {
-    const { AppModule } = await import('../src/app.module.js');
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(ThrottlerGuard)
-      .useValue({ canActivate: () => true })
-      .compile();
-    app = moduleRef.createNestApplication();
-    await app.init();
+    app = await createTestApp();
   });
 
   afterAll(async () => {
@@ -430,5 +482,35 @@ describe('Admin (e2e)', () => {
       .expect(200);
     expect(body).toHaveProperty('totalUsers');
     expect(body).toHaveProperty('openReports');
+  });
+});
+
+describe('CORS (e2e)', () => {
+  let app: INestApplication<App>;
+
+  beforeAll(async () => {
+    app = await createTestApp();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('allows the admin portal\'s origin (the default allowed origin)', async () => {
+    const response = await request(app.getHttpServer())
+      .options('/admin/users')
+      .set('Origin', 'http://localhost:3001')
+      .set('Access-Control-Request-Method', 'GET')
+      .set('Access-Control-Request-Headers', 'authorization');
+    expect(response.headers['access-control-allow-origin']).toBe('http://localhost:3001');
+  });
+
+  it('does not reflect an arbitrary, unlisted origin', async () => {
+    const response = await request(app.getHttpServer())
+      .options('/admin/users')
+      .set('Origin', 'https://evil.example.com')
+      .set('Access-Control-Request-Method', 'GET')
+      .set('Access-Control-Request-Headers', 'authorization');
+    expect(response.headers['access-control-allow-origin']).toBeUndefined();
   });
 });

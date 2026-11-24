@@ -5,3 +5,5 @@ export const registerDeviceSchema = z.object({
   platform: z.enum(['ios', 'android']),
 });
 export type RegisterDevice = z.infer<typeof registerDeviceSchema>;
+
+export const tokenParamSchema = z.string().trim().min(1);

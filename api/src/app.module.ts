@@ -1,7 +1,6 @@
 import { Module, StandardSchemaValidationPipe } from '@nestjs/common';
-import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { AdminModule } from './admin/admin.module.js';
 import { AppController } from './app.controller.js';
@@ -16,17 +15,18 @@ import { MessagesModule } from './messages/messages.module.js';
 import { MutesModule } from './mutes/mutes.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { RateLimitModule } from './rate-limit/rate-limit.module.js';
 import { ThoughtsModule } from './thoughts/thoughts.module.js';
 import { UsersModule } from './users/users.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ThrottlerModule.forRoot({
-      throttlers: [{ ttl: 60_000, limit: 60 }],
-    }),
     PrismaModule,
     AuthModule,
+    // After AuthModule: its guard must populate request.user before
+    // RateLimitModule's guard reads it (see that module's own comment).
+    RateLimitModule,
     UsersModule,
     ThoughtsModule,
     BlocksModule,
@@ -40,11 +40,6 @@ import { UsersModule } from './users/users.module.js';
     AdminModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    ThrottlerGuard,
-    { provide: APP_GUARD, useExisting: ThrottlerGuard },
-    { provide: APP_PIPE, useClass: StandardSchemaValidationPipe },
-  ],
+  providers: [AppService, { provide: APP_PIPE, useClass: StandardSchemaValidationPipe }],
 })
 export class AppModule {}

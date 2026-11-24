@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { MutesService } from '../mutes/mutes.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 function startOfToday() {
@@ -9,7 +10,10 @@ function startOfToday() {
 
 @Injectable()
 export class DestinyService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mutes: MutesService,
+  ) {}
 
   async getToday(userId: string) {
     const today = startOfToday();
@@ -20,11 +24,14 @@ export class DestinyService {
     });
     if (existing) return existing.thought;
 
-    const blocks = await this.prisma.block.findMany({
-      where: { OR: [{ blockerId: userId }, { blockedId: userId }] },
-      select: { blockerId: true, blockedId: true },
-    });
-    const excludedAuthorIds = new Set<string>([userId]);
+    const [blocks, mutedIds] = await Promise.all([
+      this.prisma.block.findMany({
+        where: { OR: [{ blockerId: userId }, { blockedId: userId }] },
+        select: { blockerId: true, blockedId: true },
+      }),
+      this.mutes.mutedAuthorIds(userId),
+    ]);
+    const excludedAuthorIds = new Set<string>([userId, ...mutedIds]);
     for (const block of blocks) {
       excludedAuthorIds.add(block.blockerId === userId ? block.blockedId : block.blockerId);
     }

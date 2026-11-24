@@ -1,5 +1,6 @@
 import { Controller, Delete, Get, HttpCode, Param, Post, Body } from '@nestjs/common';
 import { CurrentUser } from '@nestjs/authentication';
+import { Throttle } from '@nestjs/throttler';
 
 import type { AuthenticatedUser } from '../auth/current-user.js';
 import { ConnectionsService } from './connections.service.js';
@@ -10,6 +11,10 @@ import { createRequestSchema, idParamSchema } from './connections.schemas.js';
 export class ConnectionsController {
   constructor(private readonly connections: ConnectionsService) {}
 
+  // Tighter than the app-wide default: a burst of requests to many different
+  // people is itself the abuse pattern here (spam/harassment), not just a
+  // symptom of a buggy client retrying.
+  @Throttle({ default: { limit: 15, ttl: 60_000 } })
   @Post('connection-requests')
   sendRequest(@CurrentUser() user: AuthenticatedUser, @Body({ schema: createRequestSchema }) body: CreateRequest) {
     return this.connections.sendRequest(user.id, body);
