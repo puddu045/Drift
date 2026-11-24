@@ -126,5 +126,35 @@ describe('ThoughtsService', () => {
         }),
       );
     });
+
+    it('always excludes the viewer\'s own thoughts, even with no blocks', async () => {
+      prisma.block.findMany.mockResolvedValue([]);
+      prisma.thought.findMany.mockResolvedValue([]);
+
+      await service.discover('viewer', { limit: 20 });
+
+      expect(prisma.thought.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            authorId: { notIn: ['viewer'] },
+          }),
+        }),
+      );
+    });
+  });
+
+  describe('listMine', () => {
+    it('lists only the caller\'s own, non-deleted thoughts, most recent first', async () => {
+      prisma.thought.findMany.mockResolvedValue([]);
+
+      await service.listMine('author-1');
+
+      expect(prisma.thought.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { authorId: 'author-1', deletedAt: null },
+          orderBy: { createdAt: 'desc' },
+        }),
+      );
+    });
   });
 });

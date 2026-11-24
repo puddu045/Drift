@@ -35,6 +35,11 @@ export class ThoughtsController {
     return this.thoughts.discover(user.id, query);
   }
 
+  @Get('mine')
+  listMine(@CurrentUser() user: AuthenticatedUser) {
+    return this.thoughts.listMine(user.id);
+  }
+
   @Get(':id')
   getOne(@CurrentUser() user: AuthenticatedUser, @Param('id', { schema: idParamSchema }) id: string) {
     return this.thoughts.getOne(user.id, id);

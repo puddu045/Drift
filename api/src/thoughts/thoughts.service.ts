@@ -25,13 +25,16 @@ export class ThoughtsService {
     });
   }
 
-  /** Global public feed for the Universe screen, cursor-paginated by recency. */
+  /**
+   * Global public feed for the Universe screen — other people's thoughts only.
+   * A user's own thoughts never appear here; see listMine for those.
+   */
   async discover(viewerId: string, query: DiscoverQuery) {
     const blocks = await this.prisma.block.findMany({
       where: { OR: [{ blockerId: viewerId }, { blockedId: viewerId }] },
       select: { blockerId: true, blockedId: true },
     });
-    const excludedAuthorIds = new Set<string>();
+    const excludedAuthorIds = new Set<string>([viewerId]);
     for (const block of blocks) {
       excludedAuthorIds.add(block.blockerId === viewerId ? block.blockedId : block.blockerId);
     }
@@ -50,6 +53,16 @@ export class ThoughtsService {
 
     const nextCursor = thoughts.length === query.limit ? thoughts[thoughts.length - 1].id : null;
     return { thoughts, nextCursor };
+  }
+
+  /** Everything a user has posted themselves, for their own "My Thoughts" view. */
+  async listMine(userId: string) {
+    return this.prisma.thought.findMany({
+      where: { authorId: userId, deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+      select: { id: true, text: true, mood: true, createdAt: true },
+    });
   }
 
   async getOne(viewerId: string, thoughtId: string) {

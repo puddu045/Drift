@@ -22,18 +22,28 @@ function seededRandom(seed: number): number {
   return x - Math.floor(x);
 }
 
-function computeLayout(count: number, width: number, height: number): BubbleLayout[] {
+function computeLayout(count: number, width: number, height: number, pinnedCount: number): BubbleLayout[] {
   const columns = Math.max(1, Math.round(Math.sqrt((count * width) / height)));
   const rows = Math.ceil(count / columns);
   const cellWidth = width / columns;
   const cellHeight = height / rows;
+  const totalCells = columns * rows;
 
-  // Deterministic shuffle of grid cells (Fisher-Yates seeded by the loop index).
-  const cells = Array.from({ length: columns * rows }, (_, i) => i);
-  for (let i = cells.length - 1; i > 0; i--) {
+  // Pinned bubbles (e.g. ones with an unseen reaction/reply) always get the
+  // first row-major cells, so they visibly float at the top instead of
+  // landing wherever the shuffle happens to put them.
+  const pinned = Math.min(Math.max(pinnedCount, 0), totalCells);
+  const pinnedCells = Array.from({ length: pinned }, (_, i) => i);
+
+  // Deterministic shuffle of the remaining grid cells (Fisher-Yates seeded by
+  // the loop index).
+  const remainingCells = Array.from({ length: totalCells - pinned }, (_, i) => i + pinned);
+  for (let i = remainingCells.length - 1; i > 0; i--) {
     const j = Math.floor(seededRandom(i * 7.13 + 1) * (i + 1));
-    [cells[i], cells[j]] = [cells[j], cells[i]];
+    [remainingCells[i], remainingCells[j]] = [remainingCells[j], remainingCells[i]];
   }
+
+  const cells = [...pinnedCells, ...remainingCells];
 
   return Array.from({ length: count }, (_, i) => {
     const cell = cells[i % cells.length];
@@ -65,9 +75,14 @@ function computeLayout(count: number, width: number, height: number): BubbleLayo
  * looking organic rather than a rigid grid. Recomputed only when the bubble
  * count or the container size changes.
  */
-export function useBubbleLayout(count: number, width: number, height: number): BubbleLayout[] {
+export function useBubbleLayout(
+  count: number,
+  width: number,
+  height: number,
+  pinnedCount = 0,
+): BubbleLayout[] {
   return useMemo(() => {
     if (width <= 0 || height <= 0) return [];
-    return computeLayout(count, width, height);
-  }, [count, width, height]);
+    return computeLayout(count, width, height, pinnedCount);
+  }, [count, width, height, pinnedCount]);
 }

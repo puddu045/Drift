@@ -35,6 +35,11 @@ export function listThoughts(cursor?: string) {
   return api.get<{ thoughts: Thought[]; nextCursor: string | null }>(`/thoughts${query}`);
 }
 
+/** Everything the caller has posted themselves — never part of the Universe feed. */
+export function listMyThoughts() {
+  return api.get<Thought[]>('/thoughts/mine');
+}
+
 export function createThought(input: { text: string; mood: MoodId; isPublic?: boolean }) {
   return api.post<Thought>('/thoughts', input);
 }

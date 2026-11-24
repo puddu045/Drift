@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   cancelAnimation,
   Easing,
@@ -20,9 +20,10 @@ type Props = {
   reduceMotion: boolean;
   paused: boolean;
   onPress: () => void;
+  hasNotification?: boolean;
 };
 
-export function Bubble({ thought, layout, reduceMotion, paused, onPress }: Props) {
+export function Bubble({ thought, layout, reduceMotion, paused, onPress, hasNotification }: Props) {
   const progress = useSharedValue(0);
 
   useEffect(() => {
@@ -73,6 +74,7 @@ export function Bubble({ thought, layout, reduceMotion, paused, onPress }: Props
         <Text numberOfLines={4} style={styles.text}>
           {thought.text}
         </Text>
+        {hasNotification && <View style={styles.notificationDot} accessibilityLabel="New activity" />}
       </Pressable>
     </Animated.View>
   );
@@ -99,5 +101,16 @@ const styles = StyleSheet.create({
     fontSize: typography.size.sm,
     color: colors.textPrimary,
     textAlign: 'center',
+  },
+  notificationDot: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: colors.danger,
+    borderWidth: 1.5,
+    borderColor: colors.background,
   },
 });

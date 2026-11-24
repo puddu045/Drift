@@ -241,6 +241,9 @@ export function ProfileScreen() {
   return (
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.content}>
+        <Pressable onPress={() => router.back()} accessibilityLabel="Back">
+          <Text style={styles.back}>‹ Back</Text>
+        </Pressable>
         <Text style={styles.title}>Profile</Text>
 
         <Pressable onPress={onPickPhoto} style={styles.photoRow} disabled={uploadingPhoto}>
@@ -284,7 +287,6 @@ export function ProfileScreen() {
 
         {error && <Text style={styles.error}>{error}</Text>}
 
-        <Button label="Notifications" variant="ghost" onPress={() => router.push('/notifications')} />
         <Button label="Sign out" variant="ghost" onPress={() => supabase.auth.signOut()} />
       </ScrollView>
 
@@ -332,6 +334,11 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     gap: spacing.md,
+  },
+  back: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.md,
+    color: colors.accent,
   },
   title: {
     fontFamily: typography.fontFamily,

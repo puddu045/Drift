@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { ColorValue } from 'react-native';
+import { ColorValue, View } from 'react-native';
 
+import { TopRightBar } from '@/components/TopRightBar';
 import { colors, typography } from '@/theme';
 
 type IconName = keyof typeof Ionicons.glyphMap;
@@ -20,36 +21,36 @@ function tabIcon(name: IconName) {
 
 export default function TabLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-        },
-        tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.textSecondary,
-        tabBarLabelStyle: {
-          fontFamily: typography.fontFamily,
-          fontSize: typography.size.xs,
-          fontWeight: typography.weight.medium,
-        },
-      }}
-    >
-      <Tabs.Screen name="index" options={{ title: 'Universe', tabBarIcon: tabIcon('planet-outline') }} />
-      <Tabs.Screen name="destiny" options={{ title: 'Destiny', tabBarIcon: tabIcon('star-outline') }} />
-      <Tabs.Screen
-        name="create"
-        options={{ title: 'Create', tabBarIcon: tabIcon('add-circle-outline') }}
-      />
-      <Tabs.Screen
-        name="connections"
-        options={{ title: 'Connections', tabBarIcon: tabIcon('people-outline') }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{ title: 'Profile', tabBarIcon: tabIcon('person-circle-outline') }}
-      />
-    </Tabs>
+    <View style={{ flex: 1 }}>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: colors.surface,
+            borderTopColor: colors.border,
+          },
+          tabBarActiveTintColor: colors.accent,
+          tabBarInactiveTintColor: colors.textSecondary,
+          tabBarLabelStyle: {
+            fontFamily: typography.fontFamily,
+            fontSize: typography.size.xs,
+            fontWeight: typography.weight.medium,
+          },
+        }}
+      >
+        <Tabs.Screen name="index" options={{ title: 'Universe', tabBarIcon: tabIcon('planet-outline') }} />
+        <Tabs.Screen name="mine" options={{ title: 'Mine', tabBarIcon: tabIcon('albums-outline') }} />
+        <Tabs.Screen name="destiny" options={{ title: 'Destiny', tabBarIcon: tabIcon('star-outline') }} />
+        <Tabs.Screen
+          name="create"
+          options={{ title: 'Create', tabBarIcon: tabIcon('add-circle-outline') }}
+        />
+        <Tabs.Screen
+          name="connections"
+          options={{ title: 'Connections', tabBarIcon: tabIcon('people-outline') }}
+        />
+      </Tabs>
+      <TopRightBar />
+    </View>
   );
 }

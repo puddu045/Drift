@@ -71,13 +71,31 @@ describe('Thoughts (e2e)', () => {
       .expect(400);
   });
 
-  it('creates a thought then finds it in discovery, as the authenticated caller', async () => {
+  it('creates a thought that a different viewer finds in discovery', async () => {
+    const author = signTestToken(randomUUID());
+    const viewer = signTestToken(randomUUID());
+
+    const created = await request(app.getHttpServer())
+      .post('/thoughts')
+      .set('Authorization', `Bearer ${author}`)
+      .send({ text: 'A thought from the e2e suite.', mood: 'curious' })
+      .expect(201);
+
+    const discovered = await request(app.getHttpServer())
+      .get('/thoughts')
+      .set('Authorization', `Bearer ${viewer}`)
+      .expect(200);
+
+    expect(discovered.body.thoughts.map((t: { id: string }) => t.id)).toContain(created.body.id);
+  });
+
+  it('never shows the viewer their own thoughts in discovery', async () => {
     const token = signTestToken(randomUUID());
 
     const created = await request(app.getHttpServer())
       .post('/thoughts')
       .set('Authorization', `Bearer ${token}`)
-      .send({ text: 'A thought from the e2e suite.', mood: 'curious' })
+      .send({ text: 'Mine, not for my own Universe feed.', mood: 'curious' })
       .expect(201);
 
     const discovered = await request(app.getHttpServer())
@@ -85,7 +103,24 @@ describe('Thoughts (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
-    expect(discovered.body.thoughts.map((t: { id: string }) => t.id)).toContain(created.body.id);
+    expect(discovered.body.thoughts.map((t: { id: string }) => t.id)).not.toContain(created.body.id);
+  });
+
+  it('lists a user\'s own thoughts via /thoughts/mine', async () => {
+    const token = signTestToken(randomUUID());
+
+    const created = await request(app.getHttpServer())
+      .post('/thoughts')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ text: 'Findable in My Thoughts.', mood: 'happy' })
+      .expect(201);
+
+    const mine = await request(app.getHttpServer())
+      .get('/thoughts/mine')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(mine.body.map((t: { id: string }) => t.id)).toContain(created.body.id);
   });
 
   it('forbids deleting a thought that belongs to someone else', async () => {
