@@ -7,10 +7,19 @@ import { decode } from 'base64-arraybuffer';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { EditFieldModal } from '@/components/EditFieldModal';
+import { InterestsEditModal } from '@/components/InterestsEditModal';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { TextField } from '@/components/TextField';
 import { useSession } from '@/features/auth/SessionProvider';
-import { getOwnProfile, updatePreferences, upsertOwnProfile } from '@/features/profile/api';
+import {
+  getMyInterestIds,
+  getOwnProfile,
+  Interest,
+  listInterests,
+  setMyInterests,
+  updatePreferences,
+  upsertOwnProfile,
+} from '@/features/profile/api';
 import { supabase } from '@/lib/supabase';
 import { ApiError } from '@/lib/api';
 import { colors, radius, spacing, typography } from '@/theme';
@@ -54,6 +63,9 @@ export function ProfileScreen() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<FieldKey>(null);
+  const [allInterests, setAllInterests] = useState<Interest[]>([]);
+  const [myInterestIds, setMyInterestIds] = useState<string[]>([]);
+  const [editingInterests, setEditingInterests] = useState(false);
 
   // First-time setup fields — a profile can't be created without these two.
   const [setupName, setSetupName] = useState('');
@@ -75,6 +87,8 @@ export function ProfileScreen() {
         // setup card below rather than treated as an error.
       })
       .finally(() => setLoading(false));
+    listInterests().then(setAllInterests).catch(() => {});
+    getMyInterestIds().then(setMyInterestIds).catch(() => {});
   }, []);
 
   const onCreateProfile = async () => {
@@ -128,6 +142,16 @@ export function ProfileScreen() {
   const onToggleIdentity = async (value: boolean) => {
     setShowIdentity(value);
     await updatePreferences({ showIdentityOnContent: value });
+  };
+
+  const onSaveInterests = async (ids: string[]) => {
+    setMyInterestIds(ids);
+    setEditingInterests(false);
+    try {
+      await setMyInterests(ids);
+    } catch (err) {
+      setError(describeError(err, 'Could not save your interests.'));
+    }
   };
 
   const onPickPhoto = async () => {
@@ -218,7 +242,6 @@ export function ProfileScreen() {
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Profile</Text>
-        <Text style={styles.subtitle}>{session?.user.email}</Text>
 
         <Pressable onPress={onPickPhoto} style={styles.photoRow} disabled={uploadingPhoto}>
           <Avatar name={displayName} photoUrl={photoUrl} size={72} />
@@ -232,6 +255,27 @@ export function ProfileScreen() {
           e.g. fantasticMouse92.
         </Text>
         <FieldRow label="Bio" value={bio || 'Not set'} onEdit={() => setEditing('bio')} />
+
+        <View style={styles.fieldRow}>
+          <View style={styles.fieldText}>
+            <Text style={styles.fieldLabel}>Email</Text>
+            <Text style={styles.fieldValue}>{session?.user.email}</Text>
+          </View>
+        </View>
+        <Text style={styles.hint}>Private — only you can see your email. It&rsquo;s never shown to anyone else.</Text>
+
+        <FieldRow
+          label="Interests"
+          value={
+            myInterestIds.length > 0
+              ? allInterests
+                  .filter((interest) => myInterestIds.includes(interest.id))
+                  .map((interest) => interest.name)
+                  .join(', ')
+              : 'Not set'
+          }
+          onEdit={() => setEditingInterests(true)}
+        />
 
         <View style={styles.toggleRow}>
           <Text style={styles.toggleLabel}>Show my name/photo on my public thoughts and replies</Text>
@@ -255,6 +299,15 @@ export function ProfileScreen() {
           hint={FIELD_CONFIG[editing].hint}
           onCancel={() => setEditing(null)}
           onSave={onSaveField}
+        />
+      )}
+
+      {editingInterests && (
+        <InterestsEditModal
+          allInterests={allInterests}
+          selectedIds={myInterestIds}
+          onCancel={() => setEditingInterests(false)}
+          onSave={onSaveInterests}
         />
       )}
     </ScreenContainer>

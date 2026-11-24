@@ -41,6 +41,7 @@ export type PublicProfile = {
   bio: string | null;
   relationshipIntent: RelationshipIntent;
   country: string | null;
+  interests: string[];
 };
 
 export function getPublicProfile(userId: string) {
@@ -63,4 +64,18 @@ export type UpdatePreferencesInput = {
 
 export function updatePreferences(input: UpdatePreferencesInput) {
   return api.patch<void>('/profiles/me/preferences', input);
+}
+
+export type Interest = { id: string; name: string };
+
+export function listInterests() {
+  return api.get<Interest[]>('/interests');
+}
+
+export function getMyInterestIds() {
+  return api.get<string[]>('/profiles/me/interests');
+}
+
+export function setMyInterests(interestIds: string[]) {
+  return api.put<void>('/profiles/me/interests', { interestIds });
 }

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
 
 import { Avatar } from '@/components/Avatar';
@@ -9,6 +8,7 @@ import { MoodTag } from '@/components/MoodTag';
 import { blockUser } from '@/features/blocks/api';
 import { sendConnectionRequest } from '@/features/connections/api';
 import { useSession } from '@/features/auth/SessionProvider';
+import { UserProfileModal } from '@/features/profile/UserProfileModal';
 import {
   deleteThought,
   getThought,
@@ -38,7 +38,6 @@ type Props = {
 };
 
 export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
-  const router = useRouter();
   const { session } = useSession();
   const [detail, setDetail] = useState<ThoughtDetail | null>(null);
   const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
@@ -46,6 +45,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
   const [sendingReply, setSendingReply] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [viewingAuthorId, setViewingAuthorId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -104,7 +104,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
     onDeleted(); // Reuse the same "remove from view and close" behavior as delete.
   };
 
-  // Only navigable when the author opted to reveal identity — an anonymous
+  // Only viewable when the author opted to reveal identity — an anonymous
   // author's userId must never become a way to look up their profile. Tapping
   // an anonymous avatar still gives feedback rather than silently doing nothing.
   const onViewAuthor = (authorId: string, author: { displayName: string; photoUrl: string | null } | null) => {
@@ -112,7 +112,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
       setActionMessage('This person has chosen to stay anonymous.');
       return;
     }
-    router.push({ pathname: '/user/[userId]', params: { userId: authorId } });
+    setViewingAuthorId(authorId);
   };
 
   return (
@@ -150,9 +150,8 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
             ) : (
               detail.replies.map((reply) => (
                 <View key={reply.id} style={styles.replyItem}>
-                  <Pressable style={styles.authorRow} onPress={() => onViewAuthor(reply.authorId, reply.author)}>
-                    <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={22} />
-                    <Text style={styles.replyAuthorName}>{reply.author?.displayName ?? 'Anonymous'}</Text>
+                  <Pressable onPress={() => onViewAuthor(reply.authorId, reply.author)}>
+                    <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={26} />
                   </Pressable>
                   <Text style={styles.reply}>{reply.text}</Text>
                 </View>
@@ -201,6 +200,10 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
           <Text style={styles.close}>Let it drift away</Text>
         </Pressable>
       </Animated.View>
+
+      {viewingAuthorId && (
+        <UserProfileModal userId={viewingAuthorId} onClose={() => setViewingAuthorId(null)} />
+      )}
     </Animated.View>
   );
 }
@@ -246,12 +249,9 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   replyItem: {
-    gap: spacing.xs,
-  },
-  replyAuthorName: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.size.xs,
-    color: colors.textSecondary,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
   },
   reactionRow: {
     flexDirection: 'row',
@@ -284,9 +284,11 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   reply: {
+    flex: 1,
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
     color: colors.textPrimary,
+    paddingTop: 4,
   },
   replyRow: {
     flexDirection: 'row',

@@ -1,9 +1,10 @@
-import { Body, Controller, Get, NotFoundException, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Patch, Put } from '@nestjs/common';
 import { CurrentUser } from '@nestjs/authentication';
 
 import type { AuthenticatedUser } from '../auth/current-user.js';
-import type { UpdatePreferences, UpsertProfile } from './users.schemas.js';
+import type { SetInterests, UpdatePreferences, UpsertProfile } from './users.schemas.js';
 import {
+  setInterestsSchema,
   updatePreferencesSchema,
   upsertProfileSchema,
   usernameParamSchema,
@@ -35,6 +36,19 @@ export class UsersController {
     @Body({ schema: updatePreferencesSchema }) body: UpdatePreferences,
   ) {
     return this.users.updatePreferences(user.id, body);
+  }
+
+  @Get('me/interests')
+  async getMyInterests(@CurrentUser() user: AuthenticatedUser) {
+    return this.users.getMyInterestIds(user.id);
+  }
+
+  @Put('me/interests')
+  async setMyInterests(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body({ schema: setInterestsSchema }) body: SetInterests,
+  ) {
+    return this.users.setMyInterests(user.id, body);
   }
 
   @Get(':userId')

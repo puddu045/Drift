@@ -104,3 +104,66 @@ describe('Thoughts (e2e)', () => {
       .expect(403);
   });
 });
+
+describe('Interests (e2e)', () => {
+  let app: INestApplication<App>;
+
+  beforeAll(async () => {
+    const { AppModule } = await import('../src/app.module.js');
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(ThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
+    app = moduleRef.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('lists the curated interests', async () => {
+    const token = signTestToken(randomUUID());
+    const { body } = await request(app.getHttpServer())
+      .get('/interests')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(Array.isArray(body)).toBe(true);
+    expect(body.length).toBeGreaterThan(0);
+    expect(body[0]).toHaveProperty('id');
+    expect(body[0]).toHaveProperty('name');
+  });
+
+  it('saves and returns a user\'s chosen interests', async () => {
+    const token = signTestToken(randomUUID());
+
+    const { body: all } = await request(app.getHttpServer())
+      .get('/interests')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    const chosenIds = all.slice(0, 2).map((i: { id: string }) => i.id);
+
+    await request(app.getHttpServer())
+      .put('/profiles/me/interests')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ interestIds: chosenIds })
+      .expect(200);
+
+    const { body: mine } = await request(app.getHttpServer())
+      .get('/profiles/me/interests')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(new Set(mine)).toEqual(new Set(chosenIds));
+  });
+
+  it('rejects an interest id that does not exist', async () => {
+    const token = signTestToken(randomUUID());
+    await request(app.getHttpServer())
+      .put('/profiles/me/interests')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ interestIds: [randomUUID()] })
+      .expect(400);
+  });
+});

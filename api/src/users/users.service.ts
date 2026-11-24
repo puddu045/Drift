@@ -1,7 +1,7 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service.js';
-import { UpdatePreferences, UpsertProfile } from './users.schemas.js';
+import { SetInterests, UpdatePreferences, UpsertProfile } from './users.schemas.js';
 
 @Injectable()
 export class UsersService {
@@ -47,9 +47,10 @@ export class UsersService {
 
   /** Public-safe view of another user's profile, honoring their privacy settings. */
   async getPublicProfile(userId: string) {
-    const [profile, preferences] = await Promise.all([
+    const [profile, preferences, interests] = await Promise.all([
       this.prisma.userProfile.findUnique({ where: { userId } }),
       this.prisma.userPreferences.findUnique({ where: { userId } }),
+      this.prisma.userInterest.findMany({ where: { userId }, select: { interest: { select: { name: true } } } }),
     ]);
     if (!profile) throw new NotFoundException('Profile not found');
 
@@ -61,6 +62,7 @@ export class UsersService {
       bio: profile.bio,
       relationshipIntent: profile.relationshipIntent,
       country: preferences?.showCountry ? profile.country : null,
+      interests: interests.map((i) => i.interest.name),
     };
   }
 
@@ -70,6 +72,26 @@ export class UsersService {
       update: data,
       create: { userId, languages: [], ...data },
     });
+  }
+
+  async getMyInterestIds(userId: string) {
+    const rows = await this.prisma.userInterest.findMany({ where: { userId }, select: { interestId: true } });
+    return rows.map((r) => r.interestId);
+  }
+
+  async setMyInterests(userId: string, data: SetInterests) {
+    const uniqueIds = [...new Set(data.interestIds)];
+    if (uniqueIds.length > 0) {
+      const count = await this.prisma.interest.count({ where: { id: { in: uniqueIds } } });
+      if (count !== uniqueIds.length) throw new BadRequestException('One or more interests do not exist');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.userInterest.deleteMany({ where: { userId } }),
+      this.prisma.userInterest.createMany({
+        data: uniqueIds.map((interestId) => ({ userId, interestId })),
+      }),
+    ]);
   }
 
   /** Another user's public thoughts, for the "view their profile" screen. */

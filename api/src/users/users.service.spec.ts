@@ -1,4 +1,4 @@
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { vi } from 'vitest';
 
@@ -10,6 +10,9 @@ describe('UsersService', () => {
     user: { upsert: vi.fn() },
     userProfile: { findUnique: vi.fn(), upsert: vi.fn() },
     userPreferences: { findUnique: vi.fn() },
+    userInterest: { findMany: vi.fn(), deleteMany: vi.fn(), createMany: vi.fn() },
+    interest: { count: vi.fn() },
+    $transaction: vi.fn(),
   };
   let service: UsersService;
 
@@ -67,6 +70,7 @@ describe('UsersService', () => {
         country: 'US',
       });
       prisma.userPreferences.findUnique.mockResolvedValue({ showCountry: false });
+      prisma.userInterest.findMany.mockResolvedValue([]);
 
       const result = await service.getPublicProfile('u1');
       expect(result.country).toBeNull();
@@ -83,9 +87,56 @@ describe('UsersService', () => {
         country: 'US',
       });
       prisma.userPreferences.findUnique.mockResolvedValue({ showCountry: true });
+      prisma.userInterest.findMany.mockResolvedValue([]);
 
       const result = await service.getPublicProfile('u1');
       expect(result.country).toBe('US');
+    });
+
+    it('includes the owner\'s interest names', async () => {
+      prisma.userProfile.findUnique.mockResolvedValue({
+        userId: 'u1',
+        displayName: 'Alice',
+        username: 'alice',
+        photoUrl: null,
+        bio: null,
+        relationshipIntent: 'just_sharing',
+        country: 'US',
+      });
+      prisma.userPreferences.findUnique.mockResolvedValue({ showCountry: false });
+      prisma.userInterest.findMany.mockResolvedValue([
+        { interest: { name: 'Music' } },
+        { interest: { name: 'Travel' } },
+      ]);
+
+      const result = await service.getPublicProfile('u1');
+      expect(result.interests).toEqual(['Music', 'Travel']);
+    });
+  });
+
+  describe('setMyInterests', () => {
+    it('rejects an interest id that does not exist', async () => {
+      prisma.interest.count.mockResolvedValue(1);
+      await expect(
+        service.setMyInterests('u1', { interestIds: ['a', 'b'] }),
+      ).rejects.toThrow(BadRequestException);
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('replaces the user\'s interests in a transaction', async () => {
+      prisma.interest.count.mockResolvedValue(2);
+      prisma.$transaction.mockResolvedValue(undefined);
+
+      await service.setMyInterests('u1', { interestIds: ['a', 'b'] });
+
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+      expect(prisma.userInterest.deleteMany).toHaveBeenCalledWith({ where: { userId: 'u1' } });
+      expect(prisma.userInterest.createMany).toHaveBeenCalledWith({
+        data: [
+          { userId: 'u1', interestId: 'a' },
+          { userId: 'u1', interestId: 'b' },
+        ],
+      });
     });
   });
 });

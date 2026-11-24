@@ -27,3 +27,8 @@ export const updatePreferencesSchema = z.object({
   allowConnectionRequests: z.boolean().optional(),
 });
 export type UpdatePreferences = z.infer<typeof updatePreferencesSchema>;
+
+export const setInterestsSchema = z.object({
+  interestIds: z.array(z.uuid()).max(20),
+});
+export type SetInterests = z.infer<typeof setInterestsSchema>;
