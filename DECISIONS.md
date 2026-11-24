@@ -60,14 +60,26 @@ accidentally reversed later:
   by default; removed since no one asked for it and it would otherwise start reporting data
   without an explicit decision to do so.
 - **Local Postgres for development**, pointed at by `api/.env` (gitignored); production/staging
-  points `DATABASE_URL` at the real Supabase project's Postgres once one exists (not created yet).
+  points `DATABASE_URL` at the real Supabase project's Postgres once database migration there
+  is needed (local Postgres still used for day-to-day dev — see below).
+- **Real Supabase project created** (2026-11-24), in the `layo-production` org, project name
+  "Drift", URL `https://rljolrhpywrrokrwvgrt.supabase.co`, modern ECC/JWKS signing keys (no
+  legacy shared secret). Verified end-to-end: a real Supabase-issued token is correctly checked
+  against its live JWKS endpoint and provisions a local `User` row.
+- **Email provider testing state**: to test sign-in without hitting Supabase's free-tier email
+  rate limit, "Confirm email" was turned off and a test user was created via the dashboard's
+  "Add user" + "Auto Confirm User". **Revisit before any real signups are allowed** — decide
+  whether email confirmation should be required (standard/recommended) and turn it back on.
+- **Sandboxed dev environment quirk**: Node's built-in `fetch` doesn't read this container's
+  `HTTPS_PROXY` by default, so the backend needs `NODE_USE_ENV_PROXY=1` set to reach Supabase's
+  JWKS endpoint when run inside this particular cloud container. Not needed on a normal host
+  with direct internet access (e.g. actual deployment, or most local dev machines).
 
 ## Still open (to revisit later, not blocking MVP start)
 
 - Final app name/trademark/domain check.
 - Final typography choice (will propose once real screens exist).
 - Staging environment specifics.
-- Creating the real Supabase project (needed before the backend's auth can be tested against
-  live Supabase-issued tokens rather than local test tokens, and before mobile can connect to
-  a real backend at all).
+- Whether to re-enable "Confirm email" on the Supabase project before real users sign up
+  (currently off for test convenience — see above).
 - Legal review of privacy policy / Online Safety Act / App Store & Play policy compliance (flagged as needing professional legal review, not something to self-certify).

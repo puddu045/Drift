@@ -112,7 +112,7 @@ logs (AuditLog, ModerationAction).
 Phase 2 backend (`/api`) is built and tested: Supabase JWT verification with lazy user
 provisioning, profile CRUD, thought create/discover/react/reply/report, and rate limiting — all
 verified against a local Postgres with real HTTP requests (unit + e2e tests, see `api/README.md`).
-No real Supabase project exists yet, so auth has only been tested against locally-signed test
-tokens, not live Supabase-issued ones — that's the first thing to verify once a Supabase project
-is created. Connections, messaging, Destiny, notifications, blocking, and the admin portal are
-Phase 3/4 and not yet built.
+A real Supabase project now exists and auth has been verified end-to-end against it with a real
+Supabase-issued token (see DECISIONS.md), not just locally-signed test tokens. Connections,
+messaging, Destiny, notifications, blocking, and the admin portal are Phase 3/4 and not yet built.
+The mobile app still isn't wired to this backend — Universe still shows sample data.

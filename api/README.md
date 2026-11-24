@@ -35,9 +35,19 @@ npx prisma db seed       # optional: adds a few sample thoughts, clearly not rea
 npm run start:dev
 ```
 
-For `SUPABASE_URL`/`SUPABASE_JWKS_URL`/`SUPABASE_JWT_SECRET`: these only matter once a real
-Supabase project exists (not yet created — see `/DECISIONS.md`). Until then, requests need a
-token signed with a test value of `SUPABASE_JWT_SECRET` to pass authentication locally.
+A real Supabase project now exists (see `/DECISIONS.md`) and this has been verified end-to-end
+against it: real Supabase-issued tokens are correctly verified via its live JWKS endpoint, and
+the local `User` row gets provisioned automatically. Set `SUPABASE_URL` and `SUPABASE_JWKS_URL`
+in `.env` to that project's values (Project Settings → API for the URL; the JWKS path is
+`<url>/auth/v1/.well-known/jwks.json`). `SUPABASE_JWT_SECRET` is only for a project still on the
+legacy shared-secret setup — not needed here.
+
+**If running in a network-sandboxed environment** (no direct internet, only an HTTPS proxy —
+this is the case in the cloud container this was built in): Node's built-in `fetch`, which the
+JWKS client uses, does not read `HTTPS_PROXY` by default. Run the server with
+`NODE_USE_ENV_PROXY=1` set (Node ≥ 22.21) so JWKS lookups actually go through the proxy — e.g.
+`NODE_USE_ENV_PROXY=1 npm run start:dev`. Not needed on a normal machine/host with direct
+internet access.
 
 ## Tests
 

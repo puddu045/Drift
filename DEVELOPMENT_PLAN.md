@@ -23,18 +23,19 @@ Status key: ✅ done · 🔜 next · ⏳ later
 - Still not done (not blocking): text/number input fields, final typography pick, light-mode
   variant — will come up naturally once Create/Profile screens are built against real data.
 
-## Phase 2 — Core Backend ✅ (backend) / 🔜 (wiring mobile to it)
-- ✅ Prisma schema matching `ARCHITECTURE.md` §2, migrated against a local Postgres (no real
-  Supabase project created yet — see DECISIONS.md "still open").
+## Phase 2 — Core Backend ✅ (backend + real Supabase) / 🔜 (wiring mobile to it)
+- ✅ Prisma schema matching `ARCHITECTURE.md` §2, migrated against a local Postgres.
 - ✅ Custom NestJS API (`/api`): Supabase JWT verification with lazy user provisioning, profile
   CRUD, thought create/discover/react/reply/report, rate limiting (60 req/min).
 - ✅ Unit tests (mocked Prisma) + e2e tests (real HTTP requests against a test database) +
   lint, all passing. Verified by hand with signed test tokens: auth guard, validation errors,
   ownership checks, rate-limit 429s, soft delete, username conflicts.
 - ✅ Seed script with clearly-labeled sample thoughts for local development.
-- 🔜 Not yet done: creating the real Supabase project; wiring the mobile app's Universe/Create/
-  Profile screens to this API instead of sample data; Supabase client setup in the mobile app
-  for session management.
+- ✅ Real Supabase project created and auth verified end-to-end against it with a genuine
+  Supabase-issued token (not just local test tokens) — see DECISIONS.md.
+- 🔜 Not yet done: wiring the mobile app's Universe/Create/Profile screens to this API instead
+  of sample data; Supabase client setup in the mobile app for session management; deciding
+  whether to re-enable "Confirm email" on the Supabase project before real signups.
 
 ## Phase 3 — Connections ⏳
 - Connection request lifecycle (send/accept/decline/withdraw/remove), one-shot intro message.
