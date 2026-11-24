@@ -2,8 +2,14 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Avatar } from '@/components/Avatar';
+import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { MoodTag } from '@/components/MoodTag';
+import { useSession } from '@/features/auth/SessionProvider';
+import { sendConnectionRequest } from '@/features/connections/api';
+import { reportTarget } from '@/features/thoughts/api';
+import { REPORT_REASONS } from '@/features/thoughts/reportReasons';
+import { ApiError } from '@/lib/api';
 import { colors, radius, spacing, typography } from '@/theme';
 
 import { AuthoredThought, getPublicProfile, getPublicThoughtsByAuthor, PublicProfile } from './api';
@@ -14,8 +20,13 @@ type Props = {
 };
 
 export function UserProfileModal({ userId, onClose }: Props) {
+  const { session } = useSession();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [thoughts, setThoughts] = useState<AuthoredThought[]>([]);
+  const [reporting, setReporting] = useState(false);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  const isSelf = userId === session?.user.id;
 
   // The caller renders this conditionally on `userId`, so it mounts fresh
   // each time a different user's profile is opened — same pattern as
@@ -24,6 +35,21 @@ export function UserProfileModal({ userId, onClose }: Props) {
     getPublicProfile(userId).then(setProfile).catch(() => {});
     getPublicThoughtsByAuthor(userId).then(setThoughts).catch(() => {});
   }, [userId]);
+
+  const onConnect = async () => {
+    try {
+      await sendConnectionRequest(userId);
+      setActionMessage('Connection request sent.');
+    } catch (err) {
+      setActionMessage(err instanceof ApiError ? err.message : 'Could not send a request.');
+    }
+  };
+
+  const onReport = async (reason: string) => {
+    await reportTarget('profile', userId, reason);
+    setReporting(false);
+    setActionMessage('Report sent.');
+  };
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
@@ -64,6 +90,31 @@ export function UserProfileModal({ userId, onClose }: Props) {
                   </Card>
                 )}
               />
+
+              {!isSelf && (
+                <>
+                  {actionMessage && <Text style={styles.actionMessage}>{actionMessage}</Text>}
+                  {reporting ? (
+                    <View style={styles.reportReasons}>
+                      {REPORT_REASONS.map((reason) => (
+                        <Pressable key={reason} style={styles.reportReasonPill} onPress={() => onReport(reason)}>
+                          <Text style={styles.reportReasonLabel}>{reason}</Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  ) : (
+                    <View style={styles.actions}>
+                      <Button label="Connect" onPress={onConnect} style={styles.actionButton} />
+                      <Button
+                        label="Report"
+                        variant="ghost"
+                        onPress={() => setReporting(true)}
+                        style={styles.actionButton}
+                      />
+                    </View>
+                  )}
+                </>
+              )}
             </>
           )}
 
@@ -153,6 +204,35 @@ const styles = StyleSheet.create({
     fontSize: typography.size.sm,
     color: colors.textSecondary,
     fontStyle: 'italic',
+  },
+  actionMessage: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.xs,
+    color: colors.textSecondary,
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  actionButton: {
+    flex: 1,
+  },
+  reportReasons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  reportReasonPill: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.danger,
+  },
+  reportReasonLabel: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.xs,
+    color: colors.textSecondary,
   },
   close: {
     fontFamily: typography.fontFamily,

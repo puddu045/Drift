@@ -18,6 +18,7 @@ import {
   ThoughtDetail,
   toggleReaction,
 } from '@/features/thoughts/api';
+import { REPORT_REASONS } from '@/features/thoughts/reportReasons';
 import { ApiError } from '@/lib/api';
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -28,8 +29,6 @@ const REACTIONS: { type: Parameters<typeof toggleReaction>[1]; label: string }[]
   { type: 'thoughtful', label: 'Thoughtful' },
   { type: 'hug', label: 'Hug' },
 ];
-
-const REPORT_REASONS = ['Spam', 'Harassment', 'Harmful content', 'Other'];
 
 type Props = {
   thought: Thought;
@@ -119,12 +118,25 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
     <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(150)} style={styles.backdrop}>
       <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
       <Animated.View entering={ZoomIn.duration(220)} exiting={ZoomOut.duration(160)} style={styles.card}>
-        {detail && (
-          <Pressable style={styles.authorRow} onPress={() => onViewAuthor(detail.authorId, detail.author)}>
-            <Avatar name={detail.author?.displayName} photoUrl={detail.author?.photoUrl} size={28} />
-            <Text style={styles.authorName}>{detail.author?.displayName ?? 'Anonymous'}</Text>
-          </Pressable>
-        )}
+        <View style={styles.topRow}>
+          {detail ? (
+            <Pressable style={styles.authorRow} onPress={() => onViewAuthor(detail.authorId, detail.author)}>
+              <Avatar name={detail.author?.displayName} photoUrl={detail.author?.photoUrl} size={28} />
+              <Text style={styles.authorName}>{detail.author?.displayName ?? 'Anonymous'}</Text>
+            </Pressable>
+          ) : (
+            <View />
+          )}
+          {!isOwnThought && (
+            <Pressable
+              style={styles.quickReportButton}
+              onPress={() => setReporting(true)}
+              accessibilityLabel="Report this thought"
+            >
+              <Text style={styles.quickReportLabel}>⚑ Report</Text>
+            </Pressable>
+          )}
+        </View>
         <MoodTag mood={thought.mood} />
         <Text style={styles.text}>{thought.text}</Text>
 
@@ -189,7 +201,6 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
             ) : (
               <>
                 <Button label="Connect" onPress={onConnect} style={styles.actionButton} />
-                <Button label="Report" variant="ghost" onPress={() => setReporting(true)} style={styles.actionButton} />
                 <Button label="Block" variant="ghost" onPress={onBlock} style={styles.actionButton} />
               </>
             )}
@@ -237,10 +248,27 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     lineHeight: 28,
   },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   authorRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+  },
+  quickReportButton: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.danger,
+  },
+  quickReportLabel: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.xs,
+    color: colors.danger,
   },
   authorName: {
     fontFamily: typography.fontFamily,
