@@ -2,6 +2,7 @@ import { PropsWithChildren } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { DreamyBackground } from '@/components/DreamyBackground';
 import { colors } from '@/theme';
 
 type Props = PropsWithChildren<{ style?: StyleProp<ViewStyle>; edges?: ('top' | 'bottom')[] }>;
@@ -9,6 +10,7 @@ type Props = PropsWithChildren<{ style?: StyleProp<ViewStyle>; edges?: ('top' | 
 export function ScreenContainer({ children, style, edges = ['top', 'bottom'] }: Props) {
   return (
     <SafeAreaView style={styles.safeArea} edges={edges}>
+      <DreamyBackground />
       <View style={[styles.content, style]}>{children}</View>
     </SafeAreaView>
   );
