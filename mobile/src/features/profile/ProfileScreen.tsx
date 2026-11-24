@@ -8,6 +8,7 @@ import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { EditFieldModal } from '@/components/EditFieldModal';
 import { ScreenContainer } from '@/components/ScreenContainer';
+import { TextField } from '@/components/TextField';
 import { useSession } from '@/features/auth/SessionProvider';
 import { getOwnProfile, updatePreferences, upsertOwnProfile } from '@/features/profile/api';
 import { supabase } from '@/lib/supabase';
@@ -36,9 +37,14 @@ const FIELD_CONFIG: Record<
   bio: { label: 'Bio', maxLength: 280, multiline: true },
 };
 
+function describeError(err: unknown, fallback: string) {
+  return err instanceof ApiError ? err.message : fallback;
+}
+
 export function ProfileScreen() {
   const router = useRouter();
   const { session } = useSession();
+  const [hasProfile, setHasProfile] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
@@ -49,9 +55,15 @@ export function ProfileScreen() {
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<FieldKey>(null);
 
+  // First-time setup fields — a profile can't be created without these two.
+  const [setupName, setSetupName] = useState('');
+  const [setupUsername, setSetupUsername] = useState('');
+  const [settingUp, setSettingUp] = useState(false);
+
   useEffect(() => {
     getOwnProfile()
       .then((profile) => {
+        setHasProfile(true);
         setDisplayName(profile.displayName);
         setUsername(profile.username);
         setBio(profile.bio ?? '');
@@ -59,10 +71,32 @@ export function ProfileScreen() {
         setShowIdentity(profile.showIdentityOnContent);
       })
       .catch(() => {
-        // No profile yet — that's expected for a brand-new account.
+        // No profile yet — expected for a brand-new account, handled by the
+        // setup card below rather than treated as an error.
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const onCreateProfile = async () => {
+    if (!setupName.trim() || !setupUsername.trim()) return;
+    setSettingUp(true);
+    setError(null);
+    try {
+      const profile = await upsertOwnProfile({
+        displayName: setupName.trim(),
+        username: setupUsername.trim().toLowerCase(),
+      });
+      setHasProfile(true);
+      setDisplayName(profile.displayName);
+      setUsername(profile.username);
+      setBio(profile.bio ?? '');
+      setPhotoUrl(profile.photoUrl);
+    } catch (err) {
+      setError(describeError(err, 'Could not create your profile.'));
+    } finally {
+      setSettingUp(false);
+    }
+  };
 
   const save = async (next: { displayName: string; username: string; bio: string }) => {
     setError(null);
@@ -74,7 +108,7 @@ export function ProfileScreen() {
         photoUrl: photoUrl ?? undefined,
       });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not save your profile.');
+      setError(describeError(err, 'Could not save your profile.'));
     }
   };
 
@@ -84,11 +118,6 @@ export function ProfileScreen() {
       username: editing === 'username' ? value : username,
       bio: editing === 'bio' ? value : bio,
     };
-    if (!next.displayName || !next.username) {
-      setError('Display name and username can’t be empty.');
-      setEditing(null);
-      return;
-    }
     setDisplayName(next.displayName);
     setUsername(next.username.toLowerCase());
     setBio(next.bio);
@@ -124,8 +153,9 @@ export function ProfileScreen() {
 
     setUploadingPhoto(true);
     setError(null);
+    const path = `${session.user.id}/avatar.jpg`;
+    let newPhotoUrl: string;
     try {
-      const path = `${session.user.id}/avatar.jpg`;
       // React Native's Blob/File/FormData don't work reliably with Supabase
       // Storage uploads — this needs an ArrayBuffer from base64 data instead.
       const { error: uploadError } = await supabase.storage
@@ -134,17 +164,55 @@ export function ProfileScreen() {
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage.from('avatars').getPublicUrl(path);
-      const newPhotoUrl = `${data.publicUrl}?t=${Date.now()}`;
-      setPhotoUrl(newPhotoUrl);
-      await upsertOwnProfile({ displayName, username, bio: bio || undefined, photoUrl: newPhotoUrl });
+      newPhotoUrl = `${data.publicUrl}?t=${Date.now()}`;
     } catch {
       setError('Could not upload photo.');
+      setUploadingPhoto(false);
+      return;
+    }
+
+    setPhotoUrl(newPhotoUrl);
+    try {
+      await upsertOwnProfile({ displayName, username, bio: bio || undefined, photoUrl: newPhotoUrl });
+    } catch (err) {
+      setError(describeError(err, 'Photo uploaded, but could not save it to your profile.'));
     } finally {
       setUploadingPhoto(false);
     }
   };
 
   if (loading) return <ScreenContainer />;
+
+  if (!hasProfile) {
+    return (
+      <ScreenContainer>
+        <View style={styles.content}>
+          <Text style={styles.title}>Set up your profile</Text>
+          <Text style={styles.subtitle}>
+            Pick a display name and username to get started. You can change these any time.
+          </Text>
+          <TextField label="Display name" value={setupName} onChangeText={setSetupName} maxLength={60} />
+          <TextField
+            label="Username"
+            value={setupUsername}
+            onChangeText={setSetupUsername}
+            autoCapitalize="none"
+            maxLength={24}
+          />
+          <Text style={styles.hint}>
+            Lowercase letters, numbers and underscores only. Always visible to others — doesn&rsquo;t
+            need to be your real name, e.g. fantasticMouse92.
+          </Text>
+          {error && <Text style={styles.error}>{error}</Text>}
+          <Button
+            label="Create profile"
+            onPress={onCreateProfile}
+            disabled={settingUp || !setupName.trim() || !setupUsername.trim()}
+          />
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   return (
     <ScreenContainer>
@@ -157,7 +225,7 @@ export function ProfileScreen() {
           <Text style={styles.photoLabel}>{uploadingPhoto ? 'Uploading...' : 'Change photo'}</Text>
         </Pressable>
 
-        <FieldRow label="Display name" value={displayName} onEdit={() => setEditing('displayName')} />
+        <FieldRow label="Display name" value={displayName || 'Not set'} onEdit={() => setEditing('displayName')} />
         <FieldRow label="Username" value={username ? `@${username}` : 'Not set'} onEdit={() => setEditing('username')} />
         <Text style={styles.hint}>
           Your username is always visible to others and doesn&rsquo;t need to be your real name —
