@@ -13,6 +13,11 @@ type Stage =
   | { name: 'needs-verify'; factorId: string }
   | { name: 'ready' };
 
+// Temporary opt-out for local setup — NEXT_PUBLIC_REQUIRE_ADMIN_MFA=false
+// skips the MFA gate below, matching the same env var on the API side
+// (REQUIRE_ADMIN_MFA). Unset (or anything else) keeps it required.
+const mfaRequired = process.env.NEXT_PUBLIC_REQUIRE_ADMIN_MFA !== 'false';
+
 /**
  * Every admin account must clear two gates before seeing anything behind
  * this component: role === 'admin' (from the Supabase JWT's app_metadata,
@@ -34,6 +39,11 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     }
     if (session.user.app_metadata?.role !== 'admin') {
       setStage({ name: 'not-admin' });
+      return;
+    }
+
+    if (!mfaRequired) {
+      setStage({ name: 'ready' });
       return;
     }
 

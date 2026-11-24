@@ -33,6 +33,11 @@ Sign out and back in (or just sign in) afterward so a fresh token picks up the c
 
 The first time an admin-role account signs in here, it's walked through enrolling a TOTP
 authenticator (any standard authenticator app — Google Authenticator, 1Password, Authy, etc.).
-On every later sign-in, it's prompted for a 6-digit code. This is enforced by this app via
-Supabase Auth's built-in MFA (`supabase.auth.mfa.*`) — there's no way to reach any page here
-without clearing it, regardless of role.
+On every later sign-in, it's prompted for a 6-digit code. This is enforced both here
+(`supabase.auth.mfa.*`) and by the API itself (it checks the token's `aal` claim, not just role)
+— there's no way to reach any admin page or endpoint without clearing it, regardless of role.
+
+**To skip this temporarily** (e.g. while first setting things up locally), set
+`NEXT_PUBLIC_REQUIRE_ADMIN_MFA=false` here in `.env.local` **and**
+`REQUIRE_ADMIN_MFA=false` in `/api`'s `.env`, then restart both. The role check still applies —
+this only drops the MFA step. Remove both when you're done; nothing re-enables it automatically.
