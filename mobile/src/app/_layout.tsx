@@ -6,10 +6,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { AuthScreen } from '@/features/auth/AuthScreen';
 import { SessionProvider, useSession } from '@/features/auth/SessionProvider';
+import { usePushRegistration } from '@/features/notifications/usePushRegistration';
 import { colors } from '@/theme';
 
 function RootNavigator() {
   const { session, loading } = useSession();
+  usePushRegistration(!!session);
 
   if (loading) return <ScreenContainer />;
   if (!session) return <AuthScreen />;
