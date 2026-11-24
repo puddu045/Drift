@@ -1,16 +1,28 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+import { ColorValue } from 'react-native';
 
 import { colors, typography } from '@/theme';
+
+type IconName = keyof typeof Ionicons.glyphMap;
+type TabIconProps = { focused: boolean; color: ColorValue; size: number };
+
+function TabIcon({ name, color, size }: { name: IconName } & TabIconProps) {
+  return <Ionicons name={name} color={color as string} size={size} />;
+}
+
+// Standard React Navigation tabBarIcon pattern — TabIcon above already has
+// its own display name, so this wrapper closure doesn't need one.
+function tabIcon(name: IconName) {
+  // eslint-disable-next-line react/display-name
+  return (props: TabIconProps) => <TabIcon name={name} {...props} />;
+}
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        // No icon set yet (see DESIGN_SYSTEM.md — minimal nav, text-only tabs
-        // for now); without this, the default tab bar tries to render a
-        // built-in icon and shows a broken glyph box instead.
-        tabBarIcon: () => null,
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
@@ -24,11 +36,20 @@ export default function TabLayout() {
         },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Universe' }} />
-      <Tabs.Screen name="destiny" options={{ title: 'Destiny' }} />
-      <Tabs.Screen name="create" options={{ title: 'Create' }} />
-      <Tabs.Screen name="connections" options={{ title: 'Connections' }} />
-      <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
+      <Tabs.Screen name="index" options={{ title: 'Universe', tabBarIcon: tabIcon('planet-outline') }} />
+      <Tabs.Screen name="destiny" options={{ title: 'Destiny', tabBarIcon: tabIcon('star-outline') }} />
+      <Tabs.Screen
+        name="create"
+        options={{ title: 'Create', tabBarIcon: tabIcon('add-circle-outline') }}
+      />
+      <Tabs.Screen
+        name="connections"
+        options={{ title: 'Connections', tabBarIcon: tabIcon('people-outline') }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{ title: 'Profile', tabBarIcon: tabIcon('person-circle-outline') }}
+      />
     </Tabs>
   );
 }
