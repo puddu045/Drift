@@ -39,10 +39,8 @@ High-level strategy; expanded with concrete test files as each phase is implemen
 - Phase 2 backend (`/api`): 16 unit tests + 5 e2e tests passing (auth, validation, ownership,
   reactions, discovery filtering, rate limiting), plus verified by hand against the real
   Supabase project with a genuine token — see `api/README.md` to run the automated tests.
-- Phase 2 mobile (`/mobile`): typecheck, lint, and a Metro bundle export all pass clean. The
-  Phase 1 Universe prototype was verified on-device; the Phase 2 wiring (auth, real Universe
-  feed, Create, Profile, thought detail) has **not** been visually verified on a device yet — the
-  backend isn't currently reachable from outside the container it runs in (see DECISIONS.md).
-  No automated component tests yet.
-- Not yet covered: mobile E2E tests, admin portal tests (not built), the wired app actually
-  running against the API from a phone.
+- Phase 2 mobile (`/mobile`): typecheck, lint, and a Metro bundle export all pass clean, **and**
+  the full wiring was verified live on a physical device (2026-11-24) — real sign-up, posting a
+  real thought, seeing it appear in Universe from the live backend. No automated component
+  tests yet.
+- Not yet covered: mobile E2E tests, admin portal tests (not built).

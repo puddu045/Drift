@@ -38,11 +38,17 @@ Status key: ✅ done · 🔜 next · ⏳ later
   Universe fetching real thoughts, Create posting real thoughts, thought detail overlay with
   real reactions/replies/report/delete, Profile view/edit. Typecheck, lint, and a Metro bundle
   export all pass clean.
-- 🔜 Not yet visually verified on a device — this backend only runs reachable from this
-  container right now, not from the phone this has been tested on. Needs either running the
-  API on the user's own machine (same network as their phone) or a real deployment before that
-  check can happen. Also still open: deciding whether to re-enable "Confirm email" on the
-  Supabase project before real signups.
+- ✅ **Verified live on a physical device** (2026-11-24): API running on the user's own machine
+  against the real Supabase Postgres, mobile app on their phone over the same Wi-Fi. Signed up a
+  real account, posted two real thoughts through Create, and saw them appear as bubbles in
+  Universe fetched from the live backend — the full loop works end to end.
+- Still open: deciding whether to re-enable "Confirm email" on the Supabase project before real
+  signups; a real deployment (vs. running the API on a personal machine) for anything beyond
+  active development.
+
+**Phase 2 is functionally complete and proven to work live.** Ready to move to Phase 3
+(Connections: requests, private messaging, notifications, block/mute, Destiny) whenever
+approved.
 
 ## Phase 3 — Connections ⏳
 - Connection request lifecycle (send/accept/decline/withdraw/remove), one-shot intro message.
