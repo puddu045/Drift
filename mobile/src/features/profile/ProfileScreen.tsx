@@ -2,16 +2,39 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import { decode } from 'base64-arraybuffer';
 
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
+import { EditFieldModal } from '@/components/EditFieldModal';
 import { ScreenContainer } from '@/components/ScreenContainer';
-import { TextField } from '@/components/TextField';
 import { useSession } from '@/features/auth/SessionProvider';
 import { getOwnProfile, updatePreferences, upsertOwnProfile } from '@/features/profile/api';
 import { supabase } from '@/lib/supabase';
 import { ApiError } from '@/lib/api';
-import { colors, spacing, typography } from '@/theme';
+import { colors, radius, spacing, typography } from '@/theme';
+
+type FieldKey = 'displayName' | 'username' | 'bio' | null;
+
+const FIELD_CONFIG: Record<
+  Exclude<FieldKey, null>,
+  {
+    label: string;
+    maxLength: number;
+    multiline?: boolean;
+    autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+    hint?: string;
+  }
+> = {
+  displayName: { label: 'Display name', maxLength: 60 },
+  username: {
+    label: 'Username',
+    maxLength: 24,
+    autoCapitalize: 'none',
+    hint: 'Lowercase letters, numbers and underscores only.',
+  },
+  bio: { label: 'Bio', maxLength: 280, multiline: true },
+};
 
 export function ProfileScreen() {
   const router = useRouter();
@@ -22,10 +45,9 @@ export function ProfileScreen() {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [showIdentity, setShowIdentity] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
+  const [editing, setEditing] = useState<FieldKey>(null);
 
   useEffect(() => {
     getOwnProfile()
@@ -42,23 +64,36 @@ export function ProfileScreen() {
       .finally(() => setLoading(false));
   }, []);
 
-  const onSave = async () => {
-    setSaving(true);
+  const save = async (next: { displayName: string; username: string; bio: string }) => {
     setError(null);
-    setSaved(false);
     try {
       await upsertOwnProfile({
-        displayName: displayName.trim(),
-        username: username.trim(),
-        bio: bio.trim() || undefined,
+        displayName: next.displayName,
+        username: next.username.toLowerCase(),
+        bio: next.bio || undefined,
         photoUrl: photoUrl ?? undefined,
       });
-      setSaved(true);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not save your profile.');
-    } finally {
-      setSaving(false);
     }
+  };
+
+  const onSaveField = async (value: string) => {
+    const next = {
+      displayName: editing === 'displayName' ? value : displayName,
+      username: editing === 'username' ? value : username,
+      bio: editing === 'bio' ? value : bio,
+    };
+    if (!next.displayName || !next.username) {
+      setError('Display name and username can’t be empty.');
+      setEditing(null);
+      return;
+    }
+    setDisplayName(next.displayName);
+    setUsername(next.username.toLowerCase());
+    setBio(next.bio);
+    setEditing(null);
+    await save(next);
   };
 
   const onToggleIdentity = async (value: boolean) => {
@@ -77,24 +112,31 @@ export function ProfileScreen() {
       quality: 0.6,
       allowsEditing: true,
       aspect: [1, 1],
+      base64: true,
     });
     if (result.canceled || !session) return;
+
+    const asset = result.assets[0];
+    if (!asset.base64) {
+      setError('Could not read the selected photo.');
+      return;
+    }
 
     setUploadingPhoto(true);
     setError(null);
     try {
-      const asset = result.assets[0];
-      const response = await fetch(asset.uri);
-      const blob = await response.blob();
       const path = `${session.user.id}/avatar.jpg`;
+      // React Native's Blob/File/FormData don't work reliably with Supabase
+      // Storage uploads — this needs an ArrayBuffer from base64 data instead.
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+        .upload(path, decode(asset.base64), { contentType: 'image/jpeg', upsert: true });
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage.from('avatars').getPublicUrl(path);
-      // Cache-bust so the new photo shows immediately instead of a stale CDN copy.
-      setPhotoUrl(`${data.publicUrl}?t=${Date.now()}`);
+      const newPhotoUrl = `${data.publicUrl}?t=${Date.now()}`;
+      setPhotoUrl(newPhotoUrl);
+      await upsertOwnProfile({ displayName, username, bio: bio || undefined, photoUrl: newPhotoUrl });
     } catch {
       setError('Could not upload photo.');
     } finally {
@@ -115,15 +157,13 @@ export function ProfileScreen() {
           <Text style={styles.photoLabel}>{uploadingPhoto ? 'Uploading...' : 'Change photo'}</Text>
         </Pressable>
 
-        <TextField label="Display name" value={displayName} onChangeText={setDisplayName} maxLength={60} />
-        <TextField
-          label="Username"
-          value={username}
-          onChangeText={(value) => setUsername(value.toLowerCase())}
-          autoCapitalize="none"
-          maxLength={24}
-        />
-        <TextField label="Bio" value={bio} onChangeText={setBio} multiline maxLength={280} />
+        <FieldRow label="Display name" value={displayName} onEdit={() => setEditing('displayName')} />
+        <FieldRow label="Username" value={username ? `@${username}` : 'Not set'} onEdit={() => setEditing('username')} />
+        <Text style={styles.hint}>
+          Your username is always visible to others and doesn&rsquo;t need to be your real name —
+          e.g. fantasticMouse92.
+        </Text>
+        <FieldRow label="Bio" value={bio || 'Not set'} onEdit={() => setEditing('bio')} />
 
         <View style={styles.toggleRow}>
           <Text style={styles.toggleLabel}>Show my name/photo on my public thoughts and replies</Text>
@@ -131,17 +171,39 @@ export function ProfileScreen() {
         </View>
 
         {error && <Text style={styles.error}>{error}</Text>}
-        {saved && <Text style={styles.saved}>Saved.</Text>}
 
-        <Button
-          label="Save"
-          onPress={onSave}
-          disabled={saving || !displayName.trim() || !username.trim()}
-        />
         <Button label="Notifications" variant="ghost" onPress={() => router.push('/notifications')} />
         <Button label="Sign out" variant="ghost" onPress={() => supabase.auth.signOut()} />
       </ScrollView>
+
+      {editing && (
+        <EditFieldModal
+          visible
+          label={FIELD_CONFIG[editing].label}
+          value={editing === 'displayName' ? displayName : editing === 'username' ? username : bio}
+          maxLength={FIELD_CONFIG[editing].maxLength}
+          multiline={FIELD_CONFIG[editing].multiline}
+          autoCapitalize={FIELD_CONFIG[editing].autoCapitalize}
+          hint={FIELD_CONFIG[editing].hint}
+          onCancel={() => setEditing(null)}
+          onSave={onSaveField}
+        />
+      )}
     </ScreenContainer>
+  );
+}
+
+function FieldRow({ label, value, onEdit }: { label: string; value: string; onEdit: () => void }) {
+  return (
+    <View style={styles.fieldRow}>
+      <View style={styles.fieldText}>
+        <Text style={styles.fieldLabel}>{label}</Text>
+        <Text style={styles.fieldValue}>{value}</Text>
+      </View>
+      <Pressable onPress={onEdit} accessibilityLabel={`Edit ${label}`}>
+        <Text style={styles.editLink}>Edit</Text>
+      </Pressable>
+    </View>
   );
 }
 
@@ -172,6 +234,42 @@ const styles = StyleSheet.create({
     fontSize: typography.size.sm,
     color: colors.accent,
   },
+  fieldRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  fieldText: {
+    flex: 1,
+  },
+  fieldLabel: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.xs,
+    color: colors.textSecondary,
+  },
+  fieldValue: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.md,
+    color: colors.textPrimary,
+    marginTop: 2,
+  },
+  editLink: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    color: colors.accent,
+  },
+  hint: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.xs,
+    color: colors.textSecondary,
+    marginTop: -spacing.xs,
+  },
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -188,10 +286,5 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
     color: colors.danger,
-  },
-  saved: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.size.sm,
-    color: colors.accent,
   },
 });

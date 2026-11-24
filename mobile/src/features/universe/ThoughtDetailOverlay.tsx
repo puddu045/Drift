@@ -105,9 +105,13 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
   };
 
   // Only navigable when the author opted to reveal identity — an anonymous
-  // author's userId must never become a way to look up their profile.
+  // author's userId must never become a way to look up their profile. Tapping
+  // an anonymous avatar still gives feedback rather than silently doing nothing.
   const onViewAuthor = (authorId: string, author: { displayName: string; photoUrl: string | null } | null) => {
-    if (!author) return;
+    if (!author) {
+      setActionMessage('This person has chosen to stay anonymous.');
+      return;
+    }
     router.push({ pathname: '/user/[userId]', params: { userId: authorId } });
   };
 
@@ -116,11 +120,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
       <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
       <Animated.View entering={ZoomIn.duration(220)} exiting={ZoomOut.duration(160)} style={styles.card}>
         {detail && (
-          <Pressable
-            style={styles.authorRow}
-            onPress={() => onViewAuthor(detail.authorId, detail.author)}
-            disabled={!detail.author}
-          >
+          <Pressable style={styles.authorRow} onPress={() => onViewAuthor(detail.authorId, detail.author)}>
             <Avatar name={detail.author?.displayName} photoUrl={detail.author?.photoUrl} size={28} />
             <Text style={styles.authorName}>{detail.author?.displayName ?? 'Anonymous'}</Text>
           </Pressable>
@@ -150,11 +150,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
             ) : (
               detail.replies.map((reply) => (
                 <View key={reply.id} style={styles.replyItem}>
-                  <Pressable
-                    style={styles.authorRow}
-                    onPress={() => onViewAuthor(reply.authorId, reply.author)}
-                    disabled={!reply.author}
-                  >
+                  <Pressable style={styles.authorRow} onPress={() => onViewAuthor(reply.authorId, reply.author)}>
                     <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={22} />
                     <Text style={styles.replyAuthorName}>{reply.author?.displayName ?? 'Anonymous'}</Text>
                   </Pressable>
