@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
+import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { SetInterests, UpdatePreferences, UpsertProfile } from './users.schemas.js';
 
@@ -11,13 +12,27 @@ export class UsersService {
    * Finds or creates the bare User row for a Supabase-verified id. Called on
    * every authenticated request (see SupabaseAuthProvider) — see
    * prisma/schema.prisma's top comment for why there's no separate sync step.
+   *
+   * The app fires several requests for the same user in parallel (e.g. on
+   * first launch, loading Universe/notifications/connections at once), so
+   * two of these can race on the very first call for a brand-new id. Upsert
+   * isn't atomic here, so both can see "not found" and both try to create —
+   * the loser hits a unique constraint violation instead of just updating.
+   * Treat that as a sign the row now exists and fetch it.
    */
   async ensureUser(id: string) {
-    return this.prisma.user.upsert({
-      where: { id },
-      update: {},
-      create: { id },
-    });
+    try {
+      return await this.prisma.user.upsert({
+        where: { id },
+        update: {},
+        create: { id },
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+        return this.prisma.user.findUniqueOrThrow({ where: { id } });
+      }
+      throw err;
+    }
   }
 
   async getOwnProfile(userId: string) {

@@ -2,12 +2,20 @@ import { BadRequestException, ConflictException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { vi } from 'vitest';
 
+import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { UsersService } from './users.service.js';
 
+function uniqueConstraintError() {
+  return new Prisma.PrismaClientKnownRequestError('Unique constraint failed on the constraint: `users_pkey`', {
+    code: 'P2002',
+    clientVersion: 'test',
+  });
+}
+
 describe('UsersService', () => {
   const prisma = {
-    user: { upsert: vi.fn() },
+    user: { upsert: vi.fn(), findUniqueOrThrow: vi.fn() },
     userProfile: { findUnique: vi.fn(), upsert: vi.fn() },
     userPreferences: { findUnique: vi.fn() },
     userInterest: { findMany: vi.fn(), deleteMany: vi.fn(), createMany: vi.fn() },
@@ -33,6 +41,20 @@ describe('UsersService', () => {
         update: {},
         create: { id: 'u1' },
       });
+    });
+
+    it('falls back to a plain fetch when a concurrent request wins the create race', async () => {
+      prisma.user.upsert.mockRejectedValue(uniqueConstraintError());
+      prisma.user.findUniqueOrThrow.mockResolvedValue({ id: 'u1', status: 'active' });
+
+      await expect(service.ensureUser('u1')).resolves.toMatchObject({ id: 'u1' });
+      expect(prisma.user.findUniqueOrThrow).toHaveBeenCalledWith({ where: { id: 'u1' } });
+    });
+
+    it('rethrows any other error from the upsert', async () => {
+      prisma.user.upsert.mockRejectedValue(new Error('boom'));
+      await expect(service.ensureUser('u1')).rejects.toThrow('boom');
+      expect(prisma.user.findUniqueOrThrow).not.toHaveBeenCalled();
     });
   });
 
