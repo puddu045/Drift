@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   cancelAnimation,
@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { colors, moodColors, radius, spacing, typography } from '@/theme';
+import { colors, moodColors, spacing, typography } from '@/theme';
 import { Thought } from '@/features/thoughts/api';
 
 import { BubbleLayout } from './useBubbleLayout';
@@ -19,6 +19,20 @@ import { BubbleLayout } from './useBubbleLayout';
 // as a floating orb catching the light differently as it turns, not so much
 // it looks like it's spinning.
 const TILT_DEGREES = 7;
+
+// AI-generated glass-bubble textures (the user's own prompt) — a few
+// variants so bubbles don't all share an identical highlight placement.
+const GLASS_TEXTURES = [
+  require('../../../assets/bubble-glass-1.webp'),
+  require('../../../assets/bubble-glass-2.webp'),
+  require('../../../assets/bubble-glass-3.webp'),
+];
+
+function glassTextureFor(id: string) {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash + id.charCodeAt(i)) % GLASS_TEXTURES.length;
+  return GLASS_TEXTURES[hash];
+}
 
 type Props = {
   thought: Thought;
@@ -90,7 +104,7 @@ export function Bubble({ thought, layout, reduceMotion, paused, onPress, hasNoti
               width: layout.size,
               height: layout.size,
               borderRadius: layout.size,
-              borderColor: moodColor,
+              borderColor: `${moodColor}66`,
             },
           ]}
         >
@@ -103,12 +117,12 @@ export function Bubble({ thought, layout, reduceMotion, paused, onPress, hasNoti
             end={{ x: 0.9, y: 0.95 }}
             style={StyleSheet.absoluteFill}
           />
-          {/* Glossy highlight, like light catching the top of glass. */}
-          <LinearGradient
-            colors={['rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0)']}
-            start={{ x: 0.1, y: 0.05 }}
-            end={{ x: 0.7, y: 0.6 }}
-            style={styles.highlight}
+          {/* Real glass-bubble highlight/reflection texture, laid over the
+              mood tint so the color identity still reads through. */}
+          <Image
+            source={glassTextureFor(thought.id)}
+            resizeMode="cover"
+            style={[StyleSheet.absoluteFill, { width: layout.size, height: layout.size }]}
           />
           <Text numberOfLines={4} style={styles.text}>
             {thought.text}
@@ -135,14 +149,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.md,
-  },
-  highlight: {
-    position: 'absolute',
-    top: '8%',
-    left: '10%',
-    width: '55%',
-    height: '45%',
-    borderRadius: radius.lg * 3,
   },
   text: {
     fontFamily: typography.fontFamily,
