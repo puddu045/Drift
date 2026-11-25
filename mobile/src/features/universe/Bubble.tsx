@@ -29,9 +29,9 @@ const GLASS_TEXTURES = [
 ];
 
 function glassTextureFor(id: string) {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) hash = (hash + id.charCodeAt(i)) % GLASS_TEXTURES.length;
-  return GLASS_TEXTURES[hash];
+  let sum = 0;
+  for (let i = 0; i < id.length; i++) sum += id.charCodeAt(i);
+  return GLASS_TEXTURES[sum % GLASS_TEXTURES.length];
 }
 
 type Props = {
@@ -104,21 +104,24 @@ export function Bubble({ thought, layout, reduceMotion, paused, onPress, hasNoti
               width: layout.size,
               height: layout.size,
               borderRadius: layout.size,
-              borderColor: `${moodColor}66`,
+              borderColor: moodColor,
+              // Fully opaque, unlike the gradient below — otherwise the sky
+              // background shows through and every bubble reads as the same
+              // washed-out pale color regardless of mood.
+              backgroundColor: moodColor,
             },
           ]}
         >
-          {/* Base tint: lit from the top-left, deepening toward the mood
-              color at the bottom-right — reads as a curved, lit sphere
-              rather than a flat tinted disc. */}
+          {/* Soft sheen, lit from the top-left — reads as a curved, lit
+              sphere rather than a flat tinted disc. */}
           <LinearGradient
-            colors={['rgba(255, 255, 255, 0.85)', `${moodColor}55`]}
+            colors={['rgba(255, 255, 255, 0.65)', 'rgba(255, 255, 255, 0)']}
             start={{ x: 0.15, y: 0.1 }}
-            end={{ x: 0.9, y: 0.95 }}
+            end={{ x: 0.85, y: 0.9 }}
             style={StyleSheet.absoluteFill}
           />
           {/* Real glass-bubble highlight/reflection texture, laid over the
-              mood tint so the color identity still reads through. */}
+              mood color so the color identity still reads through. */}
           <Image
             source={glassTextureFor(thought.id)}
             resizeMode="cover"
