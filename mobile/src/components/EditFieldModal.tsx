@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
@@ -35,7 +35,10 @@ export function EditFieldModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <View style={styles.backdrop}>
+      <KeyboardAvoidingView
+        style={styles.backdrop}
+        behavior={Platform.select({ ios: 'padding', default: 'height' })}
+      >
         <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} accessibilityLabel="Close" />
         <View style={styles.card}>
           <Text style={styles.label}>{label}</Text>
@@ -54,7 +57,7 @@ export function EditFieldModal({
             <Button label="Save" onPress={() => onSave(draft.trim())} style={styles.actionButton} />
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

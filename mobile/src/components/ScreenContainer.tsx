@@ -1,5 +1,5 @@
 import { PropsWithChildren } from 'react';
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DreamyBackground } from '@/components/DreamyBackground';
@@ -17,11 +17,14 @@ export function ScreenContainer({ children, style, edges = ['top', 'bottom'], fl
   return (
     <SafeAreaView style={styles.safeArea} edges={edges}>
       <DreamyBackground />
-      <View
-        style={[styles.content, floatingTabBar && { paddingBottom: floatingTabBarSpace }, style]}
+      <KeyboardAvoidingView
+        style={styles.content}
+        behavior={Platform.select({ ios: 'padding', default: undefined })}
       >
-        {children}
-      </View>
+        <View style={[styles.content, floatingTabBar && { paddingBottom: floatingTabBarSpace }, style]}>
+          {children}
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

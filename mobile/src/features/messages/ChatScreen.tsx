@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 
 import { Button } from '@/components/Button';
 import { ScreenContainer } from '@/components/ScreenContainer';
@@ -11,6 +11,7 @@ import { listMessages, Message, sendMessage } from './api';
 
 export function ChatScreen({ conversationId }: { conversationId: string }) {
   const router = useRouter();
+  const navigation = useNavigation();
   const { session } = useSession();
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState('');
@@ -26,6 +27,16 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
     }, [refresh]),
   );
 
+  // A conversation is immersive — hide the floating tab bar from the parent
+  // Tabs navigator while this screen has focus, restoring it on the way out.
+  useFocusEffect(
+    useCallback(() => {
+      const parent = navigation.getParent();
+      parent?.setOptions({ tabBarStyle: { display: 'none' } });
+      return () => parent?.setOptions({ tabBarStyle: undefined });
+    }, [navigation]),
+  );
+
   const onSend = async () => {
     if (!text.trim()) return;
     setSending(true);
@@ -39,7 +50,7 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
   };
 
   return (
-    <ScreenContainer floatingTabBar>
+    <ScreenContainer>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} accessibilityLabel="Back">
           <Text style={styles.back}>‹ Back</Text>
@@ -47,9 +58,10 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
       </View>
 
       <FlatList
+        style={styles.list}
         data={messages}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={styles.listContent}
         renderItem={({ item }) => {
           const isMine = item.senderId === session?.user.id;
           return (
@@ -86,6 +98,9 @@ const styles = StyleSheet.create({
     color: colors.accent,
   },
   list: {
+    flex: 1,
+  },
+  listContent: {
     paddingHorizontal: spacing.lg,
     gap: spacing.sm,
   },
@@ -102,9 +117,9 @@ const styles = StyleSheet.create({
   },
   bubbleTheirs: {
     alignSelf: 'flex-start',
-    backgroundColor: colors.surface,
+    backgroundColor: 'rgba(255, 255, 255, 0.55)',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(255, 255, 255, 0.7)',
   },
   bubbleText: {
     fontFamily: typography.fontFamily,
@@ -121,8 +136,8 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 44,
     borderRadius: 22,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderColor: 'rgba(21, 33, 59, 0.3)',
     paddingHorizontal: spacing.md,
     color: colors.textPrimary,
     fontFamily: typography.fontFamily,

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
 
 import { Avatar } from '@/components/Avatar';
@@ -46,6 +47,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
   const [reporting, setReporting] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [viewingAuthorId, setViewingAuthorId] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -124,7 +126,11 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
   return (
     <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(150)} style={styles.backdrop}>
       <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
-      <Animated.View entering={ZoomIn.duration(220)} exiting={ZoomOut.duration(160)} style={styles.card}>
+      <Animated.View
+        entering={ZoomIn.duration(220)}
+        exiting={ZoomOut.duration(160)}
+        style={[styles.card, expanded && styles.cardExpanded]}
+      >
         <View style={styles.topRow}>
           {detail ? (
             <Pressable style={styles.authorRow} onPress={() => onViewAuthor(detail.authorId, detail.author)}>
@@ -134,50 +140,90 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
           ) : (
             <View />
           )}
-          {!isOwnThought && (
-            <Pressable
-              style={styles.quickReportButton}
-              onPress={() => setReporting(true)}
-              accessibilityLabel="Report this thought"
-            >
-              <Text style={styles.quickReportLabel}>⚑ Report</Text>
-            </Pressable>
-          )}
-        </View>
-        <MoodTag mood={thought.mood} />
-        <Text style={styles.text}>{thought.text}</Text>
-
-        <View style={styles.reactionRow}>
-          {REACTIONS.map((reaction) => (
-            <Pressable
-              key={reaction.type}
-              style={[styles.reactionPill, myReactions.has(reaction.type) && styles.reactionPillActive]}
-              onPress={() => onReact(reaction.type)}
-              accessibilityLabel={reaction.label}
-            >
-              <Text style={styles.reactionLabel}>{reaction.label}</Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {!detail ? (
-          <ActivityIndicator color={colors.accent} />
-        ) : (
-          <View style={styles.replies}>
-            {detail.replies.length === 0 ? (
-              <Text style={styles.emptyReplies}>No replies yet.</Text>
-            ) : (
-              detail.replies.map((reply) => (
-                <View key={reply.id} style={styles.replyItem}>
-                  <Pressable onPress={() => onViewAuthor(reply.authorId, reply.author)}>
-                    <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={26} />
-                  </Pressable>
-                  <Text style={styles.reply}>{reply.text}</Text>
-                </View>
-              ))
+          <View style={styles.topRowActions}>
+            {!isOwnThought && (
+              <Pressable
+                style={styles.quickReportButton}
+                onPress={() => setReporting(true)}
+                accessibilityLabel="Report this thought"
+              >
+                <Text style={styles.quickReportLabel}>⚑ Report</Text>
+              </Pressable>
             )}
+            <Pressable
+              style={styles.expandButton}
+              onPress={() => setExpanded((prev) => !prev)}
+              accessibilityLabel={expanded ? 'Shrink thought' : 'Expand thought to full screen'}
+            >
+              <Ionicons name={expanded ? 'contract-outline' : 'expand-outline'} size={18} color={colors.textPrimary} />
+            </Pressable>
           </View>
-        )}
+        </View>
+
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <MoodTag mood={thought.mood} />
+          <Text style={styles.text}>{thought.text}</Text>
+
+          <View style={styles.reactionRow}>
+            {REACTIONS.map((reaction) => (
+              <Pressable
+                key={reaction.type}
+                style={[styles.reactionPill, myReactions.has(reaction.type) && styles.reactionPillActive]}
+                onPress={() => onReact(reaction.type)}
+                accessibilityLabel={reaction.label}
+              >
+                <Text style={styles.reactionLabel}>{reaction.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {!detail ? (
+            <ActivityIndicator color={colors.accent} />
+          ) : (
+            <View style={styles.replies}>
+              {detail.replies.length === 0 ? (
+                <Text style={styles.emptyReplies}>No replies yet.</Text>
+              ) : (
+                detail.replies.map((reply) => (
+                  <View key={reply.id} style={styles.replyItem}>
+                    <Pressable onPress={() => onViewAuthor(reply.authorId, reply.author)}>
+                      <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={26} />
+                    </Pressable>
+                    <Text style={styles.reply}>{reply.text}</Text>
+                  </View>
+                ))
+              )}
+            </View>
+          )}
+
+          {actionMessage && <Text style={styles.actionMessage}>{actionMessage}</Text>}
+
+          {reporting ? (
+            <View style={styles.reportReasons}>
+              {REPORT_REASONS.map((reason) => (
+                <Pressable key={reason} style={styles.reportReasonPill} onPress={() => onReport(reason)}>
+                  <Text style={styles.reactionLabel}>{reason}</Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.actions}>
+              {isOwnThought ? (
+                <Button label="Delete" variant="ghost" onPress={onDelete} style={styles.actionButton} />
+              ) : (
+                <>
+                  <Button label="Connect" onPress={onConnect} style={styles.actionButton} />
+                  <Button label="Mute" variant="ghost" onPress={onMute} style={styles.actionButton} />
+                  <Button label="Block" variant="ghost" onPress={onBlock} style={styles.actionButton} />
+                </>
+              )}
+            </View>
+          )}
+        </ScrollView>
 
         <View style={styles.replyRow}>
           <TextInput
@@ -190,30 +236,6 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
           />
           <Button label="Send" onPress={onSendReply} disabled={sendingReply || !replyText.trim()} />
         </View>
-
-        {actionMessage && <Text style={styles.actionMessage}>{actionMessage}</Text>}
-
-        {reporting ? (
-          <View style={styles.reportReasons}>
-            {REPORT_REASONS.map((reason) => (
-              <Pressable key={reason} style={styles.reportReasonPill} onPress={() => onReport(reason)}>
-                <Text style={styles.reactionLabel}>{reason}</Text>
-              </Pressable>
-            ))}
-          </View>
-        ) : (
-          <View style={styles.actions}>
-            {isOwnThought ? (
-              <Button label="Delete" variant="ghost" onPress={onDelete} style={styles.actionButton} />
-            ) : (
-              <>
-                <Button label="Connect" onPress={onConnect} style={styles.actionButton} />
-                <Button label="Mute" variant="ghost" onPress={onMute} style={styles.actionButton} />
-                <Button label="Block" variant="ghost" onPress={onBlock} style={styles.actionButton} />
-              </>
-            )}
-          </View>
-        )}
 
         <Pressable onPress={onClose} accessibilityLabel="Close thought">
           <Text style={styles.close}>Let it drift away</Text>
@@ -234,21 +256,33 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(16, 26, 53, 0.82)',
+    backgroundColor: 'rgba(16, 26, 53, 0.45)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
   },
   card: {
-    width: '100%',
-    maxWidth: 360,
-    maxHeight: '80%',
-    backgroundColor: colors.surface,
+    width: '92%',
+    maxWidth: 400,
+    height: '72%',
+    backgroundColor: 'rgba(255, 255, 255, 0.55)',
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(255, 255, 255, 0.7)',
     padding: spacing.lg,
     gap: spacing.md,
+  },
+  cardExpanded: {
+    width: '96%',
+    maxWidth: undefined,
+    height: '93%',
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    gap: spacing.md,
+    paddingBottom: spacing.sm,
   },
   text: {
     fontFamily: typography.fontFamily,
@@ -260,6 +294,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  topRowActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   authorRow: {
     flexDirection: 'row',
@@ -277,6 +316,16 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xs,
     color: colors.danger,
+  },
+  expandButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
   },
   authorName: {
     fontFamily: typography.fontFamily,
@@ -299,7 +348,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(21, 33, 59, 0.25)',
   },
   reactionPillActive: {
     borderColor: colors.accent,
@@ -335,8 +384,8 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 40,
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderColor: 'rgba(21, 33, 59, 0.3)',
     paddingHorizontal: spacing.sm,
     color: colors.textPrimary,
     fontFamily: typography.fontFamily,

@@ -43,6 +43,8 @@ const styles = StyleSheet.create({
   },
   primary: {
     backgroundColor: colors.accent,
+    borderWidth: 1,
+    borderColor: colors.accent,
   },
   ghost: {
     backgroundColor: 'transparent',
@@ -53,7 +55,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   disabled: {
-    opacity: 0.4,
+    opacity: 0.6,
   },
   label: {
     fontFamily: typography.fontFamily,

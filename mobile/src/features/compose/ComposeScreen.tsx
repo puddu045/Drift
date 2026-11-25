@@ -109,8 +109,8 @@ const styles = StyleSheet.create({
   input: {
     minHeight: 120,
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderColor: 'rgba(21, 33, 59, 0.35)',
     padding: spacing.md,
     color: colors.textPrimary,
     fontFamily: typography.fontFamily,

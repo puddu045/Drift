@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
@@ -59,7 +59,10 @@ export function UserProfileModal({ userId, onClose }: Props) {
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      <KeyboardAvoidingView
+        style={styles.backdrop}
+        behavior={Platform.select({ ios: 'padding', default: 'height' })}
+      >
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
         <View style={styles.card}>
           {!profile ? (
@@ -88,6 +91,7 @@ export function UserProfileModal({ userId, onClose }: Props) {
                 data={thoughts}
                 keyExtractor={(item) => item.id}
                 style={styles.list}
+                contentContainerStyle={styles.listContent}
                 ListEmptyComponent={<Text style={styles.empty}>No public thoughts yet.</Text>}
                 renderItem={({ item }) => (
                   <Card style={styles.thoughtCard}>
@@ -129,7 +133,7 @@ export function UserProfileModal({ userId, onClose }: Props) {
             <Text style={styles.close}>Close</Text>
           </Pressable>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -143,13 +147,12 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   card: {
-    width: '100%',
-    maxWidth: 360,
-    maxHeight: '80%',
-    backgroundColor: colors.background,
+    width: '94%',
+    height: '92%',
+    backgroundColor: 'rgba(255, 255, 255, 0.55)',
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(255, 255, 255, 0.7)',
     padding: spacing.lg,
     gap: spacing.md,
   },
@@ -187,7 +190,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(21, 33, 59, 0.25)',
   },
   interestLabel: {
     fontFamily: typography.fontFamily,
@@ -195,7 +198,10 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   list: {
-    flexGrow: 0,
+    flex: 1,
+  },
+  listContent: {
+    paddingBottom: spacing.sm,
   },
   thoughtCard: {
     marginBottom: spacing.sm,

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { ScreenContainer } from '@/components/ScreenContainer';
@@ -31,55 +31,49 @@ export function AuthScreen() {
 
   return (
     <ScreenContainer>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.select({ ios: 'padding', default: undefined })}
-      >
-        <View style={styles.content}>
-          <Text style={styles.title}>Drift</Text>
-          <Text style={styles.subtitle}>Somewhere, someone feels the same.</Text>
+      <View style={styles.content}>
+        <Text style={styles.title}>Drift</Text>
+        <Text style={styles.subtitle}>Somewhere, someone feels the same.</Text>
 
-          <View style={styles.form}>
-            <TextField
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoComplete="email"
-              placeholder="you@example.com"
-            />
-            <TextField
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-              placeholder="••••••••"
-            />
-            {error && <Text style={styles.error}>{error}</Text>}
-            <Button
-              label={mode === 'sign-in' ? 'Sign in' : 'Create account'}
-              onPress={submit}
-              disabled={loading || !email || !password}
-            />
-            <Button
-              label={mode === 'sign-in' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
-              variant="ghost"
-              onPress={() => {
-                setError(null);
-                setMode(mode === 'sign-in' ? 'sign-up' : 'sign-in');
-              }}
-            />
-          </View>
+        <View style={styles.form}>
+          <TextField
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+            placeholder="you@example.com"
+          />
+          <TextField
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            placeholder="••••••••"
+          />
+          {error && <Text style={styles.error}>{error}</Text>}
+          <Button
+            label={mode === 'sign-in' ? 'Sign in' : 'Create account'}
+            onPress={submit}
+            disabled={loading || !email || !password}
+          />
+          <Button
+            label={mode === 'sign-in' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+            variant="ghost"
+            onPress={() => {
+              setError(null);
+              setMode(mode === 'sign-in' ? 'sign-up' : 'sign-in');
+            }}
+          />
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
   content: {
     flex: 1,
     justifyContent: 'center',
