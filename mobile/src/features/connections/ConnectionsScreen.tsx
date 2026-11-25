@@ -23,7 +23,7 @@ export function ConnectionsScreen() {
   const router = useRouter();
   const [requests, setRequests] = useState<ConnectionRequest[]>([]);
   const [connections, setConnections] = useState<Connection[]>([]);
-  const [names, setNames] = useState<Record<string, string>>({});
+  const [profiles, setProfiles] = useState<Record<string, { displayName: string; photoUrl: string | null }>>({});
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
@@ -33,7 +33,12 @@ export function ConnectionsScreen() {
         setConnections(conns);
         conns.forEach((c) => {
           getPublicProfile(c.otherUserId)
-            .then((profile) => setNames((prev) => ({ ...prev, [c.otherUserId]: profile.displayName })))
+            .then((profile) =>
+              setProfiles((prev) => ({
+                ...prev,
+                [c.otherUserId]: { displayName: profile.displayName, photoUrl: profile.photoUrl },
+              })),
+            )
             .catch(() => {});
         });
       })
@@ -107,8 +112,11 @@ export function ConnectionsScreen() {
               }
             >
               <Card style={[styles.connectionCard, styles.authorRow]}>
-                <Avatar name={names[item.otherUserId]} />
-                <Text style={styles.connectionLabel}>{names[item.otherUserId] ?? 'Someone'}</Text>
+                <Avatar
+                  name={profiles[item.otherUserId]?.displayName}
+                  photoUrl={profiles[item.otherUserId]?.photoUrl}
+                />
+                <Text style={styles.connectionLabel}>{profiles[item.otherUserId]?.displayName ?? 'Someone'}</Text>
               </Card>
             </Pressable>
           )}
