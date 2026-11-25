@@ -63,14 +63,22 @@ export function Bubble({ thought, layout, reduceMotion, paused, onPress, hasNoti
     if (reduceMotion) {
       return { transform: [{ translateX: 0 }, { translateY: 0 }, { rotateX: '0deg' }, { rotateY: '0deg' }] };
     }
+    // Every term here must be a function of the SAME angle (progress scaled
+    // by exactly one full turn) — using a frequency multiplier like
+    // `angle * 1.3` instead of a phase offset looks more organic at a
+    // glance, but it isn't periodic over one repeat of `progress` (0→1),
+    // so the moment `progress` wraps back to 0, that term snaps to a
+    // different value than it ended on: a visible mid-drift pixel jump.
+    // Phase offsets keep every term exactly periodic in `angle`, so the
+    // wrap is seamless, while still giving each axis its own timing.
     const angle = progress.value * Math.PI * 2 + layout.phase;
     return {
       transform: [
         { translateX: Math.cos(angle) * layout.driftRadiusX },
-        { translateY: Math.sin(angle * 1.3) * layout.driftRadiusY },
+        { translateY: Math.sin(angle + Math.PI / 2) * layout.driftRadiusY },
         { perspective: 400 },
         { rotateY: `${Math.cos(angle) * TILT_DEGREES}deg` },
-        { rotateX: `${Math.sin(angle * 1.3) * (TILT_DEGREES * 0.75)}deg` },
+        { rotateX: `${Math.sin(angle + Math.PI / 3) * (TILT_DEGREES * 0.75)}deg` },
       ],
     };
   });
