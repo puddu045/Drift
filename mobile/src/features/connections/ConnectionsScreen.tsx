@@ -57,7 +57,7 @@ export function ConnectionsScreen() {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer floatingTabBar>
       <View style={styles.header}>
         <Text style={styles.title}>Connections</Text>
       </View>

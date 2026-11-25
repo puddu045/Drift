@@ -48,7 +48,7 @@ export function ComposeScreen() {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer floatingTabBar>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Release a thought</Text>
 

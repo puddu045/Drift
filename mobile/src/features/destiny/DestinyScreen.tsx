@@ -33,7 +33,7 @@ export function DestinyScreen() {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer floatingTabBar>
       <View style={styles.header}>
         <Text style={styles.title}>Destiny</Text>
         <Text style={styles.subtitle}>One stranger&rsquo;s thought, just for you today.</Text>
