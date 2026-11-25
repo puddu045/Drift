@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
 
 import { Avatar } from '@/components/Avatar';
@@ -10,7 +11,6 @@ import { blockUser } from '@/features/blocks/api';
 import { sendConnectionRequest } from '@/features/connections/api';
 import { useSession } from '@/features/auth/SessionProvider';
 import { muteUser } from '@/features/mutes/api';
-import { UserProfileModal } from '@/features/profile/UserProfileModal';
 import {
   deleteThought,
   getThought,
@@ -32,13 +32,23 @@ const REACTIONS: { type: Parameters<typeof toggleReaction>[1]; label: string }[]
   { type: 'hug', label: 'Hug' },
 ];
 
+type AuthorIdentity = { displayName: string; photoUrl: string | null };
+
 type Props = {
   thought: Thought;
   onClose: () => void;
   onDeleted: () => void;
+  /** The userId of the profile this overlay was opened from (if any) — e.g.
+   * when PublicProfileScreen opens one of that user's own thoughts. Their
+   * avatar is already known to be "this profile", so it's shown but not
+   * made tappable again, which is what stops the bubble → profile → thought
+   * → profile → ... loop. Any *other* author (e.g. someone else's reply)
+   * stays tappable as usual. */
+  viewerContextUserId?: string;
 };
 
-export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
+export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContextUserId }: Props) {
+  const router = useRouter();
   const { session } = useSession();
   const [detail, setDetail] = useState<ThoughtDetail | null>(null);
   const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
@@ -46,7 +56,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
   const [sendingReply, setSendingReply] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const [viewingAuthorId, setViewingAuthorId] = useState<string | null>(null);
+  const [previewAuthor, setPreviewAuthor] = useState<{ id: string } & AuthorIdentity | null>(null);
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
@@ -115,12 +125,19 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
   // Only viewable when the author opted to reveal identity — an anonymous
   // author's userId must never become a way to look up their profile. Tapping
   // an anonymous avatar still gives feedback rather than silently doing nothing.
-  const onViewAuthor = (authorId: string, author: { displayName: string; photoUrl: string | null } | null) => {
+  const onViewAuthor = (authorId: string, author: AuthorIdentity | null) => {
     if (!author) {
       setActionMessage('This person has chosen to stay anonymous.');
       return;
     }
-    setViewingAuthorId(authorId);
+    setPreviewAuthor({ id: authorId, ...author });
+  };
+
+  const onOpenFullProfile = () => {
+    if (!previewAuthor) return;
+    const userId = previewAuthor.id;
+    setPreviewAuthor(null);
+    router.push({ pathname: '/profiles/[userId]', params: { userId } });
   };
 
   return (
@@ -137,10 +154,17 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
       >
         <View style={styles.topRow}>
           {detail ? (
-            <Pressable style={styles.authorRow} onPress={() => onViewAuthor(detail.authorId, detail.author)}>
-              <Avatar name={detail.author?.displayName} photoUrl={detail.author?.photoUrl} size={28} />
-              <Text style={styles.authorName}>{detail.author?.displayName ?? 'Anonymous'}</Text>
-            </Pressable>
+            detail.authorId === viewerContextUserId ? (
+              <View style={styles.authorRow}>
+                <Avatar name={detail.author?.displayName} photoUrl={detail.author?.photoUrl} size={28} />
+                <Text style={styles.authorName}>{detail.author?.displayName ?? 'Anonymous'}</Text>
+              </View>
+            ) : (
+              <Pressable style={styles.authorRow} onPress={() => onViewAuthor(detail.authorId, detail.author)}>
+                <Avatar name={detail.author?.displayName} photoUrl={detail.author?.photoUrl} size={28} />
+                <Text style={styles.authorName}>{detail.author?.displayName ?? 'Anonymous'}</Text>
+              </Pressable>
+            )
           ) : (
             <View />
           )}
@@ -194,9 +218,13 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
               ) : (
                 detail.replies.map((reply) => (
                   <View key={reply.id} style={styles.replyItem}>
-                    <Pressable onPress={() => onViewAuthor(reply.authorId, reply.author)}>
+                    {reply.authorId === viewerContextUserId ? (
                       <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={26} />
-                    </Pressable>
+                    ) : (
+                      <Pressable onPress={() => onViewAuthor(reply.authorId, reply.author)}>
+                        <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={26} />
+                      </Pressable>
+                    )}
                     <Text style={styles.reply}>{reply.text}</Text>
                   </View>
                 ))
@@ -246,8 +274,24 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
         </Pressable>
       </Animated.View>
 
-      {viewingAuthorId && (
-        <UserProfileModal userId={viewingAuthorId} onClose={() => setViewingAuthorId(null)} />
+      {previewAuthor && (
+        <Modal visible transparent animationType="fade" onRequestClose={() => setPreviewAuthor(null)}>
+          <View style={styles.previewBackdrop}>
+            <Pressable
+              style={StyleSheet.absoluteFill}
+              onPress={() => setPreviewAuthor(null)}
+              accessibilityLabel="Close"
+            />
+            <View style={styles.previewCard}>
+              <Avatar name={previewAuthor.displayName} photoUrl={previewAuthor.photoUrl} size={72} />
+              <Text style={styles.previewName}>{previewAuthor.displayName}</Text>
+              <Button label="View profile" onPress={onOpenFullProfile} style={styles.previewButton} />
+              <Pressable onPress={() => setPreviewAuthor(null)}>
+                <Text style={styles.close}>Close</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
       )}
     </Animated.View>
   );
@@ -429,6 +473,34 @@ const styles = StyleSheet.create({
     fontSize: typography.size.sm,
     color: colors.textSecondary,
     textAlign: 'center',
+    marginTop: spacing.xs,
+  },
+  previewBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(16, 26, 53, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.lg,
+  },
+  previewCard: {
+    width: '80%',
+    maxWidth: 320,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    padding: spacing.lg,
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  previewName: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.bold,
+    color: colors.textPrimary,
+  },
+  previewButton: {
+    width: '100%',
     marginTop: spacing.xs,
   },
 });

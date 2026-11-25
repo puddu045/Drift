@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { MoodTag } from '@/components/MoodTag';
+import { ScreenContainer } from '@/components/ScreenContainer';
 import { useSession } from '@/features/auth/SessionProvider';
 import { sendConnectionRequest } from '@/features/connections/api';
 import { muteUser } from '@/features/mutes/api';
@@ -19,10 +20,13 @@ import { AuthoredThought, getPublicProfile, getPublicThoughtsByAuthor, PublicPro
 
 type Props = {
   userId: string;
-  onClose: () => void;
 };
 
-export function UserProfileModal({ userId, onClose }: Props) {
+// A real pushed screen (not a modal-on-a-modal) so that drilling into a
+// thought's author from here, and from there into one of THEIR thoughts,
+// doesn't nest indefinitely — see ThoughtDetailOverlay's viewerContextUserId.
+export function PublicProfileScreen({ userId }: Props) {
+  const router = useRouter();
   const { session } = useSession();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [thoughts, setThoughts] = useState<AuthoredThought[]>([]);
@@ -32,9 +36,6 @@ export function UserProfileModal({ userId, onClose }: Props) {
 
   const isSelf = userId === session?.user.id;
 
-  // The caller renders this conditionally on `userId`, so it mounts fresh
-  // each time a different user's profile is opened — same pattern as
-  // EditFieldModal. No reset-on-change effect needed.
   useEffect(() => {
     getPublicProfile(userId).then(setProfile).catch(() => {});
     getPublicThoughtsByAuthor(userId).then(setThoughts).catch(() => {});
@@ -61,88 +62,83 @@ export function UserProfileModal({ userId, onClose }: Props) {
   };
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        style={styles.backdrop}
-        behavior={Platform.select({ ios: 'padding', default: 'height' })}
-      >
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
-        <SafeAreaView style={styles.card} edges={['top', 'bottom']}>
-          {!profile ? (
-            <ActivityIndicator color={colors.accent} />
-          ) : (
-            <>
-              <View style={styles.profileRow}>
-                <Avatar name={profile.displayName} photoUrl={profile.photoUrl} size={56} />
-                <View style={styles.profileText}>
-                  <Text style={styles.name}>{profile.displayName}</Text>
-                  <Text style={styles.username}>@{profile.username}</Text>
+    <ScreenContainer>
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} accessibilityLabel="Back">
+          <Text style={styles.back}>‹ Back</Text>
+        </Pressable>
+      </View>
+
+      {!profile ? (
+        <ActivityIndicator color={colors.accent} style={styles.loading} />
+      ) : (
+        <View style={styles.content}>
+          <View style={styles.profileRow}>
+            <Avatar name={profile.displayName} photoUrl={profile.photoUrl} size={56} />
+            <View style={styles.profileText}>
+              <Text style={styles.name}>{profile.displayName}</Text>
+              <Text style={styles.username}>@{profile.username}</Text>
+            </View>
+          </View>
+          {profile.bio && <Text style={styles.bio}>{profile.bio}</Text>}
+          {profile.interests.length > 0 && (
+            <View style={styles.interests}>
+              {profile.interests.map((interest) => (
+                <View key={interest} style={styles.interestChip}>
+                  <Text style={styles.interestLabel}>{interest}</Text>
                 </View>
-              </View>
-              {profile.bio && <Text style={styles.bio}>{profile.bio}</Text>}
-              {profile.interests.length > 0 && (
-                <View style={styles.interests}>
-                  {profile.interests.map((interest) => (
-                    <View key={interest} style={styles.interestChip}>
-                      <Text style={styles.interestLabel}>{interest}</Text>
-                    </View>
+              ))}
+            </View>
+          )}
+
+          <FlatList
+            data={thoughts}
+            keyExtractor={(item) => item.id}
+            style={styles.list}
+            contentContainerStyle={styles.listContent}
+            ListEmptyComponent={<Text style={styles.empty}>No public thoughts yet.</Text>}
+            renderItem={({ item }) => (
+              <Pressable onPress={() => setViewingThought(item)}>
+                <Card style={styles.thoughtCard}>
+                  <MoodTag mood={item.mood} />
+                  <Text style={styles.thoughtText}>{item.text}</Text>
+                </Card>
+              </Pressable>
+            )}
+          />
+
+          {!isSelf && (
+            <>
+              {actionMessage && <Text style={styles.actionMessage}>{actionMessage}</Text>}
+              {reporting ? (
+                <View style={styles.reportReasons}>
+                  {REPORT_REASONS.map((reason) => (
+                    <Pressable key={reason} style={styles.reportReasonPill} onPress={() => onReport(reason)}>
+                      <Text style={styles.reportReasonLabel}>{reason}</Text>
+                    </Pressable>
                   ))}
                 </View>
-              )}
-
-              <FlatList
-                data={thoughts}
-                keyExtractor={(item) => item.id}
-                style={styles.list}
-                contentContainerStyle={styles.listContent}
-                ListEmptyComponent={<Text style={styles.empty}>No public thoughts yet.</Text>}
-                renderItem={({ item }) => (
-                  <Pressable onPress={() => setViewingThought(item)}>
-                    <Card style={styles.thoughtCard}>
-                      <MoodTag mood={item.mood} />
-                      <Text style={styles.thoughtText}>{item.text}</Text>
-                    </Card>
-                  </Pressable>
-                )}
-              />
-
-              {!isSelf && (
-                <>
-                  {actionMessage && <Text style={styles.actionMessage}>{actionMessage}</Text>}
-                  {reporting ? (
-                    <View style={styles.reportReasons}>
-                      {REPORT_REASONS.map((reason) => (
-                        <Pressable key={reason} style={styles.reportReasonPill} onPress={() => onReport(reason)}>
-                          <Text style={styles.reportReasonLabel}>{reason}</Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  ) : (
-                    <View style={styles.actions}>
-                      <Button label="Connect" onPress={onConnect} style={styles.actionButton} />
-                      <Button label="Mute" variant="ghost" onPress={onMute} style={styles.actionButton} />
-                      <Button
-                        label="Report"
-                        variant="ghost"
-                        onPress={() => setReporting(true)}
-                        style={styles.actionButton}
-                      />
-                    </View>
-                  )}
-                </>
+              ) : (
+                <View style={styles.actions}>
+                  <Button label="Connect" onPress={onConnect} style={styles.actionButton} />
+                  <Button label="Mute" variant="ghost" onPress={onMute} style={styles.actionButton} />
+                  <Button
+                    label="Report"
+                    variant="ghost"
+                    onPress={() => setReporting(true)}
+                    style={styles.actionButton}
+                  />
+                </View>
               )}
             </>
           )}
-
-          <Pressable onPress={onClose} accessibilityLabel="Close profile">
-            <Text style={styles.close}>Close</Text>
-          </Pressable>
-        </SafeAreaView>
-      </KeyboardAvoidingView>
+        </View>
+      )}
 
       {viewingThought && (
         <ThoughtDetailOverlay
           thought={viewingThought}
+          viewerContextUserId={userId}
           onClose={() => setViewingThought(null)}
           onDeleted={() => {
             setThoughts((prev) => prev.filter((t) => t.id !== viewingThought.id));
@@ -150,20 +146,30 @@ export function UserProfileModal({ userId, onClose }: Props) {
           }}
         />
       )}
-    </Modal>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(16, 26, 53, 0.5)',
+  header: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
+    minHeight: 56,
+    justifyContent: 'center',
   },
-  card: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    padding: spacing.lg,
+  back: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
+    color: colors.textPrimary,
+  },
+  loading: {
+    marginTop: spacing.xl,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
     gap: spacing.md,
   },
   profileRow: {
@@ -257,11 +263,5 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xs,
     color: colors.textSecondary,
-  },
-  close: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.size.sm,
-    color: colors.textSecondary,
-    textAlign: 'center',
   },
 });

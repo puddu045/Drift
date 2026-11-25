@@ -21,6 +21,7 @@ function RootNavigator() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="notifications" />
       <Stack.Screen name="profile" />
+      <Stack.Screen name="profiles/[userId]" />
     </Stack>
   );
 }
