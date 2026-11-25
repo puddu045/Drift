@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
@@ -10,6 +11,7 @@ import { sendConnectionRequest } from '@/features/connections/api';
 import { muteUser } from '@/features/mutes/api';
 import { reportTarget } from '@/features/thoughts/api';
 import { REPORT_REASONS } from '@/features/thoughts/reportReasons';
+import { ThoughtDetailOverlay } from '@/features/universe/ThoughtDetailOverlay';
 import { ApiError } from '@/lib/api';
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -26,6 +28,7 @@ export function UserProfileModal({ userId, onClose }: Props) {
   const [thoughts, setThoughts] = useState<AuthoredThought[]>([]);
   const [reporting, setReporting] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [viewingThought, setViewingThought] = useState<AuthoredThought | null>(null);
 
   const isSelf = userId === session?.user.id;
 
@@ -64,7 +67,7 @@ export function UserProfileModal({ userId, onClose }: Props) {
         behavior={Platform.select({ ios: 'padding', default: 'height' })}
       >
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
-        <View style={styles.card}>
+        <SafeAreaView style={styles.card} edges={['top', 'bottom']}>
           {!profile ? (
             <ActivityIndicator color={colors.accent} />
           ) : (
@@ -94,10 +97,12 @@ export function UserProfileModal({ userId, onClose }: Props) {
                 contentContainerStyle={styles.listContent}
                 ListEmptyComponent={<Text style={styles.empty}>No public thoughts yet.</Text>}
                 renderItem={({ item }) => (
-                  <Card style={styles.thoughtCard}>
-                    <MoodTag mood={item.mood} />
-                    <Text style={styles.thoughtText}>{item.text}</Text>
-                  </Card>
+                  <Pressable onPress={() => setViewingThought(item)}>
+                    <Card style={styles.thoughtCard}>
+                      <MoodTag mood={item.mood} />
+                      <Text style={styles.thoughtText}>{item.text}</Text>
+                    </Card>
+                  </Pressable>
                 )}
               />
 
@@ -132,8 +137,19 @@ export function UserProfileModal({ userId, onClose }: Props) {
           <Pressable onPress={onClose} accessibilityLabel="Close profile">
             <Text style={styles.close}>Close</Text>
           </Pressable>
-        </View>
+        </SafeAreaView>
       </KeyboardAvoidingView>
+
+      {viewingThought && (
+        <ThoughtDetailOverlay
+          thought={viewingThought}
+          onClose={() => setViewingThought(null)}
+          onDeleted={() => {
+            setThoughts((prev) => prev.filter((t) => t.id !== viewingThought.id));
+            setViewingThought(null);
+          }}
+        />
+      )}
     </Modal>
   );
 }
@@ -142,17 +158,11 @@ const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(16, 26, 53, 0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.lg,
   },
   card: {
-    width: '94%',
-    height: '92%',
-    backgroundColor: 'rgba(255, 255, 255, 0.55)',
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.7)',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     padding: spacing.lg,
     gap: spacing.md,
   },

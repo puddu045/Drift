@@ -124,7 +124,11 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted }: Props) {
   };
 
   return (
-    <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(150)} style={styles.backdrop}>
+    <Animated.View
+      entering={FadeIn.duration(180)}
+      exiting={FadeOut.duration(150)}
+      style={[styles.backdrop, expanded && styles.backdropExpanded]}
+    >
       <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
       <Animated.View
         entering={ZoomIn.duration(220)}
@@ -261,21 +265,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.lg,
   },
+  backdropExpanded: {
+    padding: 0,
+  },
   card: {
     width: '92%',
     maxWidth: 400,
     height: '72%',
-    backgroundColor: 'rgba(255, 255, 255, 0.55)',
+    backgroundColor: 'rgba(255, 255, 255, 0.88)',
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.7)',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     padding: spacing.lg,
     gap: spacing.md,
   },
   cardExpanded: {
-    width: '96%',
+    width: '100%',
     maxWidth: undefined,
-    height: '93%',
+    height: '100%',
+    borderRadius: 0,
   },
   scroll: {
     flex: 1,

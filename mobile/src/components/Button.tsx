@@ -26,7 +26,12 @@ export function Button({ label, onPress, variant = 'primary', style, disabled }:
         style,
       ]}
     >
-      <Text style={[styles.label, isPrimary ? styles.labelPrimary : styles.labelGhost]}>
+      <Text
+        style={[styles.label, isPrimary ? styles.labelPrimary : styles.labelGhost]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.75}
+      >
         {label}
       </Text>
     </Pressable>
@@ -36,7 +41,7 @@ export function Button({ label, onPress, variant = 'primary', style, disabled }:
 const styles = StyleSheet.create({
   base: {
     minHeight: 48,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',

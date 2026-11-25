@@ -120,9 +120,9 @@ const styles = StyleSheet.create({
   },
   bubbleMine: {
     alignSelf: 'flex-end',
-    backgroundColor: `${colors.accent}55`,
+    backgroundColor: `${colors.accent}80`,
     borderWidth: 1,
-    borderColor: `${colors.accent}80`,
+    borderColor: `${colors.accent}b0`,
   },
   bubbleTheirs: {
     alignSelf: 'flex-start',
