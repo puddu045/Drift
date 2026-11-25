@@ -9,7 +9,6 @@ import { ApiError } from '@/lib/api';
 import { colors, radius, spacing, typography } from '@/theme';
 
 import { Bubble } from './Bubble';
-import { OrbitTrails } from './OrbitTrails';
 import { ThoughtDetailOverlay } from './ThoughtDetailOverlay';
 import { useBubbleLayout } from './useBubbleLayout';
 import { useReducedMotion } from './useReducedMotion';
@@ -124,7 +123,6 @@ export function UniverseScreen() {
       </View>
 
       <View style={styles.field} onLayout={onLayout}>
-        <OrbitTrails width={size.width} height={size.height} />
         {loading && thoughts.length === 0 && (
           <View style={styles.centered}>
             <ActivityIndicator color={colors.accent} />
@@ -204,17 +202,17 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
     alignItems: 'center',
   },
   modePillActive: {
     borderColor: colors.accent,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    backgroundColor: 'rgba(255, 255, 255, 0.45)',
     shadowColor: colors.accent,
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
+    elevation: 2,
   },
   modeLabel: {
     fontFamily: typography.fontFamily,
