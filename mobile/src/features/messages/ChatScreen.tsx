@@ -91,17 +91,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.sm,
+    // Leave enough headroom to clear the notification/profile icons, which
+    // float above every tab screen (TopRightBar) and aren't part of this
+    // screen's own layout, so they don't reserve space automatically.
+    minHeight: 56,
+    justifyContent: 'center',
   },
   back: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.md,
-    color: colors.accent,
+    fontWeight: typography.weight.semibold,
+    color: colors.textPrimary,
   },
   list: {
     flex: 1,
   },
   listContent: {
     paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
     gap: spacing.sm,
   },
   bubble: {
@@ -113,7 +120,9 @@ const styles = StyleSheet.create({
   },
   bubbleMine: {
     alignSelf: 'flex-end',
-    backgroundColor: colors.accent,
+    backgroundColor: `${colors.accent}55`,
+    borderWidth: 1,
+    borderColor: `${colors.accent}80`,
   },
   bubbleTheirs: {
     alignSelf: 'flex-start',

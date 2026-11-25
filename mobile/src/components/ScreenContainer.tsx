@@ -19,7 +19,7 @@ export function ScreenContainer({ children, style, edges = ['top', 'bottom'], fl
       <DreamyBackground />
       <KeyboardAvoidingView
         style={styles.content}
-        behavior={Platform.select({ ios: 'padding', default: undefined })}
+        behavior={Platform.select({ ios: 'padding', default: 'height' })}
       >
         <View style={[styles.content, floatingTabBar && { paddingBottom: floatingTabBarSpace }, style]}>
           {children}
