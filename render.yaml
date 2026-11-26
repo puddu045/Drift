@@ -1,0 +1,45 @@
+# Render Blueprint for the Drift API (NestJS). Deploy with:
+#   Render Dashboard -> New -> Blueprint -> select this repo.
+# Render reads this file and provisions the service below, prompting you
+# only for the envVars marked `sync: false`. See /DEPLOY.md for exactly
+# which values to paste in and where to get them from Supabase.
+#
+# Free-tier notes:
+# - The free plan spins the service down after ~15 minutes of inactivity;
+#   the next request wakes it back up, which takes a few extra seconds.
+# - preDeployCommand (for running migrations separately from the build)
+#   is a paid-plan feature, so `prisma migrate deploy` runs as part of
+#   buildCommand instead — safe to run on every deploy, it's a no-op when
+#   there's nothing new to migrate.
+services:
+  - type: web
+    name: drift-api
+    runtime: node
+    plan: free
+    rootDir: api
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /
+    autoDeployTrigger: commit
+    envVars:
+      # Pins the Node version to match local development (api/.env.example
+      # and the rest of the repo assume this). Render defaults to whatever
+      # its current newest LTS is otherwise, which drifts over time.
+      - key: NODE_VERSION
+        value: '22'
+      # Supabase project's Postgres connection string (Project Settings ->
+      # Database -> Connection string -> URI), NOT the local dev one from
+      # api/.env.example.
+      - key: DATABASE_URL
+        sync: false
+      # Supabase project settings (Project Settings -> API).
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_JWKS_URL
+        sync: false
+      # The admin portal's deployed Vercel URL, once you have it (e.g.
+      # https://drift-admin.vercel.app) — this is what lets the browser-based
+      # admin portal call this API at all. Leave unset to start; add it
+      # after the Vercel deploy below and Render will redeploy with it.
+      - key: CORS_ORIGINS
+        sync: false
