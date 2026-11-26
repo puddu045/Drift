@@ -27,6 +27,13 @@ services:
       # its current newest LTS is otherwise, which drifts over time.
       - key: NODE_VERSION
         value: '22'
+      # Pinned explicitly: on a brand-new service's very first boot, Render's
+      # auto-assigned PORT can arrive a beat too late for the app to pick it
+      # up, so it falls back to 3000 while Render's health check is watching
+      # its own default (10000) — a one-time "Timed Out" + auto-restart.
+      # Setting it ourselves removes that race entirely.
+      - key: PORT
+        value: '10000'
       # Supabase project's Postgres connection string (Project Settings ->
       # Database -> Connection string -> URI), NOT the local dev one from
       # api/.env.example.
