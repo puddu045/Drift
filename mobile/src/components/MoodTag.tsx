@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
-import { moodColors, MoodId, palette, radius, spacing, typography } from '@/theme';
+import { moodColors, moodIcons, MoodId, palette, radius, spacing, typography } from '@/theme';
 
 const moodLabels: Record<MoodId, string> = {
   love: 'Love',
@@ -14,8 +14,10 @@ const moodLabels: Record<MoodId, string> = {
 };
 
 export function MoodTag({ mood }: { mood: MoodId }) {
+  const icon = moodIcons[mood];
   return (
     <View style={[styles.tag, { backgroundColor: moodColors[mood] }]}>
+      {icon && <Image source={icon} style={styles.icon} resizeMode="contain" />}
       <Text style={styles.label}>{moodLabels[mood]}</Text>
     </View>
   );
@@ -23,10 +25,17 @@ export function MoodTag({ mood }: { mood: MoodId }) {
 
 const styles = StyleSheet.create({
   tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     alignSelf: 'flex-start',
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: radius.pill,
+  },
+  icon: {
+    width: 14,
+    height: 14,
   },
   label: {
     fontFamily: typography.fontFamily,

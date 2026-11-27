@@ -46,9 +46,7 @@ export function DestinyScreen() {
   };
 
   return (
-    // TODO(theme migration): switch to a dedicated night-sky variant once
-    // that asset arrives; falls back to the default 'day' background for now.
-    <ScreenContainer floatingTabBar>
+    <ScreenContainer floatingTabBar background="night">
       <View style={styles.header}>
         <Text style={styles.title}>Destiny</Text>
         <Text style={styles.subtitle}>One stranger&rsquo;s thought, just for you today.</Text>
@@ -110,12 +108,14 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xxl,
     fontWeight: typography.weight.bold,
-    color: colors.textPrimary,
+    // White, not the usual dark textPrimary — this header sits directly on
+    // the dark night-sky background, not a card.
+    color: '#FFFFFF',
   },
   subtitle: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
-    color: colors.textSecondary,
+    color: 'rgba(255, 255, 255, 0.8)',
     marginTop: spacing.xs,
   },
   content: {
@@ -125,6 +125,9 @@ const styles = StyleSheet.create({
   },
   card: {
     gap: spacing.md,
+    // More opaque than Card's default — needed for the dark-navy text
+    // inside it to stay legible over the night-sky background.
+    backgroundColor: 'rgba(255, 255, 255, 0.82)',
   },
   text: {
     fontFamily: typography.fontFamily,

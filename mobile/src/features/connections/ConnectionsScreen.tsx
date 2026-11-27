@@ -73,9 +73,7 @@ export function ConnectionsScreen() {
   };
 
   return (
-    // TODO(theme migration): swap to the dedicated gradient background once
-    // that asset arrives; plain for now rather than the sky image.
-    <ScreenContainer floatingTabBar background="none">
+    <ScreenContainer floatingTabBar background="pastel">
       <View style={styles.header}>
         <Text style={styles.title}>Connections</Text>
       </View>

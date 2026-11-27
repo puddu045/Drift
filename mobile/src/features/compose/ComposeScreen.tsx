@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { Button } from '@/components/Button';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { createThought } from '@/features/thoughts/api';
 import { ApiError } from '@/lib/api';
-import { colors, MoodId, moodColors, palette, radius, spacing, typography } from '@/theme';
+import { colors, MoodId, moodColors, moodIcons, palette, radius, spacing, typography } from '@/theme';
 
 const MOODS: { id: MoodId; label: string }[] = [
   { id: 'love', label: 'Love' },
@@ -48,9 +48,7 @@ export function ComposeScreen() {
   };
 
   return (
-    // TODO(theme migration): swap to the dedicated gradient background once
-    // that asset arrives; plain for now rather than the sky image.
-    <ScreenContainer floatingTabBar background="none">
+    <ScreenContainer floatingTabBar background="pastel">
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Release a thought</Text>
 
@@ -69,19 +67,23 @@ export function ComposeScreen() {
 
         <Text style={styles.sectionLabel}>Mood</Text>
         <View style={styles.moodRow}>
-          {MOODS.map((item) => (
-            <View
-              key={item.id}
-              style={[
-                styles.moodOption,
-                { backgroundColor: moodColors[item.id] },
-                mood === item.id && styles.moodOptionSelected,
-              ]}
-              onTouchEnd={() => setMood(item.id)}
-            >
-              <Text style={styles.moodLabel}>{item.label}</Text>
-            </View>
-          ))}
+          {MOODS.map((item) => {
+            const icon = moodIcons[item.id];
+            return (
+              <View
+                key={item.id}
+                style={[
+                  styles.moodOption,
+                  { backgroundColor: moodColors[item.id] },
+                  mood === item.id && styles.moodOptionSelected,
+                ]}
+                onTouchEnd={() => setMood(item.id)}
+              >
+                {icon && <Image source={icon} style={styles.moodIcon} resizeMode="contain" />}
+                <Text style={styles.moodLabel}>{item.label}</Text>
+              </View>
+            );
+          })}
         </View>
 
         <View style={styles.privacyRow}>
@@ -136,10 +138,17 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   moodOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.pill,
     opacity: 0.55,
+  },
+  moodIcon: {
+    width: 16,
+    height: 16,
   },
   moodOptionSelected: {
     opacity: 1,

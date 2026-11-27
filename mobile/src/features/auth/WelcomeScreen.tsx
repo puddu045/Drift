@@ -26,8 +26,8 @@ export function WelcomeScreen({ onGetStarted, onSignIn }: Props) {
         </View>
 
         <View style={styles.actions}>
-          <Button label="Get Started" onPress={onGetStarted} />
-          <Button label="I already have an account" variant="ghost" onPress={onSignIn} />
+          <Button label="Get Started" onPress={onGetStarted} style={styles.getStartedButton} />
+          <Button label="I already have an account" onPress={onSignIn} style={styles.signInButton} />
         </View>
       </View>
     </ScreenContainer>
@@ -65,5 +65,16 @@ const styles = StyleSheet.create({
   },
   actions: {
     gap: spacing.sm,
+    alignItems: 'center',
+  },
+  getStartedButton: {
+    width: '70%',
+    backgroundColor: '#7FB2E0',
+    borderColor: '#7FB2E0',
+  },
+  signInButton: {
+    width: '70%',
+    backgroundColor: '#FDF3E0',
+    borderColor: '#FDF3E0',
   },
 });

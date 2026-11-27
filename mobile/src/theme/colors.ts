@@ -1,5 +1,7 @@
 // "Soft Dawn" palette — see /DESIGN_SYSTEM.md for the approved tokens.
 
+import { ImageSourcePropType } from 'react-native';
+
 export const palette = {
   blush: '#F6D6E0',
   apricot: '#F8C9A7',
@@ -40,4 +42,16 @@ export const moodColors: Record<MoodId, string> = {
   random: palette.paleSky,
   lonely: palette.paleSky,
   curious: palette.lilac,
+};
+
+// Small flat pastel icons (AI-generated per the user's own prompt), one per
+// mood — 'lonely' has none yet, so callers must handle it being undefined.
+export const moodIcons: Partial<Record<MoodId, ImageSourcePropType>> = {
+  love: require('../../assets/mood-love.png'),
+  deep: require('../../assets/mood-deep.png'),
+  happy: require('../../assets/mood-happy.png'),
+  reflective: require('../../assets/mood-reflective.png'),
+  hopeful: require('../../assets/mood-hopeful.png'),
+  random: require('../../assets/mood-random.png'),
+  curious: require('../../assets/mood-curious.png'),
 };

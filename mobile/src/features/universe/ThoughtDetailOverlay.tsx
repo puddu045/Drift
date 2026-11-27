@@ -6,6 +6,7 @@ import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanima
 
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
+import { DreamyBackground } from '@/components/DreamyBackground';
 import { LanguagePickerModal } from '@/components/LanguagePickerModal';
 import { MoodTag } from '@/components/MoodTag';
 import { blockUser } from '@/features/blocks/api';
@@ -159,6 +160,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
       exiting={FadeOut.duration(150)}
       style={[styles.backdrop, expanded && styles.backdropExpanded]}
     >
+      <DreamyBackground variant="pastel" />
       <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
       <Animated.View
         entering={ZoomIn.duration(220)}

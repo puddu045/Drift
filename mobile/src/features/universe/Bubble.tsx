@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, ImageSourcePropType, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   cancelAnimation,
@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { colors, moodColors, spacing, typography } from '@/theme';
+import { colors, moodColors, MoodId, spacing, typography } from '@/theme';
 import { Thought } from '@/features/thoughts/api';
 
 import { BubbleLayout } from './useBubbleLayout';
@@ -20,18 +20,37 @@ import { BubbleLayout } from './useBubbleLayout';
 // it looks like it's spinning.
 const TILT_DEGREES = 7;
 
-// AI-generated glass-bubble textures (the user's own prompt) — a few
-// variants so bubbles don't all share an identical highlight placement.
-const GLASS_TEXTURES = [
+// Fraction of the bubble's size used as its corner radius — a soft
+// "squircle", not a full circle. Shared between the view's own borderRadius
+// and the mood-bubble images below, which were cropped with a matching ratio.
+const CORNER_RATIO = 0.24;
+
+// Frosted-glass mood-bubble art (AI-generated per the user's own prompt),
+// one per mood, already colored and highlighted — no separate color fill or
+// generic texture needed on top. 'lonely' has none yet, so it falls back to
+// one of the old generic glass textures instead of going flat.
+const MOOD_BUBBLES: Partial<Record<MoodId, ImageSourcePropType>> = {
+  love: require('../../../assets/mood-bubble-love.png'),
+  deep: require('../../../assets/mood-bubble-deep.png'),
+  happy: require('../../../assets/mood-bubble-happy.png'),
+  reflective: require('../../../assets/mood-bubble-reflective.png'),
+  hopeful: require('../../../assets/mood-bubble-hopeful.png'),
+  random: require('../../../assets/mood-bubble-random.png'),
+  curious: require('../../../assets/mood-bubble-curious.png'),
+};
+
+const FALLBACK_GLASS_TEXTURES = [
   require('../../../assets/bubble-glass-1.webp'),
   require('../../../assets/bubble-glass-2.webp'),
   require('../../../assets/bubble-glass-3.webp'),
 ];
 
-function glassTextureFor(id: string) {
+function bubbleTextureFor(mood: MoodId, id: string) {
+  const moodBubble = MOOD_BUBBLES[mood];
+  if (moodBubble) return moodBubble;
   let sum = 0;
   for (let i = 0; i < id.length; i++) sum += id.charCodeAt(i);
-  return GLASS_TEXTURES[sum % GLASS_TEXTURES.length];
+  return FALLBACK_GLASS_TEXTURES[sum % FALLBACK_GLASS_TEXTURES.length];
 }
 
 type Props = {
@@ -84,6 +103,8 @@ export function Bubble({ thought, layout, reduceMotion, paused, onPress, hasNoti
   });
 
   const moodColor = moodColors[thought.mood];
+  const moodBubble = MOOD_BUBBLES[thought.mood];
+  const cornerRadius = layout.size * CORNER_RATIO;
 
   return (
     <Animated.View
@@ -94,12 +115,12 @@ export function Bubble({ thought, layout, reduceMotion, paused, onPress, hasNoti
       ]}
     >
       {/* Shadow lives on its own layer, separate from the Pressable below —
-          overflow:hidden (needed to clip the gradients to the circle) also
+          overflow:hidden (needed to clip the gradients to the shape) also
           clips a shadow if they're on the same view. */}
       <View
         style={[
           styles.shadowLayer,
-          { width: layout.size, height: layout.size, borderRadius: layout.size, shadowColor: moodColor },
+          { width: layout.size, height: layout.size, borderRadius: cornerRadius, shadowColor: moodColor },
         ]}
       >
         <Pressable
@@ -111,7 +132,7 @@ export function Bubble({ thought, layout, reduceMotion, paused, onPress, hasNoti
             {
               width: layout.size,
               height: layout.size,
-              borderRadius: layout.size,
+              borderRadius: cornerRadius,
               borderColor: moodColor,
               // Fully opaque, unlike the gradient below — otherwise the sky
               // background shows through and every bubble reads as the same
@@ -120,18 +141,19 @@ export function Bubble({ thought, layout, reduceMotion, paused, onPress, hasNoti
             },
           ]}
         >
-          {/* Soft sheen, lit from the top-left — reads as a curved, lit
-              sphere rather than a flat tinted disc. */}
-          <LinearGradient
-            colors={['rgba(255, 255, 255, 0.65)', 'rgba(255, 255, 255, 0)']}
-            start={{ x: 0.15, y: 0.1 }}
-            end={{ x: 0.85, y: 0.9 }}
-            style={StyleSheet.absoluteFill}
-          />
-          {/* Real glass-bubble highlight/reflection texture, laid over the
-              mood color so the color identity still reads through. */}
+          {/* The per-mood frosted-glass bubble art already bakes in its own
+              highlight, so the generic sheen below is only needed for the
+              one mood (lonely) still falling back to a generic texture. */}
+          {!moodBubble && (
+            <LinearGradient
+              colors={['rgba(255, 255, 255, 0.65)', 'rgba(255, 255, 255, 0)']}
+              start={{ x: 0.15, y: 0.1 }}
+              end={{ x: 0.85, y: 0.9 }}
+              style={StyleSheet.absoluteFill}
+            />
+          )}
           <Image
-            source={glassTextureFor(thought.id)}
+            source={bubbleTextureFor(thought.mood, thought.id)}
             resizeMode="cover"
             style={[StyleSheet.absoluteFill, { width: layout.size, height: layout.size }]}
           />
