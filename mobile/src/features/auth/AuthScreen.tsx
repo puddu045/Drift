@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { ScreenContainer } from '@/components/ScreenContainer';
@@ -7,12 +7,22 @@ import { TextField } from '@/components/TextField';
 import { supabase } from '@/lib/supabase';
 import { colors, spacing, typography } from '@/theme';
 
+type Props = {
+  /** Which form to show first — set by which button WelcomeScreen was
+   * dismissed with ('Get Started' → sign-up, 'I already have an account' →
+   * sign-in). Still freely toggleable from here either way. */
+  initialMode?: 'sign-in' | 'sign-up';
+  /** Returns to WelcomeScreen, when this screen was reached through it. */
+  onBack?: () => void;
+};
+
 // Minimal email/password gate so the app can talk to the real API. This is
-// NOT the full onboarding flow from PRODUCT_REQUIREMENTS.md (welcome copy,
-// age confirmation, interests/languages, privacy preferences) — that's a
-// separate, more considered piece of UX still to design and build.
-export function AuthScreen() {
-  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
+// NOT the full onboarding flow from PRODUCT_REQUIREMENTS.md (age
+// confirmation, interests/languages, privacy preferences) — that's a
+// separate, more considered piece of UX still to design and build. The
+// welcome copy/CTA part of onboarding now lives in WelcomeScreen.tsx.
+export function AuthScreen({ initialMode = 'sign-in', onBack }: Props) {
+  const [mode, setMode] = useState<'sign-in' | 'sign-up'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,6 +41,11 @@ export function AuthScreen() {
 
   return (
     <ScreenContainer>
+      {onBack && (
+        <Pressable onPress={onBack} accessibilityLabel="Back" style={styles.back}>
+          <Text style={styles.backLabel}>‹ Back</Text>
+        </Pressable>
+      )}
       <View style={styles.content}>
         <Text style={styles.title}>Drift</Text>
         <Text style={styles.subtitle}>Somewhere, someone feels the same.</Text>
@@ -74,6 +89,16 @@ export function AuthScreen() {
 }
 
 const styles = StyleSheet.create({
+  back: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+  },
+  backLabel: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold,
+    color: colors.textPrimary,
+  },
   content: {
     flex: 1,
     justifyContent: 'center',

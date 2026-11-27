@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -6,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { AuthScreen } from '@/features/auth/AuthScreen';
 import { SessionProvider, useSession } from '@/features/auth/SessionProvider';
+import { WelcomeScreen } from '@/features/auth/WelcomeScreen';
 import { usePushRegistration } from '@/features/notifications/usePushRegistration';
 import { usePrefetchTabs } from '@/lib/usePrefetchTabs';
 import { colors } from '@/theme';
@@ -15,8 +17,30 @@ function RootNavigator() {
   usePushRegistration(!!session);
   usePrefetchTabs(!!session);
 
+  // Pre-auth flow: Welcome (sunset background, picks a mode) → AuthScreen
+  // (the actual sign-in/sign-up form). Not an Expo Router route of its own
+  // since there's nothing to deep-link to before a session exists.
+  const [authStep, setAuthStep] = useState<'welcome' | 'form'>('welcome');
+  const [formMode, setFormMode] = useState<'sign-in' | 'sign-up'>('sign-in');
+
   if (loading) return <ScreenContainer />;
-  if (!session) return <AuthScreen />;
+  if (!session) {
+    if (authStep === 'welcome') {
+      return (
+        <WelcomeScreen
+          onGetStarted={() => {
+            setFormMode('sign-up');
+            setAuthStep('form');
+          }}
+          onSignIn={() => {
+            setFormMode('sign-in');
+            setAuthStep('form');
+          }}
+        />
+      );
+    }
+    return <AuthScreen initialMode={formMode} onBack={() => setAuthStep('welcome')} />;
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>

@@ -48,7 +48,9 @@ export function ComposeScreen() {
   };
 
   return (
-    <ScreenContainer floatingTabBar>
+    // TODO(theme migration): swap to the dedicated gradient background once
+    // that asset arrives; plain for now rather than the sky image.
+    <ScreenContainer floatingTabBar background="none">
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Release a thought</Text>
 

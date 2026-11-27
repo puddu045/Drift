@@ -2,7 +2,7 @@ import { PropsWithChildren } from 'react';
 import { KeyboardAvoidingView, Platform, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { DreamyBackground } from '@/components/DreamyBackground';
+import { BackgroundVariant, DreamyBackground } from '@/components/DreamyBackground';
 import { colors, floatingTabBarSpace } from '@/theme';
 
 type Props = PropsWithChildren<{
@@ -11,12 +11,20 @@ type Props = PropsWithChildren<{
   /** Set on screens that sit under the floating (absolute) tab bar, so their
    * content doesn't render behind it — see floatingTabBarSpace's comment. */
   floatingTabBar?: boolean;
+  /** Which DreamyBackground to show behind this screen. Defaults to 'day'. */
+  background?: BackgroundVariant;
 }>;
 
-export function ScreenContainer({ children, style, edges = ['top', 'bottom'], floatingTabBar }: Props) {
+export function ScreenContainer({
+  children,
+  style,
+  edges = ['top', 'bottom'],
+  floatingTabBar,
+  background = 'day',
+}: Props) {
   return (
     <SafeAreaView style={styles.safeArea} edges={edges}>
-      <DreamyBackground />
+      <DreamyBackground variant={background} />
       <KeyboardAvoidingView
         style={styles.content}
         behavior={Platform.select({ ios: 'padding', default: 'height' })}

@@ -46,6 +46,8 @@ export function DestinyScreen() {
   };
 
   return (
+    // TODO(theme migration): switch to a dedicated night-sky variant once
+    // that asset arrives; falls back to the default 'day' background for now.
     <ScreenContainer floatingTabBar>
       <View style={styles.header}>
         <Text style={styles.title}>Destiny</Text>

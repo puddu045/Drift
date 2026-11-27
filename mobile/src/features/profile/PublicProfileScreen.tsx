@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { Avatar } from '@/components/Avatar';
@@ -112,7 +112,16 @@ export function PublicProfileScreen({ userId }: Props) {
             keyExtractor={(item) => item.id}
             style={styles.list}
             contentContainerStyle={styles.listContent}
-            ListEmptyComponent={<Text style={styles.empty}>No public thoughts yet.</Text>}
+            ListEmptyComponent={
+              <View style={styles.emptyState}>
+                <Image
+                  source={require('../../../assets/paper-plane-flourish.png')}
+                  style={styles.emptyIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.empty}>No public thoughts yet.</Text>
+              </View>
+            }
             renderItem={({ item }) => (
               <Pressable onPress={() => setViewingThought(item)}>
                 <Card style={styles.thoughtCard}>
@@ -258,6 +267,16 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.md,
     color: colors.textPrimary,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingTop: spacing.lg,
+    gap: spacing.xs,
+  },
+  emptyIcon: {
+    width: 40,
+    height: 40,
+    opacity: 0.6,
   },
   empty: {
     fontFamily: typography.fontFamily,
