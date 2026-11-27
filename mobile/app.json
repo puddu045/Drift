@@ -32,7 +32,8 @@
           "photosPermission": "Drift needs access to your photos to set a profile picture."
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

@@ -2,6 +2,7 @@ import { BadRequestException, ForbiddenException, NotFoundException } from '@nes
 import { Test } from '@nestjs/testing';
 import { vi } from 'vitest';
 
+import { BlocksService } from '../blocks/blocks.service.js';
 import { MutesService } from '../mutes/mutes.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -29,6 +30,9 @@ describe('ThoughtsService', () => {
     getPreferredLanguage: vi.fn().mockResolvedValue(null),
     translateBatch: vi.fn(),
   };
+  const blocks = {
+    isBlockedEitherWay: vi.fn().mockResolvedValue(false),
+  };
   let service: ThoughtsService;
 
   beforeEach(async () => {
@@ -37,6 +41,7 @@ describe('ThoughtsService', () => {
     prisma.userProfile.findMany.mockResolvedValue([]);
     mutes.mutedAuthorIds.mockResolvedValue([]);
     translation.getPreferredLanguage.mockResolvedValue(null);
+    blocks.isBlockedEitherWay.mockResolvedValue(false);
     const moduleRef = await Test.createTestingModule({
       providers: [
         ThoughtsService,
@@ -44,6 +49,7 @@ describe('ThoughtsService', () => {
         { provide: NotificationsService, useValue: notifications },
         { provide: MutesService, useValue: mutes },
         { provide: TranslationService, useValue: translation },
+        { provide: BlocksService, useValue: blocks },
       ],
     }).compile();
     service = moduleRef.get(ThoughtsService);
@@ -93,6 +99,31 @@ describe('ThoughtsService', () => {
     it('404s when the thought does not exist', async () => {
       prisma.thought.findUnique.mockResolvedValue(null);
       await expect(service.toggleReaction('user-1', 'missing', 'heart')).rejects.toThrow(NotFoundException);
+    });
+
+    // Security regression: a blocked relationship must stop a user from
+    // reacting via a direct API call, not just hide the thought from feeds.
+    it('404s when the caller and the author have blocked each other', async () => {
+      prisma.thought.findUnique.mockResolvedValue({ id: 't1', authorId: 'author-1', deletedAt: null });
+      blocks.isBlockedEitherWay.mockResolvedValue(true);
+      await expect(service.toggleReaction('viewer', 't1', 'heart')).rejects.toThrow(NotFoundException);
+      expect(prisma.thoughtReaction.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('reply', () => {
+    it('404s when the caller and the thought\'s author have blocked each other', async () => {
+      prisma.thought.findUnique.mockResolvedValue({ id: 't1', authorId: 'author-1', deletedAt: null });
+      blocks.isBlockedEitherWay.mockResolvedValue(true);
+      await expect(service.reply('viewer', 't1', { text: 'hi' })).rejects.toThrow(NotFoundException);
+      expect(prisma.thoughtReply.create).not.toHaveBeenCalled();
+    });
+
+    it('allows replying when there is no block', async () => {
+      prisma.thought.findUnique.mockResolvedValue({ id: 't1', authorId: 'author-1', deletedAt: null });
+      prisma.thoughtReply.create.mockResolvedValue({ id: 'r1', authorId: 'viewer', text: 'hi' });
+      prisma.userPreferences.findMany.mockResolvedValue([]);
+      await expect(service.reply('viewer', 't1', { text: 'hi' })).resolves.toMatchObject({ id: 'r1' });
     });
   });
 
@@ -194,6 +225,61 @@ describe('ThoughtsService', () => {
         replies: [],
       });
       await expect(service.getOne('author-1', 't1')).resolves.toMatchObject({ id: 't1' });
+    });
+
+    // Security regression: a client must not be able to deanonymize an
+    // "anonymous" author (DECISIONS.md #1) by reading the raw authorId off
+    // a thought/reply and looking it up via GET /profiles/:userId.
+    it('strips the raw authorId for an anonymous (non-opted-in) author on someone else\'s thought', async () => {
+      prisma.thought.findUnique.mockResolvedValue({
+        id: 't1',
+        authorId: 'author-1',
+        isPublic: true,
+        deletedAt: null,
+        replies: [{ id: 'r1', authorId: 'replier-1', text: 'hi' }],
+      });
+      prisma.userPreferences.findMany.mockResolvedValue([]); // nobody opted into showIdentityOnContent
+
+      const result = await service.getOne('viewer', 't1');
+
+      expect(result.authorId).toBeUndefined();
+      expect(result.isOwnThought).toBe(false);
+      expect(result.author).toBeNull();
+      expect(result.replies[0].authorId).toBeUndefined();
+      expect(result.replies[0].author).toBeNull();
+    });
+
+    it('keeps the raw authorId when the author opted into showIdentityOnContent', async () => {
+      prisma.thought.findUnique.mockResolvedValue({
+        id: 't1',
+        authorId: 'author-1',
+        isPublic: true,
+        deletedAt: null,
+        replies: [],
+      });
+      prisma.userPreferences.findMany.mockResolvedValue([{ userId: 'author-1' }]);
+      prisma.userProfile.findMany.mockResolvedValue([
+        { userId: 'author-1', displayName: 'Alice', photoUrl: null },
+      ]);
+
+      const result = await service.getOne('viewer', 't1');
+      expect(result.authorId).toBe('author-1');
+      expect(result.author).toEqual({ displayName: 'Alice', photoUrl: null });
+    });
+
+    it('keeps the raw authorId for the viewer\'s own thought even though it stays anonymous to others', async () => {
+      prisma.thought.findUnique.mockResolvedValue({
+        id: 't1',
+        authorId: 'viewer',
+        isPublic: true,
+        deletedAt: null,
+        replies: [],
+      });
+      prisma.userPreferences.findMany.mockResolvedValue([]);
+
+      const result = await service.getOne('viewer', 't1');
+      expect(result.authorId).toBe('viewer');
+      expect(result.isOwnThought).toBe(true);
     });
   });
 

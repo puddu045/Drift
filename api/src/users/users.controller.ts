@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, NotFoundException, Param, Patch, Post, Put } from '@nestjs/common';
 import { CurrentUser } from '@nestjs/authentication';
+import { Throttle } from '@nestjs/throttler';
 
 import type { AuthenticatedUser } from '../auth/current-user.js';
 import type { SetInterests, UpdatePreferences, UpsertProfile } from './users.schemas.js';
@@ -52,8 +53,11 @@ export class UsersController {
   }
 
   @Get(':userId')
-  async getPublicProfile(@Param('userId', { schema: usernameParamSchema }) userId: string) {
-    return this.users.getPublicProfile(userId);
+  async getPublicProfile(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('userId', { schema: usernameParamSchema }) userId: string,
+  ) {
+    return this.users.getPublicProfile(user.id, userId);
   }
 
   @Get(':userId/thoughts')
@@ -64,6 +68,9 @@ export class UsersController {
     return this.users.listPublicThoughtsByAuthor(user.id, userId);
   }
 
+  // Tighter than the app-wide default — each call hits the paid Google
+  // Translate API and consumes the shared monthly character quota.
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post(':userId/translate-bio')
   @HttpCode(200)
   async translateBio(

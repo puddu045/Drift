@@ -10,7 +10,6 @@ import { LanguagePickerModal } from '@/components/LanguagePickerModal';
 import { MoodTag } from '@/components/MoodTag';
 import { blockUser } from '@/features/blocks/api';
 import { sendConnectionRequest } from '@/features/connections/api';
-import { useSession } from '@/features/auth/SessionProvider';
 import { muteUser } from '@/features/mutes/api';
 import {
   deleteThought,
@@ -54,7 +53,6 @@ type Props = {
 
 export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContextUserId }: Props) {
   const router = useRouter();
-  const { session } = useSession();
   const [detail, setDetail] = useState<ThoughtDetail | null>(null);
   const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
   const [replyText, setReplyText] = useState('');
@@ -75,7 +73,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
     };
   }, [thought.id]);
 
-  const isOwnThought = detail?.authorId === session?.user.id;
+  const isOwnThought = detail?.isOwnThought ?? false;
 
   const onReact = async (type: (typeof REACTIONS)[number]['type']) => {
     const { reacted } = await toggleReaction(thought.id, type);
@@ -107,7 +105,10 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
   };
 
   const onConnect = async () => {
-    if (!detail) return;
+    if (!detail?.authorId) {
+      setActionMessage('This person has chosen to stay anonymous.');
+      return;
+    }
     try {
       await sendConnectionRequest(detail.authorId);
       setActionMessage('Connection request sent.');
@@ -117,13 +118,19 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
   };
 
   const onBlock = async () => {
-    if (!detail) return;
+    if (!detail?.authorId) {
+      setActionMessage('This person has chosen to stay anonymous.');
+      return;
+    }
     await blockUser(detail.authorId);
     onDeleted(); // Reuse the same "remove from view and close" behavior as delete.
   };
 
   const onMute = async () => {
-    if (!detail) return;
+    if (!detail?.authorId) {
+      setActionMessage('This person has chosen to stay anonymous.');
+      return;
+    }
     await muteUser(detail.authorId);
     setActionMessage('Muted — you won’t see their thoughts anymore.');
   };
@@ -131,8 +138,8 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
   // Only viewable when the author opted to reveal identity — an anonymous
   // author's userId must never become a way to look up their profile. Tapping
   // an anonymous avatar still gives feedback rather than silently doing nothing.
-  const onViewAuthor = (authorId: string, author: AuthorIdentity | null) => {
-    if (!author) {
+  const onViewAuthor = (authorId: string | undefined, author: AuthorIdentity | null) => {
+    if (!author || !authorId) {
       setActionMessage('This person has chosen to stay anonymous.');
       return;
     }
@@ -323,7 +330,7 @@ function ReplyRow({
 }: {
   reply: Reply;
   isContextAuthor: boolean;
-  onViewAuthor: (authorId: string, author: AuthorIdentity | null) => void;
+  onViewAuthor: (authorId: string | undefined, author: AuthorIdentity | null) => void;
 }) {
   const translation = useTranslatable(() => translateReply(reply.thoughtId, reply.id));
 

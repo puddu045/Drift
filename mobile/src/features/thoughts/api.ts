@@ -13,15 +13,19 @@ export type AuthorIdentity = { displayName: string; photoUrl: string | null } | 
 export type Reply = {
   id: string;
   thoughtId: string;
-  authorId: string;
+  // Omitted by the backend for anonymous authors — never compare this
+  // directly to the viewer's id; use the sibling isOwnReply-style checks
+  // the backend already resolves, or treat a missing author as "not mine".
+  authorId?: string;
   text: string;
   createdAt: string;
   author: AuthorIdentity;
 };
 
 export type ThoughtDetail = Thought & {
-  authorId: string;
+  authorId?: string;
   isPublic: boolean;
+  isOwnThought: boolean;
   replies: Reply[];
   _count: { reactions: number };
   author: AuthorIdentity;

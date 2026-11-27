@@ -279,19 +279,41 @@ export class TranslationService {
 
   /** Atomically increments this month's usage counter and returns whether
    * the call is within budget. Logs once per threshold crossing (80%/90%)
-   * and once when the limit itself is first reached this call. */
+   * and once when the limit itself is first reached this call.
+   *
+   * The increment and the under-limit check happen in one conditional
+   * UPDATE (not a separate read-then-write) so concurrent calls near the
+   * cap can't all pass the check before any of their writes land — without
+   * this, simultaneous requests could jointly push usage arbitrarily far
+   * past the configured monthly budget. */
   private async reserveQuota(charCount: number): Promise<boolean> {
     const limit = monthlyCharLimit();
     const month = currentMonthKey();
-    const before = (await this.prisma.translationUsage.findUnique({ where: { month } }))?.characterCount ?? 0;
+
+    const existing = await this.prisma.translationUsage.findUnique({ where: { month } });
+    const before = existing?.characterCount ?? 0;
     if (before >= limit) return false;
 
-    const after = before + charCount;
-    await this.prisma.translationUsage.upsert({
-      where: { month },
-      create: { month, characterCount: after },
-      update: { characterCount: { increment: charCount } },
+    if (!existing) {
+      await this.prisma.translationUsage.upsert({
+        where: { month },
+        create: { month, characterCount: 0 },
+        update: {},
+      });
+    }
+
+    // Conditional on the row still being under budget *at the moment of the
+    // write*, not on the `before` value read above — so two concurrent
+    // calls that both read "under budget" can't both then write: only
+    // whichever one's UPDATE actually finds the row still under the limit
+    // (not yet incremented by the other) applies.
+    const result = await this.prisma.translationUsage.updateMany({
+      where: { month, characterCount: { lt: limit } },
+      data: { characterCount: { increment: charCount } },
     });
+    if (result.count === 0) return false;
+
+    const after = before + charCount;
 
     for (const threshold of WARNING_THRESHOLDS) {
       const thresholdChars = limit * threshold;

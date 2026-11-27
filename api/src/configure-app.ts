@@ -1,4 +1,5 @@
 import type { INestApplication } from '@nestjs/common';
+import helmet from 'helmet';
 
 // The mobile app isn't a browser, so CORS never applies to it — this is only
 // for the admin portal (a browser app on its own origin). Configurable via
@@ -10,5 +11,9 @@ export function corsOrigins() {
 }
 
 export function configureApp(app: INestApplication) {
+  // Pure JSON API, never serves HTML — disable the CSP/COEP defaults that
+  // assume a page is being rendered (they'd just add no-op headers) and keep
+  // the rest (HSTS, X-Content-Type-Options, X-Frame-Options, etc).
+  app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
   app.enableCors({ origin: corsOrigins() });
 }

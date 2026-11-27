@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
+import { BlocksService } from '../blocks/blocks.service.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { TranslationService } from '../translation/translation.service.js';
@@ -10,6 +11,7 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly translation: TranslationService,
+    private readonly blocks: BlocksService,
   ) {}
 
   /**
@@ -69,7 +71,11 @@ export class UsersService {
   }
 
   /** Public-safe view of another user's profile, honoring their privacy settings. */
-  async getPublicProfile(userId: string) {
+  async getPublicProfile(viewerId: string, userId: string) {
+    if (await this.blocks.isBlockedEitherWay(viewerId, userId)) {
+      throw new ForbiddenException('Not available');
+    }
+
     const [profile, preferences, interests] = await Promise.all([
       this.prisma.userProfile.findUnique({ where: { userId } }),
       this.prisma.userPreferences.findUnique({ where: { userId } }),
@@ -91,6 +97,10 @@ export class UsersService {
 
   /** On-demand translation for a profile's bio — the "Translate" button on it. */
   async translateBio(viewerId: string, userId: string) {
+    if (await this.blocks.isBlockedEitherWay(viewerId, userId)) {
+      throw new ForbiddenException('Not available');
+    }
+
     const profile = await this.prisma.userProfile.findUnique({ where: { userId }, select: { bio: true } });
     if (!profile) throw new NotFoundException('Profile not found');
     if (!profile.bio) throw new BadRequestException('This profile has no bio to translate.');
@@ -136,16 +146,9 @@ export class UsersService {
 
   /** Another user's public thoughts, for the "view their profile" screen. */
   async listPublicThoughtsByAuthor(viewerId: string, authorId: string) {
-    const blocked = await this.prisma.block.findFirst({
-      where: {
-        OR: [
-          { blockerId: viewerId, blockedId: authorId },
-          { blockerId: authorId, blockedId: viewerId },
-        ],
-      },
-      select: { id: true },
-    });
-    if (blocked) throw new ForbiddenException('Not available');
+    if (await this.blocks.isBlockedEitherWay(viewerId, authorId)) {
+      throw new ForbiddenException('Not available');
+    }
 
     return this.prisma.thought.findMany({
       where: { authorId, isPublic: true, deletedAt: null },

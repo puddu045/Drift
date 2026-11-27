@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CurrentUser } from '@nestjs/authentication';
+import { Throttle } from '@nestjs/throttler';
 
 import type { AuthenticatedUser } from '../auth/current-user.js';
 import type { CreateReply, CreateThought, DiscoverQuery, React } from './thoughts.schemas.js';
@@ -75,12 +76,16 @@ export class ThoughtsController {
     return this.thoughts.reply(user.id, id, body);
   }
 
+  // Tighter than the app-wide default — each call hits the paid Google
+  // Translate API and consumes the shared monthly character quota.
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post(':id/translate')
   @HttpCode(200)
   translateOne(@CurrentUser() user: AuthenticatedUser, @Param('id', { schema: idParamSchema }) id: string) {
     return this.thoughts.translateOne(user.id, id);
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post(':id/replies/:replyId/translate')
   @HttpCode(200)
   translateReply(

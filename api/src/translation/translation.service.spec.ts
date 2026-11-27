@@ -11,7 +11,7 @@ function jsonResponse(body: unknown, ok = true, status = 200) {
 describe('TranslationService', () => {
   const prisma = {
     translation: { findMany: vi.fn(), createMany: vi.fn() },
-    translationUsage: { findUnique: vi.fn(), upsert: vi.fn() },
+    translationUsage: { findUnique: vi.fn(), upsert: vi.fn(), updateMany: vi.fn() },
     userPreferences: { findUnique: vi.fn() },
   };
   let service: TranslationService;
@@ -38,6 +38,7 @@ describe('TranslationService', () => {
     delete process.env.TRANSLATION_MONTHLY_CHAR_LIMIT;
     mockTranslationLookups({});
     prisma.translationUsage.findUnique.mockResolvedValue(null);
+    prisma.translationUsage.updateMany.mockResolvedValue({ count: 1 });
     const moduleRef = await Test.createTestingModule({
       providers: [TranslationService, { provide: PrismaService, useValue: prisma }],
     }).compile();
@@ -229,9 +230,9 @@ describe('TranslationService', () => {
 
       await service.translateBatch(['hello'], 'es');
 
-      expect(prisma.translationUsage.upsert).toHaveBeenCalledWith(
+      expect(prisma.translationUsage.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          update: { characterCount: { increment: 'hello'.length } },
+          data: { characterCount: { increment: 'hello'.length } },
         }),
       );
     });

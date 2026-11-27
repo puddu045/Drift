@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
+import { BlocksService } from '../blocks/blocks.service.js';
 import { MutesService } from '../mutes/mutes.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -21,6 +22,7 @@ export class ThoughtsService {
     private readonly notifications: NotificationsService,
     private readonly mutes: MutesService,
     private readonly translation: TranslationService,
+    private readonly blocks: BlocksService,
   ) {}
 
   /**
@@ -170,10 +172,27 @@ export class ThoughtsService {
     }
 
     const identities = await this.identityMap([thought.authorId, ...thought.replies.map((r) => r.authorId)]);
+    const { authorId, ...rest } = thought;
+    const isOwnThought = authorId === viewerId;
+    const author = identities.get(authorId) ?? null;
     return {
-      ...thought,
-      author: identities.get(thought.authorId) ?? null,
-      replies: thought.replies.map((reply) => ({ ...reply, author: identities.get(reply.authorId) ?? null })),
+      ...rest,
+      // Raw authorId is a real user id — only surface it when identity is
+      // already visible (opted in, or it's the viewer's own), otherwise it
+      // would let a client deanonymize "anonymous" authors via /profiles/:id.
+      authorId: author || isOwnThought ? authorId : undefined,
+      isOwnThought,
+      author,
+      replies: thought.replies.map((reply) => {
+        const replyAuthor = identities.get(reply.authorId) ?? null;
+        const isOwnReply = reply.authorId === viewerId;
+        const { authorId: replyAuthorId, ...replyRest } = reply;
+        return {
+          ...replyRest,
+          authorId: replyAuthor || isOwnReply ? replyAuthorId : undefined,
+          author: replyAuthor,
+        };
+      }),
     };
   }
 
@@ -211,6 +230,9 @@ export class ThoughtsService {
   async toggleReaction(userId: string, thoughtId: string, type: ReactionType) {
     const thought = await this.prisma.thought.findUnique({ where: { id: thoughtId } });
     if (!thought || thought.deletedAt) throw new NotFoundException('Thought not found');
+    if (thought.authorId !== userId && (await this.blocks.isBlockedEitherWay(userId, thought.authorId))) {
+      throw new NotFoundException('Thought not found');
+    }
 
     const existing = await this.prisma.thoughtReaction.findUnique({
       where: { thoughtId_userId_type: { thoughtId, userId, type } },
@@ -230,6 +252,9 @@ export class ThoughtsService {
   async reply(userId: string, thoughtId: string, data: CreateReply) {
     const thought = await this.prisma.thought.findUnique({ where: { id: thoughtId } });
     if (!thought || thought.deletedAt) throw new NotFoundException('Thought not found');
+    if (thought.authorId !== userId && (await this.blocks.isBlockedEitherWay(userId, thought.authorId))) {
+      throw new NotFoundException('Thought not found');
+    }
 
     const reply = await this.prisma.thoughtReply.create({
       data: { thoughtId, authorId: userId, text: data.text },

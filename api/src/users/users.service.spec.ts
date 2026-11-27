@@ -1,7 +1,8 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { vi } from 'vitest';
 
+import { BlocksService } from '../blocks/blocks.service.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { TranslationService } from '../translation/translation.service.js';
@@ -27,16 +28,21 @@ describe('UsersService', () => {
     getPreferredLanguage: vi.fn().mockResolvedValue(null),
     translateBatch: vi.fn(),
   };
+  const blocks = {
+    isBlockedEitherWay: vi.fn().mockResolvedValue(false),
+  };
   let service: UsersService;
 
   beforeEach(async () => {
     vi.resetAllMocks();
     translation.getPreferredLanguage.mockResolvedValue(null);
+    blocks.isBlockedEitherWay.mockResolvedValue(false);
     const moduleRef = await Test.createTestingModule({
       providers: [
         UsersService,
         { provide: PrismaService, useValue: prisma },
         { provide: TranslationService, useValue: translation },
+        { provide: BlocksService, useValue: blocks },
       ],
     }).compile();
     service = moduleRef.get(UsersService);
@@ -104,7 +110,7 @@ describe('UsersService', () => {
       prisma.userPreferences.findUnique.mockResolvedValue({ showCountry: false });
       prisma.userInterest.findMany.mockResolvedValue([]);
 
-      const result = await service.getPublicProfile('u1');
+      const result = await service.getPublicProfile('viewer', 'u1');
       expect(result.country).toBeNull();
     });
 
@@ -121,7 +127,7 @@ describe('UsersService', () => {
       prisma.userPreferences.findUnique.mockResolvedValue({ showCountry: true });
       prisma.userInterest.findMany.mockResolvedValue([]);
 
-      const result = await service.getPublicProfile('u1');
+      const result = await service.getPublicProfile('viewer', 'u1');
       expect(result.country).toBe('US');
     });
 
@@ -141,8 +147,16 @@ describe('UsersService', () => {
         { interest: { name: 'Travel' } },
       ]);
 
-      const result = await service.getPublicProfile('u1');
+      const result = await service.getPublicProfile('viewer', 'u1');
       expect(result.interests).toEqual(['Music', 'Travel']);
+    });
+
+    // Security regression: blocking must stop a user from seeing the
+    // other's profile via a direct API call, not just hide it in the UI.
+    it('refuses when the viewer and the profile owner have blocked each other', async () => {
+      blocks.isBlockedEitherWay.mockResolvedValue(true);
+      await expect(service.getPublicProfile('viewer', 'u1')).rejects.toThrow(ForbiddenException);
+      expect(prisma.userProfile.findUnique).not.toHaveBeenCalled();
     });
   });
 
@@ -150,6 +164,12 @@ describe('UsersService', () => {
     it('404s when the profile does not exist', async () => {
       prisma.userProfile.findUnique.mockResolvedValue(null);
       await expect(service.translateBio('viewer1', 'u1')).rejects.toThrow('Profile not found');
+    });
+
+    it('refuses when the viewer and the profile owner have blocked each other', async () => {
+      blocks.isBlockedEitherWay.mockResolvedValue(true);
+      await expect(service.translateBio('viewer1', 'u1')).rejects.toThrow(ForbiddenException);
+      expect(prisma.userProfile.findUnique).not.toHaveBeenCalled();
     });
 
     it('rejects when the profile has no bio', async () => {
