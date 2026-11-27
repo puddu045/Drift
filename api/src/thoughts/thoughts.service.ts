@@ -24,19 +24,25 @@ export class ThoughtsService {
   ) {}
 
   /**
-   * Translates `thoughts[].text` in place into the viewer's preferred
+   * Translates `items[].text` in place into the viewer's preferred
    * language, if they've set one (see UserPreferences.preferredLanguage —
    * unset means "show exactly as written"). A no-op, with no API call, for
    * every viewer who hasn't opted in.
    */
-  private async translateForViewer<T extends { text: string }>(viewerId: string, items: T[]): Promise<T[]> {
+  private async translateForViewer<T extends { id: string; text: string }>(
+    viewerId: string,
+    items: T[],
+    sourceType: 'thought' | 'reply' | ((item: T) => 'thought' | 'reply'),
+  ): Promise<T[]> {
     if (items.length === 0) return items;
     const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
     if (!preferredLanguage) return items;
 
+    const resolveType = typeof sourceType === 'function' ? sourceType : () => sourceType;
     const translated = await this.translation.translateBatch(
       items.map((item) => item.text),
       preferredLanguage,
+      items.map((item) => ({ type: resolveType(item), id: item.id })),
     );
     return items.map((item, i) => ({ ...item, text: translated[i] }));
   }
@@ -77,7 +83,7 @@ export class ThoughtsService {
     });
 
     const nextCursor = thoughts.length === query.limit ? thoughts[thoughts.length - 1].id : null;
-    return { thoughts: await this.translateForViewer(viewerId, thoughts), nextCursor };
+    return { thoughts: await this.translateForViewer(viewerId, thoughts, 'thought'), nextCursor };
   }
 
   /** Everything a user has posted themselves, for their own "My Thoughts" view. */
@@ -88,7 +94,7 @@ export class ThoughtsService {
       take: 200,
       select: { id: true, text: true, mood: true, createdAt: true },
     });
-    return this.translateForViewer(userId, thoughts);
+    return this.translateForViewer(userId, thoughts, 'thought');
   }
 
   /** Other people's thoughts the user has reacted to or replied on, for "My Interactions". */
@@ -114,7 +120,7 @@ export class ThoughtsService {
       take: 200,
       select: { id: true, text: true, mood: true, createdAt: true },
     });
-    return this.translateForViewer(userId, thoughts);
+    return this.translateForViewer(userId, thoughts, 'thought');
   }
 
   async getOne(viewerId: string, thoughtId: string) {
@@ -133,10 +139,11 @@ export class ThoughtsService {
     const identities = await this.identityMap([thought.authorId, ...thought.replies.map((r) => r.authorId)]);
     // Translated together in one batch call (thought + every reply) rather
     // than one call per item.
-    const [translatedThought, ...translatedReplies] = await this.translateForViewer(viewerId, [
-      thought,
-      ...thought.replies,
-    ]);
+    const [translatedThought, ...translatedReplies] = await this.translateForViewer(
+      viewerId,
+      [thought, ...thought.replies],
+      (item) => (item.id === thought.id ? 'thought' : 'reply'),
+    );
     return {
       ...translatedThought,
       author: identities.get(thought.authorId) ?? null,

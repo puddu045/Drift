@@ -11,15 +11,33 @@ function jsonResponse(body: unknown, ok = true, status = 200) {
 describe('TranslationService', () => {
   const prisma = {
     translation: { findMany: vi.fn(), createMany: vi.fn() },
+    translationUsage: { findUnique: vi.fn(), upsert: vi.fn() },
     userPreferences: { findUnique: vi.fn() },
   };
   let service: TranslationService;
   const originalApiKey = process.env.GOOGLE_TRANSLATE_API_KEY;
+  const originalLimit = process.env.TRANSLATION_MONTHLY_CHAR_LIMIT;
+
+  // Cache-lookup and "known source language" queries both hit
+  // prisma.translation.findMany, distinguished by whether `targetLanguage`
+  // is part of the where clause — this routes each to the right fixture
+  // instead of guessing the service's hash algorithm.
+  function mockTranslationLookups(opts: {
+    cached?: { textHash: string; translatedText: string }[];
+    knownSource?: { textHash: string; detectedSourceLanguage: string }[];
+  }) {
+    prisma.translation.findMany.mockImplementation(async ({ where }: { where: Record<string, unknown> }) => {
+      if ('targetLanguage' in where) return opts.cached ?? [];
+      return opts.knownSource ?? [];
+    });
+  }
 
   beforeEach(async () => {
     vi.resetAllMocks();
     process.env.GOOGLE_TRANSLATE_API_KEY = 'test-key';
-    prisma.translation.findMany.mockResolvedValue([]);
+    delete process.env.TRANSLATION_MONTHLY_CHAR_LIMIT;
+    mockTranslationLookups({});
+    prisma.translationUsage.findUnique.mockResolvedValue(null);
     const moduleRef = await Test.createTestingModule({
       providers: [TranslationService, { provide: PrismaService, useValue: prisma }],
     }).compile();
@@ -29,6 +47,8 @@ describe('TranslationService', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     process.env.GOOGLE_TRANSLATE_API_KEY = originalApiKey;
+    if (originalLimit === undefined) delete process.env.TRANSLATION_MONTHLY_CHAR_LIMIT;
+    else process.env.TRANSLATION_MONTHLY_CHAR_LIMIT = originalLimit;
   });
 
   describe('translateBatch', () => {
@@ -41,13 +61,13 @@ describe('TranslationService', () => {
       expect(fetchSpy).not.toHaveBeenCalled();
     });
 
-    it('returns a cached translation without calling the API', async () => {
+    it('returns a cached translation without calling the API (cache hit)', async () => {
       // Mirrors whatever textHash the service actually looked up, rather
-      // than guessing the hash algorithm — the point of this test is that
-      // a cache hit skips the network call, not the hash itself.
+      // than guessing its hash algorithm — the point here is that a hit
+      // skips the network call entirely, not the hash itself.
       prisma.translation.findMany.mockImplementation(
-        async ({ where }: { where: { textHash: { in: string[] } } }) =>
-          where.textHash.in.map((textHash) => ({ textHash, translatedText: 'hello' })),
+        async ({ where }: { where: { textHash?: { in: string[] }; targetLanguage?: string } }) =>
+          where.targetLanguage ? where.textHash!.in.map((textHash) => ({ textHash, translatedText: 'hello' })) : [],
       );
       const fetchSpy = vi.fn();
       vi.stubGlobal('fetch', fetchSpy);
@@ -56,13 +76,15 @@ describe('TranslationService', () => {
       expect(fetchSpy).not.toHaveBeenCalled();
     });
 
-    it('calls the API for a cache miss, translates, and caches the result', async () => {
-      const fetchSpy = vi.fn().mockResolvedValue(
-        jsonResponse({ data: { translations: [{ translatedText: 'hello' }] } }),
-      );
+    it('calls the API for a cache miss, translates, caches the result with detected language and source ref', async () => {
+      const fetchSpy = vi
+        .fn()
+        .mockResolvedValue(jsonResponse({ data: { translations: [{ translatedText: 'hello', detectedSourceLanguage: 'es' }] } }));
       vi.stubGlobal('fetch', fetchSpy);
 
-      await expect(service.translateBatch(['hola'], 'en')).resolves.toEqual(['hello']);
+      await expect(
+        service.translateBatch(['hola'], 'en', [{ type: 'thought', id: 't1' }]),
+      ).resolves.toEqual(['hello']);
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       const [url, init] = fetchSpy.mock.calls[0];
@@ -70,9 +92,51 @@ describe('TranslationService', () => {
       expect(JSON.parse(init.body)).toEqual({ q: ['hola'], target: 'en', format: 'text' });
 
       expect(prisma.translation.createMany).toHaveBeenCalledWith({
-        data: [expect.objectContaining({ targetLanguage: 'en', sourceText: 'hola', translatedText: 'hello' })],
+        data: [
+          expect.objectContaining({
+            targetLanguage: 'en',
+            sourceText: 'hola',
+            translatedText: 'hello',
+            detectedSourceLanguage: 'es',
+            sourceType: 'thought',
+            sourceId: 't1',
+          }),
+        ],
         skipDuplicates: true,
       });
+      expect(prisma.translationUsage.upsert).toHaveBeenCalled();
+    });
+
+    it('treats different text (e.g. edited content) as an independent cache entry', async () => {
+      // Nothing is pre-seeded as cached, so "hello!" (as if some other,
+      // already-cached text like "hello" had just been edited to this)
+      // still goes to the API — a hash-keyed cache invalidates
+      // automatically on any content change, with no separate
+      // invalidation step needed.
+      const fetchSpy = vi
+        .fn()
+        .mockResolvedValue(jsonResponse({ data: { translations: [{ translatedText: 'bonjour!' }] } }));
+      vi.stubGlobal('fetch', fetchSpy);
+
+      await expect(service.translateBatch(['hello!'], 'fr')).resolves.toEqual(['bonjour!']);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(fetchSpy.mock.calls[0][1].body).q).toEqual(['hello!']);
+    });
+
+    it('skips the API call when the text is already in the target language (reusing a previously detected source)', async () => {
+      prisma.translation.findMany.mockImplementation(
+        async ({ where }: { where: { targetLanguage?: string; textHash?: { in: string[] } } }) => {
+          if (where.targetLanguage) return []; // no direct (text, target) cache hit
+          // But a prior translation of this exact text (into some other
+          // target) told us its real source language is "en".
+          return (where.textHash?.in ?? []).map((textHash) => ({ textHash, detectedSourceLanguage: 'en' }));
+        },
+      );
+      const fetchSpy = vi.fn();
+      vi.stubGlobal('fetch', fetchSpy);
+
+      await expect(service.translateBatch(['hello'], 'en')).resolves.toEqual(['hello']);
+      expect(fetchSpy).not.toHaveBeenCalled();
     });
 
     it('falls back to the original text when the API call fails', async () => {
@@ -83,11 +147,12 @@ describe('TranslationService', () => {
       expect(prisma.translation.createMany).not.toHaveBeenCalled();
     });
 
-    it('falls back to the original text when fetch itself throws', async () => {
+    it('falls back to the original text when fetch itself throws, with no retry', async () => {
       const fetchSpy = vi.fn().mockRejectedValue(new Error('network down'));
       vi.stubGlobal('fetch', fetchSpy);
 
       await expect(service.translateBatch(['hola'], 'en')).resolves.toEqual(['hola']);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
     });
 
     it('returns an empty array without touching the cache or the API for no texts', async () => {
@@ -97,6 +162,78 @@ describe('TranslationService', () => {
       await expect(service.translateBatch([], 'en')).resolves.toEqual([]);
       expect(prisma.translation.findMany).not.toHaveBeenCalled();
       expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('skips empty, URL-only and emoji-only text without a cache lookup or API call', async () => {
+      const fetchSpy = vi.fn();
+      vi.stubGlobal('fetch', fetchSpy);
+
+      await expect(service.translateBatch(['', '   ', 'https://example.com/x', '😀🎉'], 'en')).resolves.toEqual([
+        '',
+        '   ',
+        'https://example.com/x',
+        '😀🎉',
+      ]);
+      expect(prisma.translation.findMany).not.toHaveBeenCalled();
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('still translates real text mixed in with untranslatable entries', async () => {
+      const fetchSpy = vi
+        .fn()
+        .mockResolvedValue(jsonResponse({ data: { translations: [{ translatedText: 'hola' }] } }));
+      vi.stubGlobal('fetch', fetchSpy);
+
+      await expect(service.translateBatch(['', 'hello', '😀'], 'es')).resolves.toEqual(['', 'hola', '😀']);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(fetchSpy.mock.calls[0][1].body).q).toEqual(['hello']);
+    });
+
+    it('de-dupes concurrent requests for the same (text, target) into a single API call', async () => {
+      let resolveFetch!: (value: Response) => void;
+      const fetchSpy = vi.fn().mockReturnValue(
+        new Promise<Response>((resolve) => {
+          resolveFetch = resolve;
+        }),
+      );
+      vi.stubGlobal('fetch', fetchSpy);
+
+      // Both start before either finishes — the second must reuse the
+      // first's in-flight call rather than firing its own.
+      const first = service.translateBatch(['hola'], 'en');
+      const second = service.translateBatch(['hola'], 'en');
+
+      resolveFetch(jsonResponse({ data: { translations: [{ translatedText: 'hello' }] } }));
+
+      await expect(first).resolves.toEqual(['hello']);
+      await expect(second).resolves.toEqual(['hello']);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call the API once the monthly character limit is reached, falling back to original text', async () => {
+      process.env.TRANSLATION_MONTHLY_CHAR_LIMIT = '10';
+      prisma.translationUsage.findUnique.mockResolvedValue({ characterCount: 10 });
+      const fetchSpy = vi.fn();
+      vi.stubGlobal('fetch', fetchSpy);
+
+      await expect(service.translateBatch(['hola'], 'en')).resolves.toEqual(['hola']);
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(prisma.translationUsage.upsert).not.toHaveBeenCalled();
+    });
+
+    it('records actual character usage for a successful call', async () => {
+      const fetchSpy = vi
+        .fn()
+        .mockResolvedValue(jsonResponse({ data: { translations: [{ translatedText: 'hola' }] } }));
+      vi.stubGlobal('fetch', fetchSpy);
+
+      await service.translateBatch(['hello'], 'es');
+
+      expect(prisma.translationUsage.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          update: { characterCount: { increment: 'hello'.length } },
+        }),
+      );
     });
   });
 

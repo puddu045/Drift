@@ -80,7 +80,9 @@ export class UsersService {
     let bio = profile.bio;
     const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
     if (bio && preferredLanguage) {
-      [bio] = await this.translation.translateBatch([bio], preferredLanguage);
+      [bio] = await this.translation.translateBatch([bio], preferredLanguage, [
+        { type: 'profile_bio', id: userId },
+      ]);
     }
 
     return {
@@ -148,6 +150,7 @@ export class UsersService {
     const translated = await this.translation.translateBatch(
       thoughts.map((t) => t.text),
       preferredLanguage,
+      thoughts.map((t) => ({ type: 'thought', id: t.id })),
     );
     return thoughts.map((t, i) => ({ ...t, text: translated[i] }));
   }

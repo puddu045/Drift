@@ -447,12 +447,34 @@ model AuditLog {
 // to different content. Lets a popular thought's translation be computed
 // once no matter how many viewers in that language see it.
 model Translation {
-  textHash       String   @db.VarChar(64)
-  targetLanguage String   @db.VarChar(10)
+  textHash       String  @db.VarChar(64)
+  targetLanguage String  @db.VarChar(10)
   sourceText     String
   translatedText String
-  createdAt      DateTime @default(now())
+  // From Google's response — lets a later request for a DIFFERENT target
+  // language skip the API call entirely when that target turns out to
+  // match the content's own language (checked across all rows for this
+  // textHash, not just this one target). Null for rows written before this
+  // column existed.
+  detectedSourceLanguage String? @db.VarChar(10)
+  // Metadata only, not part of the cache key — which thought/reply/profile
+  // this translation was first requested for. Never used to decide a cache
+  // hit (that's textHash + targetLanguage alone, so identical text in a
+  // different piece of content still reuses this row).
+  sourceType String?
+  sourceId   String?
+  createdAt  DateTime @default(now())
 
   @@id([textHash, targetLanguage])
   @@map("translations")
+}
+
+// One row per calendar month (UTC), incremented by the actual character
+// count sent to Google on every real API call (not cache hits). Backs the
+// configurable monthly hard limit in TranslationService.
+model TranslationUsage {
+  month          String @id @db.VarChar(7)
+  characterCount Int    @default(0)
+
+  @@map("translation_usage")
 }

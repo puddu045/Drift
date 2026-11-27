@@ -83,6 +83,13 @@ is always shown exactly as written.
 
 For local dev, add the same key to `api/.env` as `GOOGLE_TRANSLATE_API_KEY`.
 
+**Usage controls:** translations are cached in the database (shared across
+all users, never re-translated once seen), and a hard monthly cap keeps
+total usage well under the 500,000-character free tier — defaults to
+450,000, logging a warning at 80%/90% and falling back to untranslated
+text once hit. Override with `TRANSLATION_MONTHLY_CHAR_LIMIT` (an env var,
+same place as the API key) if you want a different cap.
+
 ## About the mobile app
 
 The mobile app isn't part of this deploy — "free hosting" doesn't really

@@ -17,10 +17,12 @@ export class DestinyService {
     private readonly translation: TranslationService,
   ) {}
 
-  private async translateForViewer(viewerId: string, thought: { text: string }) {
+  private async translateForViewer(viewerId: string, thought: { id: string; text: string }) {
     const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
     if (!preferredLanguage) return thought;
-    const [translatedText] = await this.translation.translateBatch([thought.text], preferredLanguage);
+    const [translatedText] = await this.translation.translateBatch([thought.text], preferredLanguage, [
+      { type: 'thought', id: thought.id },
+    ]);
     return { ...thought, text: translatedText };
   }
 
