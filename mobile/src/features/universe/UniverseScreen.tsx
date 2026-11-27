@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Image, LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useIsFocused } from 'expo-router';
 
 import { ScreenContainer } from '@/components/ScreenContainer';
@@ -11,6 +11,7 @@ import { PREFETCH_KEYS } from '@/lib/usePrefetchTabs';
 import { colors, radius, spacing, typography } from '@/theme';
 
 import { Bubble } from './Bubble';
+import { FloatingBalloon } from './FloatingBalloon';
 import { ThoughtDetailOverlay } from './ThoughtDetailOverlay';
 import { useBubbleLayout } from './useBubbleLayout';
 import { useReducedMotion } from './useReducedMotion';
@@ -152,11 +153,6 @@ export function UniverseScreen() {
       </View>
 
       <View style={styles.field} onLayout={onLayout}>
-        <Image
-          source={require('../../../assets/balloon-accent.png')}
-          pointerEvents="none"
-          style={styles.balloonAccent}
-        />
         {loading && thoughts.length === 0 && (
           <View style={styles.centered}>
             <ActivityIndicator color={colors.accent} />
@@ -190,6 +186,7 @@ export function UniverseScreen() {
               hasNotification={mode === 'mine' && notifiedIds.has(thought.id)}
             />
           ))}
+        <FloatingBalloon reduceMotion={reduceMotion} />
       </View>
 
       {selected && (
@@ -260,16 +257,6 @@ const styles = StyleSheet.create({
   },
   field: {
     flex: 1,
-  },
-  // Purely decorative — sits behind the bubbles (rendered after it) and
-  // never intercepts touches.
-  balloonAccent: {
-    position: 'absolute',
-    top: spacing.lg,
-    right: spacing.lg,
-    width: 56,
-    height: 56,
-    resizeMode: 'contain',
   },
   centered: {
     position: 'absolute',

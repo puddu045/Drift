@@ -30,13 +30,13 @@ const CORNER_RATIO = 0.24;
 // generic texture needed on top. 'lonely' has none yet, so it falls back to
 // one of the old generic glass textures instead of going flat.
 const MOOD_BUBBLES: Partial<Record<MoodId, ImageSourcePropType>> = {
-  love: require('../../../assets/mood-bubble-love.png'),
-  deep: require('../../../assets/mood-bubble-deep.png'),
-  happy: require('../../../assets/mood-bubble-happy.png'),
-  reflective: require('../../../assets/mood-bubble-reflective.png'),
-  hopeful: require('../../../assets/mood-bubble-hopeful.png'),
-  random: require('../../../assets/mood-bubble-random.png'),
-  curious: require('../../../assets/mood-bubble-curious.png'),
+  love: require('../../../assets/mood-bubble-love.webp'),
+  deep: require('../../../assets/mood-bubble-deep.webp'),
+  happy: require('../../../assets/mood-bubble-happy.webp'),
+  reflective: require('../../../assets/mood-bubble-reflective.webp'),
+  hopeful: require('../../../assets/mood-bubble-hopeful.webp'),
+  random: require('../../../assets/mood-bubble-random.webp'),
+  curious: require('../../../assets/mood-bubble-curious.webp'),
 };
 
 const FALLBACK_GLASS_TEXTURES = [

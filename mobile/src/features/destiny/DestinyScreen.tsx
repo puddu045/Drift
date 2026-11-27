@@ -84,26 +84,6 @@ export function DestinyScreen() {
             {stage === 'sent' && <Text style={styles.outcome}>Your reply drifted their way.</Text>}
             {stage === 'drifted' && <Text style={styles.outcome}>Let it drift on by.</Text>}
 
-            {stage === 'choosing' && (
-              <View style={styles.choiceRow}>
-                <Pressable style={styles.driftButton} onPress={() => setStage('drifted')}>
-                  <Ionicons name="shuffle-outline" size={16} color={colors.textPrimary} />
-                  <Text style={styles.driftLabel}>Let it drift</Text>
-                </Pressable>
-                <Pressable onPress={() => setStage('replying')} style={styles.replyButtonWrapper}>
-                  <LinearGradient
-                    colors={['#FADCC4', '#F3B88F']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.replyButton}
-                  >
-                    <Ionicons name="heart-outline" size={16} color="#FFFFFF" />
-                    <Text style={styles.replyLabel}>Reply</Text>
-                  </LinearGradient>
-                </Pressable>
-              </View>
-            )}
-
             {stage === 'replying' && (
               <View style={styles.replyRow}>
                 <TextInput
@@ -119,6 +99,26 @@ export function DestinyScreen() {
               </View>
             )}
           </Card>
+        )}
+
+        {thought && stage === 'choosing' && (
+          <View style={styles.choiceRow}>
+            <Pressable style={styles.driftButton} onPress={() => setStage('drifted')}>
+              <Ionicons name="shuffle-outline" size={16} color={colors.textPrimary} />
+              <Text style={styles.driftLabel}>Let it drift</Text>
+            </Pressable>
+            <Pressable onPress={() => setStage('replying')} style={styles.replyButtonWrapper}>
+              <LinearGradient
+                colors={['#FADCC4', '#F3B88F']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.replyButton}
+              >
+                <Ionicons name="heart-outline" size={16} color="#FFFFFF" />
+                <Text style={styles.replyLabel}>Reply</Text>
+              </LinearGradient>
+            </Pressable>
+          </View>
         )}
       </View>
 
@@ -198,6 +198,7 @@ const styles = StyleSheet.create({
   choiceRow: {
     flexDirection: 'row',
     gap: spacing.sm,
+    marginTop: spacing.md,
   },
   driftButton: {
     flexDirection: 'row',
