@@ -29,16 +29,25 @@ const SUBTITLES: Record<Mode, string> = {
   interactions: 'Thoughts you’ve connected with.',
 };
 
+type ModeData = { thoughts: Thought[]; notifiedIds: Set<string> };
+
+// "World" is warmed at launch by usePrefetchTabs; "mine"/"interactions"
+// aren't (no point prefetching a mode you may never open), but once you've
+// visited either in this session, switching back to it is instant too.
+const MODE_CACHE_KEYS: Record<Mode, string> = {
+  world: PREFETCH_KEYS.universeWorld,
+  mine: 'universe:mine',
+  interactions: 'universe:interactions',
+};
+
 export function UniverseScreen() {
   const [mode, setMode] = useState<Mode>('world');
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [selected, setSelected] = useState<Thought | null>(null);
-  // Seeded from usePrefetchTabs (warmed right after sign-in) when present —
-  // only covers "world" mode (the default), so switching to "My Thoughts" or
-  // "My Interactions" still shows the usual loading state the first time.
-  const [thoughts, setThoughts] = useState<Thought[]>(() => getCached(PREFETCH_KEYS.universeWorld) ?? []);
-  const [notifiedIds, setNotifiedIds] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(() => getCached(PREFETCH_KEYS.universeWorld) === undefined);
+  const initialData = getCached<ModeData>(MODE_CACHE_KEYS.world);
+  const [thoughts, setThoughts] = useState<Thought[]>(() => initialData?.thoughts ?? []);
+  const [notifiedIds, setNotifiedIds] = useState<Set<string>>(() => initialData?.notifiedIds ?? new Set());
+  const [loading, setLoading] = useState(() => initialData === undefined);
   const [error, setError] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
   // A screen that's been visited once stays mounted in the background when
@@ -67,13 +76,22 @@ export function UniverseScreen() {
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
-      setLoading(true);
+      const cacheKey = MODE_CACHE_KEYS[mode];
+      const cached = getCached<ModeData>(cacheKey);
+      if (cached) {
+        // Show the last known data for this mode immediately instead of a
+        // spinner, then still refresh in the background below.
+        setThoughts(cached.thoughts);
+        setNotifiedIds(cached.notifiedIds);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
       setError(null);
 
       const load = async () => {
         if (mode === 'world') {
           const result = await listThoughts();
-          setCached(PREFETCH_KEYS.universeWorld, result.thoughts);
           return { thoughts: result.thoughts, notifiedIds: new Set<string>() };
         }
         if (mode === 'interactions') {
@@ -99,6 +117,7 @@ export function UniverseScreen() {
           if (cancelled) return;
           setThoughts(result.thoughts);
           setNotifiedIds(result.notifiedIds);
+          setCached(cacheKey, result);
         })
         .catch((err: unknown) => {
           if (!cancelled) setError(err instanceof ApiError ? err.message : 'Could not load thoughts.');

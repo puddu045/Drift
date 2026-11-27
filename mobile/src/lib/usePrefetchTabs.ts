@@ -29,7 +29,11 @@ export function usePrefetchTabs(enabled: boolean) {
 
     listThoughts()
       .then((result) => {
-        if (!cancelled) setCached(PREFETCH_KEYS.universeWorld, result.thoughts);
+        // Shape matches UniverseScreen's per-mode cache (ModeData) — "World"
+        // has no notified-reply tracking, unlike "My Thoughts".
+        if (!cancelled) {
+          setCached(PREFETCH_KEYS.universeWorld, { thoughts: result.thoughts, notifiedIds: new Set<string>() });
+        }
       })
       .catch(() => {});
 
