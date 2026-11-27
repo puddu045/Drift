@@ -64,6 +64,25 @@ admin portal's browser requests to the API get blocked by CORS.
 Then open your Vercel URL, sign in with an account that has `role: admin`
 in Supabase, and confirm the dashboard loads data from the live API.
 
+## Optional: translation
+
+If you want thoughts/replies/bios translated into each user's preferred
+language (set in the mobile app's Profile screen), the API needs a Google
+Cloud Translation API key. Without one, this feature is a no-op — content
+is always shown exactly as written.
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com), create
+   a project (or pick an existing one).
+2. **APIs & Services** -> **Library**, search for **Cloud Translation API**,
+   click **Enable**. (This requires a billing account on the project, even
+   though actual usage is free up to 500,000 characters/month.)
+3. **APIs & Services** -> **Credentials** -> **Create Credentials** ->
+   **API key**. Copy the key.
+4. On Render: `drift-api` -> **Environment** -> add `GOOGLE_TRANSLATE_API_KEY`
+   with that value, save — Render redeploys automatically.
+
+For local dev, add the same key to `api/.env` as `GOOGLE_TRANSLATE_API_KEY`.
+
 ## About the mobile app
 
 The mobile app isn't part of this deploy — "free hosting" doesn't really

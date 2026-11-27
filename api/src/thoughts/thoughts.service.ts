@@ -3,6 +3,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { MutesService } from '../mutes/mutes.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { TranslationService } from '../translation/translation.service.js';
 import {
   CreateReply,
   CreateReport,
@@ -19,7 +20,26 @@ export class ThoughtsService {
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
     private readonly mutes: MutesService,
+    private readonly translation: TranslationService,
   ) {}
+
+  /**
+   * Translates `thoughts[].text` in place into the viewer's preferred
+   * language, if they've set one (see UserPreferences.preferredLanguage —
+   * unset means "show exactly as written"). A no-op, with no API call, for
+   * every viewer who hasn't opted in.
+   */
+  private async translateForViewer<T extends { text: string }>(viewerId: string, items: T[]): Promise<T[]> {
+    if (items.length === 0) return items;
+    const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
+    if (!preferredLanguage) return items;
+
+    const translated = await this.translation.translateBatch(
+      items.map((item) => item.text),
+      preferredLanguage,
+    );
+    return items.map((item, i) => ({ ...item, text: translated[i] }));
+  }
 
   async create(authorId: string, data: CreateThought) {
     return this.prisma.thought.create({
@@ -57,17 +77,18 @@ export class ThoughtsService {
     });
 
     const nextCursor = thoughts.length === query.limit ? thoughts[thoughts.length - 1].id : null;
-    return { thoughts, nextCursor };
+    return { thoughts: await this.translateForViewer(viewerId, thoughts), nextCursor };
   }
 
   /** Everything a user has posted themselves, for their own "My Thoughts" view. */
   async listMine(userId: string) {
-    return this.prisma.thought.findMany({
+    const thoughts = await this.prisma.thought.findMany({
       where: { authorId: userId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
       take: 200,
       select: { id: true, text: true, mood: true, createdAt: true },
     });
+    return this.translateForViewer(userId, thoughts);
   }
 
   /** Other people's thoughts the user has reacted to or replied on, for "My Interactions". */
@@ -83,7 +104,7 @@ export class ThoughtsService {
     const thoughtIds = [...new Set([...reactions, ...replies].map((r) => r.thoughtId))];
     if (thoughtIds.length === 0) return [];
 
-    return this.prisma.thought.findMany({
+    const thoughts = await this.prisma.thought.findMany({
       where: {
         id: { in: thoughtIds },
         authorId: { notIn: [userId, ...mutedIds] },
@@ -93,6 +114,7 @@ export class ThoughtsService {
       take: 200,
       select: { id: true, text: true, mood: true, createdAt: true },
     });
+    return this.translateForViewer(userId, thoughts);
   }
 
   async getOne(viewerId: string, thoughtId: string) {
@@ -109,10 +131,16 @@ export class ThoughtsService {
     }
 
     const identities = await this.identityMap([thought.authorId, ...thought.replies.map((r) => r.authorId)]);
+    // Translated together in one batch call (thought + every reply) rather
+    // than one call per item.
+    const [translatedThought, ...translatedReplies] = await this.translateForViewer(viewerId, [
+      thought,
+      ...thought.replies,
+    ]);
     return {
-      ...thought,
+      ...translatedThought,
       author: identities.get(thought.authorId) ?? null,
-      replies: thought.replies.map((reply) => ({ ...reply, author: identities.get(reply.authorId) ?? null })),
+      replies: translatedReplies.map((reply) => ({ ...reply, author: identities.get(reply.authorId) ?? null })),
     };
   }
 

@@ -14,6 +14,7 @@ export type Profile = {
   createdAt: string;
   updatedAt: string;
   showIdentityOnContent: boolean;
+  preferredLanguage: string | null;
 };
 
 export type UpsertProfileInput = {
@@ -60,6 +61,9 @@ export type UpdatePreferencesInput = {
   showActivity?: boolean;
   discoverable?: boolean;
   allowConnectionRequests?: boolean;
+  /** A language code (e.g. "en", "pt") to translate thoughts, replies and
+   * bios into, or null to turn translation off. */
+  preferredLanguage?: string | null;
 };
 
 export function updatePreferences(input: UpdatePreferencesInput) {

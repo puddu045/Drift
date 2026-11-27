@@ -4,6 +4,7 @@ import { vi } from 'vitest';
 
 import { MutesService } from '../mutes/mutes.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { TranslationService } from '../translation/translation.service.js';
 import { DestinyService } from './destiny.service.js';
 
 describe('DestinyService', () => {
@@ -13,17 +14,23 @@ describe('DestinyService', () => {
     thought: { findMany: vi.fn() },
   };
   const mutes = { mutedAuthorIds: vi.fn() };
+  const translation = {
+    getPreferredLanguage: vi.fn().mockResolvedValue(null),
+    translateBatch: vi.fn(),
+  };
   let service: DestinyService;
 
   beforeEach(async () => {
     vi.resetAllMocks();
     mutes.mutedAuthorIds.mockResolvedValue([]);
     prisma.destinyAssignment.findMany.mockResolvedValue([]);
+    translation.getPreferredLanguage.mockResolvedValue(null);
     const moduleRef = await Test.createTestingModule({
       providers: [
         DestinyService,
         { provide: PrismaService, useValue: prisma },
         { provide: MutesService, useValue: mutes },
+        { provide: TranslationService, useValue: translation },
       ],
     }).compile();
     service = moduleRef.get(DestinyService);

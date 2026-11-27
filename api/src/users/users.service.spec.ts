@@ -4,6 +4,7 @@ import { vi } from 'vitest';
 
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { TranslationService } from '../translation/translation.service.js';
 import { UsersService } from './users.service.js';
 
 function uniqueConstraintError() {
@@ -22,12 +23,21 @@ describe('UsersService', () => {
     interest: { count: vi.fn() },
     $transaction: vi.fn(),
   };
+  const translation = {
+    getPreferredLanguage: vi.fn().mockResolvedValue(null),
+    translateBatch: vi.fn(),
+  };
   let service: UsersService;
 
   beforeEach(async () => {
     vi.resetAllMocks();
+    translation.getPreferredLanguage.mockResolvedValue(null);
     const moduleRef = await Test.createTestingModule({
-      providers: [UsersService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        UsersService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: TranslationService, useValue: translation },
+      ],
     }).compile();
     service = moduleRef.get(UsersService);
   });
@@ -94,7 +104,7 @@ describe('UsersService', () => {
       prisma.userPreferences.findUnique.mockResolvedValue({ showCountry: false });
       prisma.userInterest.findMany.mockResolvedValue([]);
 
-      const result = await service.getPublicProfile('u1');
+      const result = await service.getPublicProfile('viewer1', 'u1');
       expect(result.country).toBeNull();
     });
 
@@ -111,7 +121,7 @@ describe('UsersService', () => {
       prisma.userPreferences.findUnique.mockResolvedValue({ showCountry: true });
       prisma.userInterest.findMany.mockResolvedValue([]);
 
-      const result = await service.getPublicProfile('u1');
+      const result = await service.getPublicProfile('viewer1', 'u1');
       expect(result.country).toBe('US');
     });
 
@@ -131,7 +141,7 @@ describe('UsersService', () => {
         { interest: { name: 'Travel' } },
       ]);
 
-      const result = await service.getPublicProfile('u1');
+      const result = await service.getPublicProfile('viewer1', 'u1');
       expect(result.interests).toEqual(['Music', 'Travel']);
     });
   });

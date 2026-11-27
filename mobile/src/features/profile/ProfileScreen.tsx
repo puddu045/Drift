@@ -8,6 +8,7 @@ import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { EditFieldModal } from '@/components/EditFieldModal';
 import { InterestsEditModal } from '@/components/InterestsEditModal';
+import { LanguagePickerModal } from '@/components/LanguagePickerModal';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { TextField } from '@/components/TextField';
 import { useSession } from '@/features/auth/SessionProvider';
@@ -22,6 +23,7 @@ import {
   updatePreferences,
   upsertOwnProfile,
 } from '@/features/profile/api';
+import { languageLabel } from '@/features/profile/languages';
 import { supabase } from '@/lib/supabase';
 import { ApiError } from '@/lib/api';
 import { colors, radius, spacing, typography } from '@/theme';
@@ -61,6 +63,8 @@ export function ProfileScreen() {
   const [bio, setBio] = useState('');
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [showIdentity, setShowIdentity] = useState(false);
+  const [preferredLanguage, setPreferredLanguage] = useState<string | null>(null);
+  const [editingLanguage, setEditingLanguage] = useState(false);
   const [loading, setLoading] = useState(true);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +88,7 @@ export function ProfileScreen() {
         setBio(profile.bio ?? '');
         setPhotoUrl(profile.photoUrl);
         setShowIdentity(profile.showIdentityOnContent);
+        setPreferredLanguage(profile.preferredLanguage);
       })
       .catch(() => {
         // No profile yet — expected for a brand-new account, handled by the
@@ -164,6 +169,12 @@ export function ProfileScreen() {
   const onToggleIdentity = async (value: boolean) => {
     setShowIdentity(value);
     await updatePreferences({ showIdentityOnContent: value });
+  };
+
+  const onSelectLanguage = async (code: string | null) => {
+    setPreferredLanguage(code);
+    setEditingLanguage(false);
+    await updatePreferences({ preferredLanguage: code });
   };
 
   const onSaveInterests = async (ids: string[]) => {
@@ -307,6 +318,12 @@ export function ProfileScreen() {
           <Switch value={showIdentity} onValueChange={onToggleIdentity} />
         </View>
 
+        <FieldRow
+          label="Translate thoughts into"
+          value={languageLabel(preferredLanguage)}
+          onEdit={() => setEditingLanguage(true)}
+        />
+
         {mutedUsers.length > 0 && (
           <View style={styles.mutedSection}>
             <Text style={styles.fieldLabel}>Muted</Text>
@@ -346,6 +363,14 @@ export function ProfileScreen() {
           selectedIds={myInterestIds}
           onCancel={() => setEditingInterests(false)}
           onSave={onSaveInterests}
+        />
+      )}
+
+      {editingLanguage && (
+        <LanguagePickerModal
+          selected={preferredLanguage}
+          onCancel={() => setEditingLanguage(false)}
+          onSelect={onSelectLanguage}
         />
       )}
     </ScreenContainer>

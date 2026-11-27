@@ -52,8 +52,11 @@ export class UsersController {
   }
 
   @Get(':userId')
-  async getPublicProfile(@Param('userId', { schema: usernameParamSchema }) userId: string) {
-    return this.users.getPublicProfile(userId);
+  async getPublicProfile(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('userId', { schema: usernameParamSchema }) userId: string,
+  ) {
+    return this.users.getPublicProfile(user.id, userId);
   }
 
   @Get(':userId/thoughts')

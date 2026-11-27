@@ -5,6 +5,7 @@ import { vi } from 'vitest';
 import { MutesService } from '../mutes/mutes.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { TranslationService } from '../translation/translation.service.js';
 import { ThoughtsService } from './thoughts.service.js';
 
 describe('ThoughtsService', () => {
@@ -24,6 +25,10 @@ describe('ThoughtsService', () => {
   };
   const notifications = { create: vi.fn() };
   const mutes = { mutedAuthorIds: vi.fn() };
+  const translation = {
+    getPreferredLanguage: vi.fn().mockResolvedValue(null),
+    translateBatch: vi.fn(),
+  };
   let service: ThoughtsService;
 
   beforeEach(async () => {
@@ -31,12 +36,14 @@ describe('ThoughtsService', () => {
     prisma.userPreferences.findMany.mockResolvedValue([]);
     prisma.userProfile.findMany.mockResolvedValue([]);
     mutes.mutedAuthorIds.mockResolvedValue([]);
+    translation.getPreferredLanguage.mockResolvedValue(null);
     const moduleRef = await Test.createTestingModule({
       providers: [
         ThoughtsService,
         { provide: PrismaService, useValue: prisma },
         { provide: NotificationsService, useValue: notifications },
         { provide: MutesService, useValue: mutes },
+        { provide: TranslationService, useValue: translation },
       ],
     }).compile();
     service = moduleRef.get(ThoughtsService);

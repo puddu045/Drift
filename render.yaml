@@ -65,3 +65,8 @@ services:
       # after the Vercel deploy below and Render will redeploy with it.
       - key: CORS_ORIGINS
         sync: false
+      # Google Cloud Translation API key — see /DEPLOY.md for how to get
+      # one. Optional: without it, thoughts/replies/bios are always shown
+      # exactly as written, with no translation attempted.
+      - key: GOOGLE_TRANSLATE_API_KEY
+        sync: false

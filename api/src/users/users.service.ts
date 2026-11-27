@@ -2,11 +2,15 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable,
 
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { TranslationService } from '../translation/translation.service.js';
 import { SetInterests, UpdatePreferences, UpsertProfile } from './users.schemas.js';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly translation: TranslationService,
+  ) {}
 
   /**
    * Finds or creates the bare User row for a Supabase-verified id. Called on
@@ -41,7 +45,11 @@ export class UsersService {
       this.prisma.userPreferences.findUnique({ where: { userId } }),
     ]);
     if (!profile) return null;
-    return { ...profile, showIdentityOnContent: preferences?.showIdentityOnContent ?? false };
+    return {
+      ...profile,
+      showIdentityOnContent: preferences?.showIdentityOnContent ?? false,
+      preferredLanguage: preferences?.preferredLanguage ?? null,
+    };
   }
 
   async upsertProfile(userId: string, data: UpsertProfile) {
@@ -61,7 +69,7 @@ export class UsersService {
   }
 
   /** Public-safe view of another user's profile, honoring their privacy settings. */
-  async getPublicProfile(userId: string) {
+  async getPublicProfile(viewerId: string, userId: string) {
     const [profile, preferences, interests] = await Promise.all([
       this.prisma.userProfile.findUnique({ where: { userId } }),
       this.prisma.userPreferences.findUnique({ where: { userId } }),
@@ -69,12 +77,18 @@ export class UsersService {
     ]);
     if (!profile) throw new NotFoundException('Profile not found');
 
+    let bio = profile.bio;
+    const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
+    if (bio && preferredLanguage) {
+      [bio] = await this.translation.translateBatch([bio], preferredLanguage);
+    }
+
     return {
       userId: profile.userId,
       displayName: profile.displayName,
       username: profile.username,
       photoUrl: profile.photoUrl,
-      bio: profile.bio,
+      bio,
       relationshipIntent: profile.relationshipIntent,
       country: preferences?.showCountry ? profile.country : null,
       interests: interests.map((i) => i.interest.name),
@@ -122,11 +136,19 @@ export class UsersService {
     });
     if (blocked) throw new ForbiddenException('Not available');
 
-    return this.prisma.thought.findMany({
+    const thoughts = await this.prisma.thought.findMany({
       where: { authorId, isPublic: true, deletedAt: null },
       orderBy: { createdAt: 'desc' },
       take: 50,
       select: { id: true, text: true, mood: true, createdAt: true },
     });
+
+    const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
+    if (!preferredLanguage) return thoughts;
+    const translated = await this.translation.translateBatch(
+      thoughts.map((t) => t.text),
+      preferredLanguage,
+    );
+    return thoughts.map((t, i) => ({ ...t, text: translated[i] }));
   }
 }

@@ -145,6 +145,12 @@ model UserProfile {
 model UserPreferences {
   userId                    String  @id @db.Uuid
   languages                 String[]
+  // The language content is translated into for this user, e.g. "en", "es",
+  // "pt-BR". Unset (null) means no translation — thoughts/replies/bios are
+  // shown exactly as their author wrote them. Distinct from `languages`
+  // above (languages the user understands/speaks, not yet wired to
+  // anything) — this one drives TranslationService.
+  preferredLanguage         String?
   showCountry               Boolean @default(false)
   showActivity              Boolean @default(false)
   discoverable              Boolean @default(true)
@@ -433,4 +439,20 @@ model AuditLog {
 
   @@index([actorId, createdAt])
   @@map("audit_logs")
+}
+
+// Cache for TranslationService, keyed by a hash of the source text rather
+// than content id/type — any identical text in any target language reuses
+// the same row, and it stays valid even if the same text is later attached
+// to different content. Lets a popular thought's translation be computed
+// once no matter how many viewers in that language see it.
+model Translation {
+  textHash       String   @db.VarChar(64)
+  targetLanguage String   @db.VarChar(10)
+  sourceText     String
+  translatedText String
+  createdAt      DateTime @default(now())
+
+  @@id([textHash, targetLanguage])
+  @@map("translations")
 }

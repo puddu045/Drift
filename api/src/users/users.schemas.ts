@@ -25,6 +25,17 @@ export const updatePreferencesSchema = z.object({
   showActivity: z.boolean().optional(),
   discoverable: z.boolean().optional(),
   allowConnectionRequests: z.boolean().optional(),
+  // A language code (e.g. "en", "es", "pt-BR") to translate thoughts,
+  // replies and bios into, or null to turn translation off and see content
+  // exactly as written. Omitted (not sent) leaves it unchanged.
+  preferredLanguage: z
+    .string()
+    .trim()
+    .min(2)
+    .max(10)
+    .regex(/^[a-zA-Z-]+$/)
+    .nullable()
+    .optional(),
 });
 export type UpdatePreferences = z.infer<typeof updatePreferencesSchema>;
 

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { MutesService } from '../mutes/mutes.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { TranslationService } from '../translation/translation.service.js';
 
 function startOfToday() {
   const now = new Date();
@@ -13,7 +14,15 @@ export class DestinyService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mutes: MutesService,
+    private readonly translation: TranslationService,
   ) {}
+
+  private async translateForViewer(viewerId: string, thought: { text: string }) {
+    const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
+    if (!preferredLanguage) return thought;
+    const [translatedText] = await this.translation.translateBatch([thought.text], preferredLanguage);
+    return { ...thought, text: translatedText };
+  }
 
   async getToday(userId: string) {
     const today = startOfToday();
@@ -22,7 +31,7 @@ export class DestinyService {
       where: { userId_assignedDate: { userId, assignedDate: today } },
       include: { thought: true },
     });
-    if (existing) return existing.thought;
+    if (existing) return this.translateForViewer(userId, existing.thought);
 
     const [blocks, mutedIds] = await Promise.all([
       this.prisma.block.findMany({
@@ -58,6 +67,6 @@ export class DestinyService {
       data: { userId, thoughtId: chosen.id, assignedDate: today },
       include: { thought: true },
     });
-    return assignment.thought;
+    return this.translateForViewer(userId, assignment.thought);
   }
 }
