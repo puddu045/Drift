@@ -11,6 +11,7 @@ type Stage =
   | { name: 'not-admin' }
   | { name: 'needs-enroll'; qrCode: string; secret: string; factorId: string }
   | { name: 'needs-verify'; factorId: string }
+  | { name: 'error'; message: string }
   | { name: 'ready' };
 
 // Temporary opt-out for local setup — NEXT_PUBLIC_REQUIRE_ADMIN_MFA=false
@@ -47,30 +48,47 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (aal?.currentLevel === 'aal2') {
-      setStage({ name: 'ready' });
-      return;
-    }
+    try {
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal?.currentLevel === 'aal2') {
+        setStage({ name: 'ready' });
+        return;
+      }
 
-    const { data: factors } = await supabase.auth.mfa.listFactors();
-    const verifiedTotp = factors?.totp.find((f) => f.status === 'verified');
-    if (verifiedTotp) {
-      setStage({ name: 'needs-verify', factorId: verifiedTotp.id });
-      return;
-    }
+      // supabase.auth.mfa.listFactors() only ever returns verified factors
+      // (that's what its own types say) — session.user.factors is the raw
+      // field with both statuses, which is what we need to find a stale
+      // unverified one below.
+      const totpFactors = session.user.factors?.filter((f) => f.factor_type === 'totp') ?? [];
+      const verifiedTotp = totpFactors.find((f) => f.status === 'verified');
+      if (verifiedTotp) {
+        setStage({ name: 'needs-verify', factorId: verifiedTotp.id });
+        return;
+      }
 
-    const { data: enrolled, error: enrollError } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
-    if (enrollError || !enrolled) {
-      setError(enrollError?.message ?? 'Could not start MFA enrollment.');
-      return;
+      // Supabase allows only one unverified TOTP factor at a time, and its
+      // QR/secret can't be recovered after enroll() returns — so an
+      // abandoned attempt (e.g. the QR didn't scan) just blocks a fresh
+      // one with a 422 until it's cleared out first.
+      const unverifiedTotp = totpFactors.find((f) => f.status === 'unverified');
+      if (unverifiedTotp) {
+        await supabase.auth.mfa.unenroll({ factorId: unverifiedTotp.id });
+      }
+
+      const { data: enrolled, error: enrollError } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+      if (enrollError || !enrolled) {
+        setStage({ name: 'error', message: enrollError?.message ?? 'Could not start MFA enrollment.' });
+        return;
+      }
+      setStage({
+        name: 'needs-enroll',
+        qrCode: enrolled.totp.qr_code,
+        secret: enrolled.totp.secret,
+        factorId: enrolled.id,
+      });
+    } catch (err) {
+      setStage({ name: 'error', message: err instanceof Error ? err.message : 'Something went wrong.' });
     }
-    setStage({
-      name: 'needs-enroll',
-      qrCode: enrolled.totp.qr_code,
-      secret: enrolled.totp.secret,
-      factorId: enrolled.id,
-    });
   }, []);
 
   useEffect(() => {
@@ -138,6 +156,25 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
             Sign in
           </button>
         </form>
+      </div>
+    );
+  }
+
+  if (stage.name === 'error') {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 text-center">
+        <p className="text-sm text-red-600">{stage.message}</p>
+        <div className="flex gap-4">
+          <button
+            onClick={() => supabase.auth.getSession().then(({ data }) => evaluate(data.session))}
+            className="text-sm text-slate-500 underline"
+          >
+            Try again
+          </button>
+          <button onClick={() => supabase.auth.signOut()} className="text-sm text-slate-500 underline">
+            Sign out
+          </button>
+        </div>
       </div>
     );
   }
