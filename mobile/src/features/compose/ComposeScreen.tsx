@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Image, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 import { Button } from '@/components/Button';
@@ -31,6 +32,8 @@ export function ComposeScreen() {
 
   const canSubmit = text.trim().length > 0 && mood !== null && !submitting;
 
+  const onClose = () => router.navigate('/(tabs)');
+
   const onSubmit = async () => {
     if (!mood || !text.trim()) return;
     setSubmitting(true);
@@ -49,23 +52,32 @@ export function ComposeScreen() {
 
   return (
     <ScreenContainer floatingTabBar background="pastel">
+      <View style={styles.header}>
+        <Pressable onPress={onClose} accessibilityLabel="Close" style={styles.closeButton}>
+          <Ionicons name="close" size={22} color={colors.textPrimary} />
+        </Pressable>
+      </View>
+
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Release a thought</Text>
+        <Text style={styles.title}>Release a Thought</Text>
+        <Text style={styles.subtitle}>Let your thought drift into the universe.</Text>
 
-        <TextInput
-          style={styles.input}
-          value={text}
-          onChangeText={(value) => setText(value.slice(0, MAX_LENGTH))}
-          placeholder="What's on your mind?"
-          placeholderTextColor={colors.textSecondary}
-          multiline
-          maxLength={MAX_LENGTH}
-        />
-        <Text style={styles.counter}>
-          {text.length}/{MAX_LENGTH}
-        </Text>
+        <View>
+          <TextInput
+            style={styles.input}
+            value={text}
+            onChangeText={(value) => setText(value.slice(0, MAX_LENGTH))}
+            placeholder="What's on your mind?"
+            placeholderTextColor={colors.textSecondary}
+            multiline
+            maxLength={MAX_LENGTH}
+          />
+          <Text style={styles.counter}>
+            {text.length}/{MAX_LENGTH}
+          </Text>
+        </View>
 
-        <Text style={styles.sectionLabel}>Mood</Text>
+        <Text style={styles.sectionLabel}>Choose a mood</Text>
         <View style={styles.moodRow}>
           {MOODS.map((item) => {
             const icon = moodIcons[item.id];
@@ -87,19 +99,39 @@ export function ComposeScreen() {
         </View>
 
         <View style={styles.privacyRow}>
-          <Text style={styles.sectionLabel}>Discoverable by others</Text>
+          <View style={styles.privacyLabelRow}>
+            <Ionicons name="globe-outline" size={18} color={colors.textSecondary} />
+            <Text style={styles.sectionLabel}>Discoverable by others</Text>
+          </View>
           <Switch value={isPublic} onValueChange={setIsPublic} />
         </View>
 
         {error && <Text style={styles.error}>{error}</Text>}
 
-        <Button label="Release into the universe" onPress={onSubmit} disabled={!canSubmit} />
+        <Button
+          label="Release to Universe"
+          onPress={onSubmit}
+          disabled={!canSubmit}
+          style={styles.submitButton}
+          labelColor="#FFFFFF"
+          icon={<Ionicons name="paper-plane" size={18} color="#FFFFFF" />}
+        />
       </ScrollView>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
+  header: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+  },
+  closeButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   content: {
     padding: spacing.lg,
     gap: spacing.md,
@@ -109,12 +141,23 @@ const styles = StyleSheet.create({
     fontSize: typography.size.xl,
     fontWeight: typography.weight.bold,
     color: colors.textPrimary,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.sm,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: -spacing.sm,
   },
   input: {
     minHeight: 120,
     borderRadius: radius.md,
     borderWidth: 1.5,
-    borderColor: 'rgba(21, 33, 59, 0.35)',
+    borderColor: 'rgba(248, 201, 167, 0.6)',
+    // Peach, semi-transparent — a "glass" tint over whatever's behind it
+    // rather than an opaque fill.
+    backgroundColor: 'rgba(248, 201, 167, 0.22)',
     padding: spacing.md,
     color: colors.textPrimary,
     fontFamily: typography.fontFamily,
@@ -122,7 +165,9 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   counter: {
-    alignSelf: 'flex-end',
+    position: 'absolute',
+    right: spacing.sm,
+    bottom: spacing.sm,
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xs,
     color: colors.textSecondary,
@@ -144,15 +189,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.pill,
-    opacity: 0.55,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
   },
   moodIcon: {
     width: 16,
     height: 16,
   },
   moodOptionSelected: {
-    opacity: 1,
-    borderWidth: 2,
     borderColor: colors.textPrimary,
   },
   moodLabel: {
@@ -168,9 +212,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  privacyLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
   error: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
     color: colors.danger,
+  },
+  submitButton: {
+    backgroundColor: palette.navy,
+    borderColor: palette.navy,
   },
 });

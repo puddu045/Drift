@@ -15,7 +15,7 @@ type VariantConfig = {
 };
 
 const VARIANTS: Partial<Record<BackgroundVariant, VariantConfig>> = {
-  day: { source: require('../../assets/drift-sky-day.webp'), width: 1024, height: 1536 },
+  day: { source: require('../../assets/drift-sky-day.webp'), width: 969, height: 1624 },
   sunset: {
     source: require('../../assets/drift-sunset.webp'),
     width: 1024,

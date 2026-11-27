@@ -1,4 +1,5 @@
-import { Pressable, StyleProp, StyleSheet, Text, ViewStyle } from 'react-native';
+import { ReactNode } from 'react';
+import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -8,9 +9,15 @@ type Props = {
   variant?: 'primary' | 'ghost';
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
+  /** Rendered to the left of the label — for a one-off like a paper-plane
+   * "send" icon. Most buttons don't need this. */
+  icon?: ReactNode;
+  /** Overrides the variant's default label color — for a one-off like dark
+   * text that doesn't match either variant's usual color. */
+  labelColor?: string;
 };
 
-export function Button({ label, onPress, variant = 'primary', style, disabled }: Props) {
+export function Button({ label, onPress, variant = 'primary', style, disabled, icon, labelColor }: Props) {
   const isPrimary = variant === 'primary';
   return (
     <Pressable
@@ -26,14 +33,21 @@ export function Button({ label, onPress, variant = 'primary', style, disabled }:
         style,
       ]}
     >
-      <Text
-        style={[styles.label, isPrimary ? styles.labelPrimary : styles.labelGhost]}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.75}
-      >
-        {label}
-      </Text>
+      <View style={styles.row}>
+        {icon}
+        <Text
+          style={[
+            styles.label,
+            isPrimary ? styles.labelPrimary : styles.labelGhost,
+            labelColor && { color: labelColor },
+          ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.75}
+        >
+          {label}
+        </Text>
+      </View>
     </Pressable>
   );
 }
@@ -45,6 +59,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
   primary: {
     backgroundColor: colors.accent,
