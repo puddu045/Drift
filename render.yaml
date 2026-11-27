@@ -25,7 +25,13 @@ services:
     # ~15-20 minute "Timed Out" on every deploy even though the app itself
     # was already up and serving requests the whole time.
     startCommand: node dist/main
-    healthCheckPath: /
+    # No healthCheckPath: the dashboard's own deploy notice showed Render
+    # probing "drift-api-2qzl.onrender.com:10000/" — the PUBLIC hostname
+    # with the INTERNAL port appended, which Render's own docs say isn't
+    # reachable from outside. That's very likely why every deploy sat
+    # "waiting for health check" for ~15-20 minutes before a restart
+    # finally cleared it, regardless of app-side fixes. Falling back to
+    # Render's plain port-detection (no HTTP check at all) sidesteps it.
     autoDeployTrigger: commit
     envVars:
       # Pins the Node version to match local development (api/.env.example
