@@ -7,19 +7,27 @@ import { MoodTag } from '@/components/MoodTag';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { replyToThought, Thought } from '@/features/thoughts/api';
 import { ApiError } from '@/lib/api';
+import { getCached, setCached } from '@/lib/prefetchCache';
+import { PREFETCH_KEYS } from '@/lib/usePrefetchTabs';
 import { colors, spacing, typography } from '@/theme';
 
 import { getTodayDestiny } from './api';
 
 export function DestinyScreen() {
-  const [thought, setThought] = useState<Thought | null>(null);
+  // Seeded from usePrefetchTabs (warmed right after sign-in) when present,
+  // so a first visit this session can render immediately instead of a
+  // spinner — the fetch below still runs regardless, to keep it fresh.
+  const [thought, setThought] = useState<Thought | null>(() => getCached(PREFETCH_KEYS.destinyToday) ?? null);
   const [error, setError] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [sent, setSent] = useState(false);
 
   useEffect(() => {
     getTodayDestiny()
-      .then(setThought)
+      .then((result) => {
+        setThought(result);
+        setCached(PREFETCH_KEYS.destinyToday, result);
+      })
       .catch((err: unknown) =>
         setError(err instanceof ApiError ? err.message : 'No Destiny thought available today.'),
       );

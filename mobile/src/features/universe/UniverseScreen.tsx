@@ -6,6 +6,8 @@ import { ScreenContainer } from '@/components/ScreenContainer';
 import { listNotifications } from '@/features/notifications/api';
 import { listInteractions, listMyThoughts, listThoughts, Thought } from '@/features/thoughts/api';
 import { ApiError } from '@/lib/api';
+import { getCached, setCached } from '@/lib/prefetchCache';
+import { PREFETCH_KEYS } from '@/lib/usePrefetchTabs';
 import { colors, radius, spacing, typography } from '@/theme';
 
 import { Bubble } from './Bubble';
@@ -31,13 +33,16 @@ export function UniverseScreen() {
   const [mode, setMode] = useState<Mode>('world');
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [selected, setSelected] = useState<Thought | null>(null);
-  const [thoughts, setThoughts] = useState<Thought[]>([]);
+  // Seeded from usePrefetchTabs (warmed right after sign-in) when present —
+  // only covers "world" mode (the default), so switching to "My Thoughts" or
+  // "My Interactions" still shows the usual loading state the first time.
+  const [thoughts, setThoughts] = useState<Thought[]>(() => getCached(PREFETCH_KEYS.universeWorld) ?? []);
   const [notifiedIds, setNotifiedIds] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => getCached(PREFETCH_KEYS.universeWorld) === undefined);
   const [error, setError] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
-  // With the tab bar's `lazy: false`, every tab now stays mounted in the
-  // background — without this, the bubbles would keep animating (and
+  // A screen that's been visited once stays mounted in the background when
+  // you switch tabs — without this, its bubbles would keep animating (and
   // burning battery) even while a different tab is on screen.
   const isFocused = useIsFocused();
 
@@ -68,6 +73,7 @@ export function UniverseScreen() {
       const load = async () => {
         if (mode === 'world') {
           const result = await listThoughts();
+          setCached(PREFETCH_KEYS.universeWorld, result.thoughts);
           return { thoughts: result.thoughts, notifiedIds: new Set<string>() };
         }
         if (mode === 'interactions') {

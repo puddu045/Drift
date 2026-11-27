@@ -8,6 +8,8 @@ import { Card } from '@/components/Card';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { getPublicProfile } from '@/features/profile/api';
 import { ApiError } from '@/lib/api';
+import { getCached, setCached } from '@/lib/prefetchCache';
+import { PREFETCH_KEYS } from '@/lib/usePrefetchTabs';
 import { colors, spacing, typography } from '@/theme';
 
 import {
@@ -21,8 +23,15 @@ import {
 
 export function ConnectionsScreen() {
   const router = useRouter();
-  const [requests, setRequests] = useState<ConnectionRequest[]>([]);
-  const [connections, setConnections] = useState<Connection[]>([]);
+  // Seeded from usePrefetchTabs (warmed right after sign-in) when present,
+  // so a first visit this session can render immediately instead of a
+  // blank list — refresh() below still runs regardless, to keep it fresh.
+  const [requests, setRequests] = useState<ConnectionRequest[]>(
+    () => getCached(PREFETCH_KEYS.connectionsRequests) ?? [],
+  );
+  const [connections, setConnections] = useState<Connection[]>(
+    () => getCached(PREFETCH_KEYS.connectionsList) ?? [],
+  );
   const [profiles, setProfiles] = useState<Record<string, { displayName: string; photoUrl: string | null }>>({});
   const [error, setError] = useState<string | null>(null);
 
@@ -31,6 +40,8 @@ export function ConnectionsScreen() {
       .then(([reqs, conns]) => {
         setRequests(reqs);
         setConnections(conns);
+        setCached(PREFETCH_KEYS.connectionsRequests, reqs);
+        setCached(PREFETCH_KEYS.connectionsList, conns);
         conns.forEach((c) => {
           getPublicProfile(c.otherUserId)
             .then((profile) =>
