@@ -83,3 +83,10 @@ export function getMyInterestIds() {
 export function setMyInterests(interestIds: string[]) {
   return api.put<void>('/profiles/me/interests', { interestIds });
 }
+
+export type Translation = { translatedText: string; language: string };
+
+/** On-demand only — a "Translate" tap on a profile's bio, never automatic. */
+export function translateBio(userId: string) {
+  return api.post<Translation>(`/profiles/${userId}/translate-bio`);
+}

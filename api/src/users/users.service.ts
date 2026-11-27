@@ -69,7 +69,7 @@ export class UsersService {
   }
 
   /** Public-safe view of another user's profile, honoring their privacy settings. */
-  async getPublicProfile(viewerId: string, userId: string) {
+  async getPublicProfile(userId: string) {
     const [profile, preferences, interests] = await Promise.all([
       this.prisma.userProfile.findUnique({ where: { userId } }),
       this.prisma.userPreferences.findUnique({ where: { userId } }),
@@ -77,24 +77,33 @@ export class UsersService {
     ]);
     if (!profile) throw new NotFoundException('Profile not found');
 
-    let bio = profile.bio;
-    const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
-    if (bio && preferredLanguage) {
-      [bio] = await this.translation.translateBatch([bio], preferredLanguage, [
-        { type: 'profile_bio', id: userId },
-      ]);
-    }
-
     return {
       userId: profile.userId,
       displayName: profile.displayName,
       username: profile.username,
       photoUrl: profile.photoUrl,
-      bio,
+      bio: profile.bio,
       relationshipIntent: profile.relationshipIntent,
       country: preferences?.showCountry ? profile.country : null,
       interests: interests.map((i) => i.interest.name),
     };
+  }
+
+  /** On-demand translation for a profile's bio — the "Translate" button on it. */
+  async translateBio(viewerId: string, userId: string) {
+    const profile = await this.prisma.userProfile.findUnique({ where: { userId }, select: { bio: true } });
+    if (!profile) throw new NotFoundException('Profile not found');
+    if (!profile.bio) throw new BadRequestException('This profile has no bio to translate.');
+
+    const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
+    if (!preferredLanguage) {
+      throw new BadRequestException('Set a preferred language in your profile before translating.');
+    }
+
+    const [translatedText] = await this.translation.translateBatch([profile.bio], preferredLanguage, [
+      { type: 'profile_bio', id: userId },
+    ]);
+    return { translatedText, language: preferredLanguage };
   }
 
   async updatePreferences(userId: string, data: UpdatePreferences) {
@@ -138,20 +147,11 @@ export class UsersService {
     });
     if (blocked) throw new ForbiddenException('Not available');
 
-    const thoughts = await this.prisma.thought.findMany({
+    return this.prisma.thought.findMany({
       where: { authorId, isPublic: true, deletedAt: null },
       orderBy: { createdAt: 'desc' },
       take: 50,
       select: { id: true, text: true, mood: true, createdAt: true },
     });
-
-    const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
-    if (!preferredLanguage) return thoughts;
-    const translated = await this.translation.translateBatch(
-      thoughts.map((t) => t.text),
-      preferredLanguage,
-      thoughts.map((t) => ({ type: 'thought', id: t.id })),
-    );
-    return thoughts.map((t, i) => ({ ...t, text: translated[i] }));
   }
 }

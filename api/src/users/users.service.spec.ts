@@ -104,7 +104,7 @@ describe('UsersService', () => {
       prisma.userPreferences.findUnique.mockResolvedValue({ showCountry: false });
       prisma.userInterest.findMany.mockResolvedValue([]);
 
-      const result = await service.getPublicProfile('viewer1', 'u1');
+      const result = await service.getPublicProfile('u1');
       expect(result.country).toBeNull();
     });
 
@@ -121,7 +121,7 @@ describe('UsersService', () => {
       prisma.userPreferences.findUnique.mockResolvedValue({ showCountry: true });
       prisma.userInterest.findMany.mockResolvedValue([]);
 
-      const result = await service.getPublicProfile('viewer1', 'u1');
+      const result = await service.getPublicProfile('u1');
       expect(result.country).toBe('US');
     });
 
@@ -141,8 +141,42 @@ describe('UsersService', () => {
         { interest: { name: 'Travel' } },
       ]);
 
-      const result = await service.getPublicProfile('viewer1', 'u1');
+      const result = await service.getPublicProfile('u1');
       expect(result.interests).toEqual(['Music', 'Travel']);
+    });
+  });
+
+  describe('translateBio', () => {
+    it('404s when the profile does not exist', async () => {
+      prisma.userProfile.findUnique.mockResolvedValue(null);
+      await expect(service.translateBio('viewer1', 'u1')).rejects.toThrow('Profile not found');
+    });
+
+    it('rejects when the profile has no bio', async () => {
+      prisma.userProfile.findUnique.mockResolvedValue({ bio: null });
+      await expect(service.translateBio('viewer1', 'u1')).rejects.toThrow(BadRequestException);
+      expect(translation.getPreferredLanguage).not.toHaveBeenCalled();
+    });
+
+    it('requires a preferred language before translating', async () => {
+      prisma.userProfile.findUnique.mockResolvedValue({ bio: 'hola' });
+      translation.getPreferredLanguage.mockResolvedValue(null);
+      await expect(service.translateBio('viewer1', 'u1')).rejects.toThrow(BadRequestException);
+      expect(translation.translateBatch).not.toHaveBeenCalled();
+    });
+
+    it("translates into the viewer's preferred language, tagging the profile as the source", async () => {
+      prisma.userProfile.findUnique.mockResolvedValue({ bio: 'hola' });
+      translation.getPreferredLanguage.mockResolvedValue('en');
+      translation.translateBatch.mockResolvedValue(['hello']);
+
+      await expect(service.translateBio('viewer1', 'u1')).resolves.toEqual({
+        translatedText: 'hello',
+        language: 'en',
+      });
+      expect(translation.translateBatch).toHaveBeenCalledWith(['hola'], 'en', [
+        { type: 'profile_bio', id: 'u1' },
+      ]);
     });
   });
 

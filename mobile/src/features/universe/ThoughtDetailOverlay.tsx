@@ -6,6 +6,7 @@ import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanima
 
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
+import { LanguagePickerModal } from '@/components/LanguagePickerModal';
 import { MoodTag } from '@/components/MoodTag';
 import { blockUser } from '@/features/blocks/api';
 import { sendConnectionRequest } from '@/features/connections/api';
@@ -14,14 +15,18 @@ import { muteUser } from '@/features/mutes/api';
 import {
   deleteThought,
   getThought,
+  Reply,
   reportTarget,
   replyToThought,
   Thought,
   ThoughtDetail,
   toggleReaction,
+  translateReply,
+  translateThought,
 } from '@/features/thoughts/api';
 import { REPORT_REASONS } from '@/features/thoughts/reportReasons';
 import { ApiError } from '@/lib/api';
+import { useTranslatable } from '@/lib/useTranslatable';
 import { colors, radius, spacing, typography } from '@/theme';
 
 const REACTIONS: { type: Parameters<typeof toggleReaction>[1]; label: string }[] = [
@@ -58,6 +63,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [previewAuthor, setPreviewAuthor] = useState<{ id: string } & AuthorIdentity | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const translation = useTranslatable(() => translateThought(thought.id));
 
   useEffect(() => {
     let cancelled = false;
@@ -194,7 +200,16 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
           keyboardShouldPersistTaps="handled"
         >
           <MoodTag mood={thought.mood} />
-          <Text style={styles.text}>{thought.text}</Text>
+          <Text style={styles.text}>{translation.text ?? thought.text}</Text>
+          <Pressable onPress={translation.toggle} disabled={translation.loading}>
+            <Text style={styles.translateLink}>
+              {translation.loading
+                ? 'Translating…'
+                : translation.showingTranslation
+                  ? 'Show original'
+                  : 'Translate'}
+            </Text>
+          </Pressable>
 
           <View style={styles.reactionRow}>
             {REACTIONS.map((reaction) => (
@@ -217,16 +232,12 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
                 <Text style={styles.emptyReplies}>No replies yet.</Text>
               ) : (
                 detail.replies.map((reply) => (
-                  <View key={reply.id} style={styles.replyItem}>
-                    {reply.authorId === viewerContextUserId ? (
-                      <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={26} />
-                    ) : (
-                      <Pressable onPress={() => onViewAuthor(reply.authorId, reply.author)}>
-                        <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={26} />
-                      </Pressable>
-                    )}
-                    <Text style={styles.reply}>{reply.text}</Text>
-                  </View>
+                  <ReplyRow
+                    key={reply.id}
+                    reply={reply}
+                    isContextAuthor={reply.authorId === viewerContextUserId}
+                    onViewAuthor={onViewAuthor}
+                  />
                 ))
               )}
             </View>
@@ -274,6 +285,14 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
         </Pressable>
       </Animated.View>
 
+      {translation.needsLanguage && (
+        <LanguagePickerModal
+          selected={null}
+          onCancel={translation.dismissLanguagePrompt}
+          onSelect={translation.onLanguageChosen}
+        />
+      )}
+
       {previewAuthor && (
         <Modal visible transparent animationType="fade" onRequestClose={() => setPreviewAuthor(null)}>
           <View style={styles.previewBackdrop}>
@@ -294,6 +313,50 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
         </Modal>
       )}
     </Animated.View>
+  );
+}
+
+function ReplyRow({
+  reply,
+  isContextAuthor,
+  onViewAuthor,
+}: {
+  reply: Reply;
+  isContextAuthor: boolean;
+  onViewAuthor: (authorId: string, author: AuthorIdentity | null) => void;
+}) {
+  const translation = useTranslatable(() => translateReply(reply.thoughtId, reply.id));
+
+  return (
+    <View style={styles.replyItem}>
+      {isContextAuthor ? (
+        <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={26} />
+      ) : (
+        <Pressable onPress={() => onViewAuthor(reply.authorId, reply.author)}>
+          <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={26} />
+        </Pressable>
+      )}
+      <View style={styles.replyTextCol}>
+        <Text style={styles.reply}>{translation.text ?? reply.text}</Text>
+        <Pressable onPress={translation.toggle} disabled={translation.loading}>
+          <Text style={styles.translateLink}>
+            {translation.loading
+              ? 'Translating…'
+              : translation.showingTranslation
+                ? 'Show original'
+                : 'Translate'}
+          </Text>
+        </Pressable>
+      </View>
+
+      {translation.needsLanguage && (
+        <LanguagePickerModal
+          selected={null}
+          onCancel={translation.dismissLanguagePrompt}
+          onSelect={translation.onLanguageChosen}
+        />
+      )}
+    </View>
   );
 }
 
@@ -420,12 +483,21 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontStyle: 'italic',
   },
-  reply: {
+  replyTextCol: {
     flex: 1,
+    gap: 2,
+  },
+  reply: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
     color: colors.textPrimary,
     paddingTop: 4,
+  },
+  translateLink: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
+    color: colors.accent,
   },
   replyRow: {
     flexDirection: 'row',

@@ -1,4 +1,4 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { vi } from 'vitest';
 
@@ -17,7 +17,7 @@ describe('ThoughtsService', () => {
       update: vi.fn(),
     },
     thoughtReaction: { findUnique: vi.fn(), create: vi.fn(), delete: vi.fn(), findMany: vi.fn() },
-    thoughtReply: { create: vi.fn(), findMany: vi.fn() },
+    thoughtReply: { create: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
     block: { findMany: vi.fn() },
     report: { create: vi.fn() },
     userPreferences: { findMany: vi.fn() },
@@ -93,6 +93,84 @@ describe('ThoughtsService', () => {
     it('404s when the thought does not exist', async () => {
       prisma.thought.findUnique.mockResolvedValue(null);
       await expect(service.toggleReaction('user-1', 'missing', 'heart')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('translateOne', () => {
+    it('404s a private thought for a non-owner', async () => {
+      prisma.thought.findUnique.mockResolvedValue({
+        id: 't1',
+        text: 'hola',
+        authorId: 'author-1',
+        isPublic: false,
+        deletedAt: null,
+      });
+      await expect(service.translateOne('someone-else', 't1')).rejects.toThrow(NotFoundException);
+      expect(translation.getPreferredLanguage).not.toHaveBeenCalled();
+    });
+
+    it('requires a preferred language before translating', async () => {
+      prisma.thought.findUnique.mockResolvedValue({
+        id: 't1',
+        text: 'hola',
+        authorId: 'author-1',
+        isPublic: true,
+        deletedAt: null,
+      });
+      translation.getPreferredLanguage.mockResolvedValue(null);
+      await expect(service.translateOne('viewer', 't1')).rejects.toThrow(BadRequestException);
+      expect(translation.translateBatch).not.toHaveBeenCalled();
+    });
+
+    it('translates into the viewer\'s preferred language, tagging the thought as the source', async () => {
+      prisma.thought.findUnique.mockResolvedValue({
+        id: 't1',
+        text: 'hola',
+        authorId: 'author-1',
+        isPublic: true,
+        deletedAt: null,
+      });
+      translation.getPreferredLanguage.mockResolvedValue('en');
+      translation.translateBatch.mockResolvedValue(['hello']);
+
+      await expect(service.translateOne('viewer', 't1')).resolves.toEqual({
+        translatedText: 'hello',
+        language: 'en',
+      });
+      expect(translation.translateBatch).toHaveBeenCalledWith(['hola'], 'en', [{ type: 'thought', id: 't1' }]);
+    });
+  });
+
+  describe('translateReply', () => {
+    it('404s when the reply does not belong to the given thought', async () => {
+      prisma.thoughtReply.findUnique.mockResolvedValue({ id: 'r1', thoughtId: 'other-thought', text: 'hola' });
+      await expect(service.translateReply('viewer', 't1', 'r1')).rejects.toThrow(NotFoundException);
+    });
+
+    it('404s a reply on a private thought for a non-owner', async () => {
+      prisma.thoughtReply.findUnique.mockResolvedValue({ id: 'r1', thoughtId: 't1', text: 'hola', deletedAt: null });
+      prisma.thought.findUnique.mockResolvedValue({ authorId: 'author-1', isPublic: false, deletedAt: null });
+      await expect(service.translateReply('someone-else', 't1', 'r1')).rejects.toThrow(NotFoundException);
+    });
+
+    it('requires a preferred language before translating', async () => {
+      prisma.thoughtReply.findUnique.mockResolvedValue({ id: 'r1', thoughtId: 't1', text: 'hola', deletedAt: null });
+      prisma.thought.findUnique.mockResolvedValue({ authorId: 'author-1', isPublic: true, deletedAt: null });
+      translation.getPreferredLanguage.mockResolvedValue(null);
+      await expect(service.translateReply('viewer', 't1', 'r1')).rejects.toThrow(BadRequestException);
+    });
+
+    it("translates into the viewer's preferred language, tagging the reply as the source", async () => {
+      prisma.thoughtReply.findUnique.mockResolvedValue({ id: 'r1', thoughtId: 't1', text: 'hola', deletedAt: null });
+      prisma.thought.findUnique.mockResolvedValue({ authorId: 'author-1', isPublic: true, deletedAt: null });
+      translation.getPreferredLanguage.mockResolvedValue('en');
+      translation.translateBatch.mockResolvedValue(['hello']);
+
+      await expect(service.translateReply('viewer', 't1', 'r1')).resolves.toEqual({
+        translatedText: 'hello',
+        language: 'en',
+      });
+      expect(translation.translateBatch).toHaveBeenCalledWith(['hola'], 'en', [{ type: 'reply', id: 'r1' }]);
     });
   });
 

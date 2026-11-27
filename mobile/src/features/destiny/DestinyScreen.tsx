@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { LanguagePickerModal } from '@/components/LanguagePickerModal';
 import { MoodTag } from '@/components/MoodTag';
 import { ScreenContainer } from '@/components/ScreenContainer';
-import { replyToThought, Thought } from '@/features/thoughts/api';
+import { replyToThought, Thought, translateThought } from '@/features/thoughts/api';
 import { ApiError } from '@/lib/api';
 import { getCached, setCached } from '@/lib/prefetchCache';
+import { useTranslatable } from '@/lib/useTranslatable';
 import { PREFETCH_KEYS } from '@/lib/usePrefetchTabs';
 import { colors, spacing, typography } from '@/theme';
 
@@ -21,6 +23,9 @@ export function DestinyScreen() {
   const [error, setError] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [sent, setSent] = useState(false);
+  const translation = useTranslatable(() =>
+    thought ? translateThought(thought.id) : Promise.reject(new Error('No thought yet')),
+  );
 
   useEffect(() => {
     getTodayDestiny()
@@ -53,7 +58,16 @@ export function DestinyScreen() {
         {thought && (
           <Card style={styles.card}>
             <MoodTag mood={thought.mood} />
-            <Text style={styles.text}>{thought.text}</Text>
+            <Text style={styles.text}>{translation.text ?? thought.text}</Text>
+            <Pressable onPress={translation.toggle} disabled={translation.loading}>
+              <Text style={styles.translateLink}>
+                {translation.loading
+                  ? 'Translating…'
+                  : translation.showingTranslation
+                    ? 'Show original'
+                    : 'Translate'}
+              </Text>
+            </Pressable>
             {sent ? (
               <Text style={styles.sent}>Your reply drifted their way.</Text>
             ) : (
@@ -72,6 +86,14 @@ export function DestinyScreen() {
           </Card>
         )}
       </View>
+
+      {translation.needsLanguage && (
+        <LanguagePickerModal
+          selected={null}
+          onCancel={translation.dismissLanguagePrompt}
+          onSelect={translation.onLanguageChosen}
+        />
+      )}
     </ScreenContainer>
   );
 }
@@ -117,6 +139,12 @@ const styles = StyleSheet.create({
   sent: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
+    color: colors.accent,
+  },
+  translateLink: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
     color: colors.accent,
   },
   replyRow: {

@@ -74,9 +74,11 @@ export function ProfileScreen() {
   const [editingInterests, setEditingInterests] = useState(false);
   const [mutedUsers, setMutedUsers] = useState<{ userId: string; name: string }[]>([]);
 
-  // First-time setup fields — a profile can't be created without these two.
+  // First-time setup fields — a profile can't be created without these three.
   const [setupName, setSetupName] = useState('');
   const [setupUsername, setSetupUsername] = useState('');
+  const [setupLanguage, setSetupLanguage] = useState<string | null>(null);
+  const [editingSetupLanguage, setEditingSetupLanguage] = useState(false);
   const [settingUp, setSettingUp] = useState(false);
 
   useEffect(() => {
@@ -119,7 +121,7 @@ export function ProfileScreen() {
   };
 
   const onCreateProfile = async () => {
-    if (!setupName.trim() || !setupUsername.trim()) return;
+    if (!setupName.trim() || !setupUsername.trim() || !setupLanguage) return;
     setSettingUp(true);
     setError(null);
     try {
@@ -127,11 +129,13 @@ export function ProfileScreen() {
         displayName: setupName.trim(),
         username: setupUsername.trim().toLowerCase(),
       });
+      await updatePreferences({ preferredLanguage: setupLanguage });
       setHasProfile(true);
       setDisplayName(profile.displayName);
       setUsername(profile.username);
       setBio(profile.bio ?? '');
       setPhotoUrl(profile.photoUrl);
+      setPreferredLanguage(setupLanguage);
     } catch (err) {
       setError(describeError(err, 'Could not create your profile.'));
     } finally {
@@ -171,7 +175,7 @@ export function ProfileScreen() {
     await updatePreferences({ showIdentityOnContent: value });
   };
 
-  const onSelectLanguage = async (code: string | null) => {
+  const onSelectLanguage = async (code: string) => {
     setPreferredLanguage(code);
     setEditingLanguage(false);
     await updatePreferences({ preferredLanguage: code });
@@ -260,13 +264,34 @@ export function ProfileScreen() {
             Lowercase letters, numbers and underscores only. Always visible to others — doesn&rsquo;t
             need to be your real name, e.g. fantasticMouse92.
           </Text>
+
+          <FieldRow
+            label="Default translation language"
+            value={setupLanguage ? languageLabel(setupLanguage) : 'Choose one'}
+            onEdit={() => setEditingSetupLanguage(true)}
+          />
+          <Text style={styles.hint}>
+            Used whenever you tap Translate on a post, reply or bio written in another language.
+          </Text>
+
           {error && <Text style={styles.error}>{error}</Text>}
           <Button
             label="Create profile"
             onPress={onCreateProfile}
-            disabled={settingUp || !setupName.trim() || !setupUsername.trim()}
+            disabled={settingUp || !setupName.trim() || !setupUsername.trim() || !setupLanguage}
           />
         </View>
+
+        {editingSetupLanguage && (
+          <LanguagePickerModal
+            selected={setupLanguage}
+            onCancel={() => setEditingSetupLanguage(false)}
+            onSelect={(code) => {
+              setSetupLanguage(code);
+              setEditingSetupLanguage(false);
+            }}
+          />
+        )}
       </ScreenContainer>
     );
   }
@@ -319,7 +344,7 @@ export function ProfileScreen() {
         </View>
 
         <FieldRow
-          label="Translate thoughts into"
+          label="Default translation language"
           value={languageLabel(preferredLanguage)}
           onEdit={() => setEditingLanguage(true)}
         />

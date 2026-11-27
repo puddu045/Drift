@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { MutesService } from '../mutes/mutes.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
@@ -24,27 +24,60 @@ export class ThoughtsService {
   ) {}
 
   /**
-   * Translates `items[].text` in place into the viewer's preferred
-   * language, if they've set one (see UserPreferences.preferredLanguage —
-   * unset means "show exactly as written"). A no-op, with no API call, for
-   * every viewer who hasn't opted in.
+   * On-demand translation for a single thought — the "Translate" button on a
+   * post, not anything automatic. Requires the viewer to have a preferred
+   * language set (UserPreferences.preferredLanguage); the mobile app prompts
+   * for one the first time this is needed if it isn't set yet.
    */
-  private async translateForViewer<T extends { id: string; text: string }>(
-    viewerId: string,
-    items: T[],
-    sourceType: 'thought' | 'reply' | ((item: T) => 'thought' | 'reply'),
-  ): Promise<T[]> {
-    if (items.length === 0) return items;
-    const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
-    if (!preferredLanguage) return items;
+  async translateOne(viewerId: string, thoughtId: string) {
+    const thought = await this.prisma.thought.findUnique({
+      where: { id: thoughtId },
+      select: { id: true, text: true, authorId: true, isPublic: true, deletedAt: true },
+    });
+    if (!thought || thought.deletedAt) throw new NotFoundException('Thought not found');
+    if (!thought.isPublic && thought.authorId !== viewerId) {
+      throw new NotFoundException('Thought not found');
+    }
 
-    const resolveType = typeof sourceType === 'function' ? sourceType : () => sourceType;
-    const translated = await this.translation.translateBatch(
-      items.map((item) => item.text),
-      preferredLanguage,
-      items.map((item) => ({ type: resolveType(item), id: item.id })),
-    );
-    return items.map((item, i) => ({ ...item, text: translated[i] }));
+    const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
+    if (!preferredLanguage) {
+      throw new BadRequestException('Set a preferred language in your profile before translating.');
+    }
+
+    const [translatedText] = await this.translation.translateBatch([thought.text], preferredLanguage, [
+      { type: 'thought', id: thought.id },
+    ]);
+    return { translatedText, language: preferredLanguage };
+  }
+
+  /** Same as translateOne, for a single reply — visible to whoever can see its parent thought. */
+  async translateReply(viewerId: string, thoughtId: string, replyId: string) {
+    const reply = await this.prisma.thoughtReply.findUnique({
+      where: { id: replyId },
+      select: { id: true, thoughtId: true, text: true, deletedAt: true },
+    });
+    if (!reply || reply.deletedAt || reply.thoughtId !== thoughtId) {
+      throw new NotFoundException('Reply not found');
+    }
+
+    const thought = await this.prisma.thought.findUnique({
+      where: { id: thoughtId },
+      select: { authorId: true, isPublic: true, deletedAt: true },
+    });
+    if (!thought || thought.deletedAt) throw new NotFoundException('Reply not found');
+    if (!thought.isPublic && thought.authorId !== viewerId) {
+      throw new NotFoundException('Reply not found');
+    }
+
+    const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
+    if (!preferredLanguage) {
+      throw new BadRequestException('Set a preferred language in your profile before translating.');
+    }
+
+    const [translatedText] = await this.translation.translateBatch([reply.text], preferredLanguage, [
+      { type: 'reply', id: reply.id },
+    ]);
+    return { translatedText, language: preferredLanguage };
   }
 
   async create(authorId: string, data: CreateThought) {
@@ -83,7 +116,7 @@ export class ThoughtsService {
     });
 
     const nextCursor = thoughts.length === query.limit ? thoughts[thoughts.length - 1].id : null;
-    return { thoughts: await this.translateForViewer(viewerId, thoughts, 'thought'), nextCursor };
+    return { thoughts, nextCursor };
   }
 
   /** Everything a user has posted themselves, for their own "My Thoughts" view. */
@@ -94,7 +127,7 @@ export class ThoughtsService {
       take: 200,
       select: { id: true, text: true, mood: true, createdAt: true },
     });
-    return this.translateForViewer(userId, thoughts, 'thought');
+    return thoughts;
   }
 
   /** Other people's thoughts the user has reacted to or replied on, for "My Interactions". */
@@ -120,7 +153,7 @@ export class ThoughtsService {
       take: 200,
       select: { id: true, text: true, mood: true, createdAt: true },
     });
-    return this.translateForViewer(userId, thoughts, 'thought');
+    return thoughts;
   }
 
   async getOne(viewerId: string, thoughtId: string) {
@@ -137,17 +170,10 @@ export class ThoughtsService {
     }
 
     const identities = await this.identityMap([thought.authorId, ...thought.replies.map((r) => r.authorId)]);
-    // Translated together in one batch call (thought + every reply) rather
-    // than one call per item.
-    const [translatedThought, ...translatedReplies] = await this.translateForViewer(
-      viewerId,
-      [thought, ...thought.replies],
-      (item) => (item.id === thought.id ? 'thought' : 'reply'),
-    );
     return {
-      ...translatedThought,
+      ...thought,
       author: identities.get(thought.authorId) ?? null,
-      replies: translatedReplies.map((reply) => ({ ...reply, author: identities.get(reply.authorId) ?? null })),
+      replies: thought.replies.map((reply) => ({ ...reply, author: identities.get(reply.authorId) ?? null })),
     };
   }
 

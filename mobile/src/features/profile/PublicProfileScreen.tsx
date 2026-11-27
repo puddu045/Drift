@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { LanguagePickerModal } from '@/components/LanguagePickerModal';
 import { MoodTag } from '@/components/MoodTag';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { useSession } from '@/features/auth/SessionProvider';
@@ -14,9 +15,10 @@ import { reportTarget } from '@/features/thoughts/api';
 import { REPORT_REASONS } from '@/features/thoughts/reportReasons';
 import { ThoughtDetailOverlay } from '@/features/universe/ThoughtDetailOverlay';
 import { ApiError } from '@/lib/api';
+import { useTranslatable } from '@/lib/useTranslatable';
 import { colors, radius, spacing, typography } from '@/theme';
 
-import { AuthoredThought, getPublicProfile, getPublicThoughtsByAuthor, PublicProfile } from './api';
+import { AuthoredThought, getPublicProfile, getPublicThoughtsByAuthor, PublicProfile, translateBio } from './api';
 
 type Props = {
   userId: string;
@@ -35,6 +37,7 @@ export function PublicProfileScreen({ userId }: Props) {
   const [viewingThought, setViewingThought] = useState<AuthoredThought | null>(null);
 
   const isSelf = userId === session?.user.id;
+  const bioTranslation = useTranslatable(() => translateBio(userId));
 
   useEffect(() => {
     getPublicProfile(userId).then(setProfile).catch(() => {});
@@ -80,7 +83,20 @@ export function PublicProfileScreen({ userId }: Props) {
               <Text style={styles.username}>@{profile.username}</Text>
             </View>
           </View>
-          {profile.bio && <Text style={styles.bio}>{profile.bio}</Text>}
+          {profile.bio && (
+            <View>
+              <Text style={styles.bio}>{bioTranslation.text ?? profile.bio}</Text>
+              <Pressable onPress={bioTranslation.toggle} disabled={bioTranslation.loading}>
+                <Text style={styles.translateLink}>
+                  {bioTranslation.loading
+                    ? 'Translating…'
+                    : bioTranslation.showingTranslation
+                      ? 'Show original'
+                      : 'Translate'}
+                </Text>
+              </Pressable>
+            </View>
+          )}
           {profile.interests.length > 0 && (
             <View style={styles.interests}>
               {profile.interests.map((interest) => (
@@ -133,6 +149,14 @@ export function PublicProfileScreen({ userId }: Props) {
             </>
           )}
         </View>
+      )}
+
+      {bioTranslation.needsLanguage && (
+        <LanguagePickerModal
+          selected={null}
+          onCancel={bioTranslation.dismissLanguagePrompt}
+          onSelect={bioTranslation.onLanguageChosen}
+        />
       )}
 
       {viewingThought && (
@@ -195,6 +219,13 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
     color: colors.textSecondary,
+  },
+  translateLink: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
+    color: colors.accent,
+    marginTop: 4,
   },
   interests: {
     flexDirection: 'row',

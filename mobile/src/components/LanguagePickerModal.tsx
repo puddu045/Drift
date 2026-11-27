@@ -5,23 +5,27 @@ import { colors, radius, spacing, typography } from '@/theme';
 
 type Props = {
   selected: string | null;
-  onCancel: () => void;
-  onSelect: (code: string | null) => void;
+  onSelect: (code: string) => void;
+  /** Settings-row use (changing an already-set language) can be dismissed
+   * without picking one; the mandatory first-time prompt can't — omit
+   * onCancel there so there's no way out except choosing. */
+  onCancel?: () => void;
 };
 
-export function LanguagePickerModal({ selected, onCancel, onSelect }: Props) {
+export function LanguagePickerModal({ selected, onSelect, onCancel }: Props) {
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onCancel}>
       <View style={styles.backdrop}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} accessibilityLabel="Close" />
+        {onCancel && (
+          <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} accessibilityLabel="Close" />
+        )}
         <View style={styles.card}>
-          <Text style={styles.label}>Translate thoughts into</Text>
+          <Text style={styles.label}>Default translation language</Text>
           <Text style={styles.hint}>
-            Thoughts, replies and bios posted in any language will be shown to you translated into this one.
-            Doesn&rsquo;t change what you post — only what you see.
+            Whenever you tap Translate on a post, reply or bio, it&rsquo;s translated into this language.
+            Doesn&rsquo;t change what you post — only what Translate shows you.
           </Text>
           <ScrollView style={styles.list}>
-            <Option label="Off — show exactly as written" active={selected === null} onPress={() => onSelect(null)} />
             {LANGUAGES.map((language) => (
               <Option
                 key={language.code}

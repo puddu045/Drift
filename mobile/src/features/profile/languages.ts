@@ -41,6 +41,6 @@ export const LANGUAGES: { code: string; label: string }[] = [
 ];
 
 export function languageLabel(code: string | null): string {
-  if (!code) return 'Off — show exactly as written';
+  if (!code) return 'Not set';
   return LANGUAGES.find((l) => l.code === code)?.label ?? code;
 }

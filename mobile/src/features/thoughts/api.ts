@@ -68,3 +68,14 @@ export function replyToThought(thoughtId: string, text: string) {
 export function reportTarget(targetType: ReportTargetType, targetId: string, reason: string) {
   return api.post('/reports', { targetType, targetId, reason });
 }
+
+export type Translation = { translatedText: string; language: string };
+
+/** On-demand only — never called automatically, just from a "Translate" tap. */
+export function translateThought(thoughtId: string) {
+  return api.post<Translation>(`/thoughts/${thoughtId}/translate`);
+}
+
+export function translateReply(thoughtId: string, replyId: string) {
+  return api.post<Translation>(`/thoughts/${thoughtId}/replies/${replyId}/translate`);
+}

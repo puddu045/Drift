@@ -74,4 +74,20 @@ export class ThoughtsController {
   ) {
     return this.thoughts.reply(user.id, id, body);
   }
+
+  @Post(':id/translate')
+  @HttpCode(200)
+  translateOne(@CurrentUser() user: AuthenticatedUser, @Param('id', { schema: idParamSchema }) id: string) {
+    return this.thoughts.translateOne(user.id, id);
+  }
+
+  @Post(':id/replies/:replyId/translate')
+  @HttpCode(200)
+  translateReply(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', { schema: idParamSchema }) id: string,
+    @Param('replyId', { schema: idParamSchema }) replyId: string,
+  ) {
+    return this.thoughts.translateReply(user.id, id, replyId);
+  }
 }

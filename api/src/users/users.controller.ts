@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Param, Patch, Put } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, NotFoundException, Param, Patch, Post, Put } from '@nestjs/common';
 import { CurrentUser } from '@nestjs/authentication';
 
 import type { AuthenticatedUser } from '../auth/current-user.js';
@@ -52,11 +52,8 @@ export class UsersController {
   }
 
   @Get(':userId')
-  async getPublicProfile(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('userId', { schema: usernameParamSchema }) userId: string,
-  ) {
-    return this.users.getPublicProfile(user.id, userId);
+  async getPublicProfile(@Param('userId', { schema: usernameParamSchema }) userId: string) {
+    return this.users.getPublicProfile(userId);
   }
 
   @Get(':userId/thoughts')
@@ -65,5 +62,14 @@ export class UsersController {
     @Param('userId', { schema: usernameParamSchema }) userId: string,
   ) {
     return this.users.listPublicThoughtsByAuthor(user.id, userId);
+  }
+
+  @Post(':userId/translate-bio')
+  @HttpCode(200)
+  async translateBio(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('userId', { schema: usernameParamSchema }) userId: string,
+  ) {
+    return this.users.translateBio(user.id, userId);
   }
 }
