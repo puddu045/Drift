@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useIsFocused } from 'expo-router';
 
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { listNotifications } from '@/features/notifications/api';
@@ -36,6 +36,10 @@ export function UniverseScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
+  // With the tab bar's `lazy: false`, every tab now stays mounted in the
+  // background — without this, the bubbles would keep animating (and
+  // burning battery) even while a different tab is on screen.
+  const isFocused = useIsFocused();
 
   // Only "My Thoughts" pins notified bubbles to the top — World and My
   // Interactions keep the usual loosely-random placement.
@@ -151,7 +155,7 @@ export function UniverseScreen() {
               thought={thought}
               layout={layouts[i]}
               reduceMotion={reduceMotion}
-              paused={selected?.id === thought.id}
+              paused={selected?.id === thought.id || !isFocused}
               onPress={() => setSelected(thought)}
               hasNotification={mode === 'mine' && notifiedIds.has(thought.id)}
             />

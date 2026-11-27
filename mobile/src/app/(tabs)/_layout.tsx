@@ -36,6 +36,11 @@ export default function TabLayout() {
       <Tabs
         screenOptions={{
           headerShown: false,
+          // Mount every tab up front instead of only on first visit, so
+          // switching tabs doesn't pay each screen's mount/layout cost the
+          // first time you tap it — that first-visit delay was the "loading
+          // each screen when opened" slowness.
+          lazy: false,
           tabBarStyle: {
             position: 'absolute',
             left: spacing.md,
