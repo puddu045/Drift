@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useFonts, PlayfairDisplay_700Bold, PlayfairDisplay_400Regular_Italic } from '@expo-google-fonts/playfair-display';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
@@ -16,13 +19,17 @@ import { colors, spacing, typography } from '@/theme';
 import { getTodayDestiny } from './api';
 
 export function DestinyScreen() {
+  useFonts({ PlayfairDisplay_700Bold, PlayfairDisplay_400Regular_Italic });
+
   // Seeded from usePrefetchTabs (warmed right after sign-in) when present,
   // so a first visit this session can render immediately instead of a
   // spinner — the fetch below still runs regardless, to keep it fresh.
   const [thought, setThought] = useState<Thought | null>(() => getCached(PREFETCH_KEYS.destinyToday) ?? null);
   const [error, setError] = useState<string | null>(null);
+  // 'choosing': the "Let it drift" / "Reply" choice. 'replying': the open
+  // text input. 'sent'/'drifted': the two terminal states.
+  const [stage, setStage] = useState<'choosing' | 'replying' | 'sent' | 'drifted'>('choosing');
   const [replyText, setReplyText] = useState('');
-  const [sent, setSent] = useState(false);
   const translation = useTranslatable(() =>
     thought ? translateThought(thought.id) : Promise.reject(new Error('No thought yet')),
   );
@@ -42,12 +49,17 @@ export function DestinyScreen() {
     if (!thought || !replyText.trim()) return;
     await replyToThought(thought.id, replyText.trim());
     setReplyText('');
-    setSent(true);
+    setStage('sent');
   };
 
   return (
     <ScreenContainer floatingTabBar background="night">
       <View style={styles.header}>
+        <Image
+          source={require('../../../assets/destiny-sparkle.webp')}
+          style={styles.sparkle}
+          resizeMode="contain"
+        />
         <Text style={styles.title}>Destiny</Text>
         <Text style={styles.subtitle}>One stranger&rsquo;s thought, just for you today.</Text>
       </View>
@@ -68,9 +80,31 @@ export function DestinyScreen() {
                     : 'Translate'}
               </Text>
             </Pressable>
-            {sent ? (
-              <Text style={styles.sent}>Your reply drifted their way.</Text>
-            ) : (
+
+            {stage === 'sent' && <Text style={styles.outcome}>Your reply drifted their way.</Text>}
+            {stage === 'drifted' && <Text style={styles.outcome}>Let it drift on by.</Text>}
+
+            {stage === 'choosing' && (
+              <View style={styles.choiceRow}>
+                <Pressable style={styles.driftButton} onPress={() => setStage('drifted')}>
+                  <Ionicons name="shuffle-outline" size={16} color={colors.textPrimary} />
+                  <Text style={styles.driftLabel}>Let it drift</Text>
+                </Pressable>
+                <Pressable onPress={() => setStage('replying')} style={styles.replyButtonWrapper}>
+                  <LinearGradient
+                    colors={['#FADCC4', '#F3B88F']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.replyButton}
+                  >
+                    <Ionicons name="heart-outline" size={16} color="#FFFFFF" />
+                    <Text style={styles.replyLabel}>Reply</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+            )}
+
+            {stage === 'replying' && (
               <View style={styles.replyRow}>
                 <TextInput
                   style={styles.input}
@@ -79,6 +113,7 @@ export function DestinyScreen() {
                   placeholder="Reply..."
                   placeholderTextColor={colors.textSecondary}
                   maxLength={280}
+                  autoFocus
                 />
                 <Button label="Send" onPress={onReply} disabled={!replyText.trim()} />
               </View>
@@ -100,14 +135,19 @@ export function DestinyScreen() {
 
 const styles = StyleSheet.create({
   header: {
+    alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.md,
   },
+  sparkle: {
+    width: 32,
+    height: 32,
+    marginBottom: spacing.xs,
+  },
   title: {
-    fontFamily: typography.fontFamily,
+    fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: typography.size.xxl,
-    fontWeight: typography.weight.bold,
     // White, not the usual dark textPrimary — this header sits directly on
     // the dark night-sky background, not a card.
     color: '#FFFFFF',
@@ -117,6 +157,7 @@ const styles = StyleSheet.create({
     fontSize: typography.size.sm,
     color: 'rgba(255, 255, 255, 0.8)',
     marginTop: spacing.xs,
+    textAlign: 'center',
   },
   content: {
     flex: 1,
@@ -125,12 +166,14 @@ const styles = StyleSheet.create({
   },
   card: {
     gap: spacing.md,
-    // More opaque than Card's default — needed for the dark-navy text
-    // inside it to stay legible over the night-sky background.
-    backgroundColor: 'rgba(255, 255, 255, 0.82)',
+    // Peach, with a little transparency — not the plain white/opaque card
+    // used elsewhere, but still opaque enough for the dark-navy text inside
+    // it to stay legible over the night-sky background.
+    backgroundColor: 'rgba(248, 201, 167, 0.72)',
+    borderColor: 'rgba(255, 255, 255, 0.7)',
   },
   text: {
-    fontFamily: typography.fontFamily,
+    fontFamily: 'PlayfairDisplay_400Regular_Italic',
     fontSize: typography.size.lg,
     color: colors.textPrimary,
     lineHeight: 28,
@@ -141,16 +184,56 @@ const styles = StyleSheet.create({
     color: colors.danger,
     textAlign: 'center',
   },
-  sent: {
+  outcome: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
-    color: colors.accent,
+    color: colors.textPrimary,
   },
   translateLink: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
     color: colors.accent,
+  },
+  choiceRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  driftButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+    minHeight: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    justifyContent: 'center',
+  },
+  driftLabel: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    color: colors.textPrimary,
+  },
+  replyButtonWrapper: {
+    flex: 1,
+    borderRadius: 22,
+    overflow: 'hidden',
+  },
+  replyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    minHeight: 44,
+  },
+  replyLabel: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    color: '#FFFFFF',
   },
   replyRow: {
     flexDirection: 'row',

@@ -3,7 +3,7 @@ import { Tabs } from 'expo-router';
 import { ColorValue, StyleSheet, View } from 'react-native';
 
 import { TopRightBar } from '@/components/TopRightBar';
-import { colors, spacing, typography } from '@/theme';
+import { colors, palette, spacing, typography } from '@/theme';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 type TabIconProps = { focused: boolean; color: ColorValue; size: number };
@@ -44,7 +44,7 @@ export default function TabLayout() {
             height: 64,
             borderRadius: 28,
             borderTopWidth: 0,
-            backgroundColor: 'rgba(255, 255, 255, 0.4)',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
             shadowColor: colors.textPrimary,
             shadowOpacity: 0.08,
             shadowRadius: 12,
@@ -94,6 +94,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconWrapActive: {
-    backgroundColor: `${colors.accent}80`,
+    backgroundColor: `${palette.paleSky}CC`,
   },
 });
