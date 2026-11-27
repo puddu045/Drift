@@ -25,13 +25,16 @@ services:
     # ~15-20 minute "Timed Out" on every deploy even though the app itself
     # was already up and serving requests the whole time.
     startCommand: node dist/main
-    # No healthCheckPath: the dashboard's own deploy notice showed Render
-    # probing "drift-api-2qzl.onrender.com:10000/" — the PUBLIC hostname
-    # with the INTERNAL port appended, which Render's own docs say isn't
-    # reachable from outside. That's very likely why every deploy sat
-    # "waiting for health check" for ~15-20 minutes before a restart
-    # finally cleared it, regardless of app-side fixes. Falling back to
-    # Render's plain port-detection (no HTTP check at all) sidesteps it.
+    # No healthCheckPath: every deploy sat "waiting for health check" for
+    # ~15-20 minutes before a restart finally cleared it. Root cause turned
+    # out to be simple once the service was reachable at all — `GET /`
+    # requires auth in this app (a global guard, opt out per-route with
+    # @Public()), so Render's unauthenticated health check was always going
+    # to get a 401, never the 2xx it was waiting for. Falling back to
+    # Render's plain port-detection (no HTTP check) sidesteps that. Could
+    # revisit with a dedicated @Public() /health route if real uptime
+    # monitoring (not just "is the port open") becomes worth the extra
+    # endpoint.
     autoDeployTrigger: commit
     envVars:
       # Pins the Node version to match local development (api/.env.example
