@@ -1,11 +1,10 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { BlocksService } from '../blocks/blocks.service.js';
-import { Prisma } from '../generated/prisma/client.js';
 import { MutesService } from '../mutes/mutes.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { TranslationService } from '../translation/translation.service.js';
+import { dailyTranslateLimit, TranslationService } from '../translation/translation.service.js';
 import {
   CreateReply,
   CreateReport,
@@ -15,17 +14,6 @@ import {
 } from './thoughts.schemas.js';
 
 type ReactionType = import('zod').infer<typeof reactionTypeSchema>;
-
-// Configurable via env (mirrors TranslationService's monthlyCharLimit
-// pattern); default chosen as a reasonable per-user daily allowance that
-// still lets the global monthly character budget serve many users.
-function dailyThoughtTranslateLimit(): number {
-  return Number(process.env.THOUGHT_TRANSLATE_DAILY_LIMIT) || 5;
-}
-
-function currentDayKey(): string {
-  return new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD', UTC
-}
 
 @Injectable()
 export class ThoughtsService {
@@ -58,9 +46,9 @@ export class ThoughtsService {
       throw new BadRequestException('Set a preferred language in your profile before translating.');
     }
 
-    if (!(await this.reserveDailyTranslateQuota(viewerId, thought.id))) {
+    if (!(await this.translation.reserveDailyQuota(viewerId, 'thought', thought.id))) {
       throw new ForbiddenException(
-        `You can translate up to ${dailyThoughtTranslateLimit()} thoughts per day. Try again tomorrow.`,
+        `You can translate up to ${dailyTranslateLimit()} items per day. Try again tomorrow.`,
       );
     }
 
@@ -92,6 +80,12 @@ export class ThoughtsService {
     const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
     if (!preferredLanguage) {
       throw new BadRequestException('Set a preferred language in your profile before translating.');
+    }
+
+    if (!(await this.translation.reserveDailyQuota(viewerId, 'reply', reply.id))) {
+      throw new ForbiddenException(
+        `You can translate up to ${dailyTranslateLimit()} items per day. Try again tomorrow.`,
+      );
     }
 
     const [translatedText] = await this.translation.translateBatch([reply.text], preferredLanguage, [
@@ -212,40 +206,6 @@ export class ThoughtsService {
         };
       }),
     };
-  }
-
-  /**
-   * Caps each user at `dailyThoughtTranslateLimit()` *distinct* thoughts
-   * translated per UTC day — re-toggling a thought already translated today
-   * doesn't spend another slot, only a thought not yet seen today does.
-   *
-   * Not hardened against two concurrent first-time translate requests for
-   * two different thoughts both reading "under limit" before either write
-   * lands (unlike TranslationService's monthly character budget, which
-   * guards real spend with a single atomic UPDATE) — this is a soft
-   * per-user product cap, not a financial boundary, and that race needs
-   * genuinely simultaneous requests from the same user to matter at all.
-   * The unique constraint on (userId, thoughtId, day) does still guarantee
-   * the same thought is never double-counted.
-   */
-  private async reserveDailyTranslateQuota(userId: string, thoughtId: string): Promise<boolean> {
-    const day = currentDayKey();
-    const existing = await this.prisma.thoughtTranslationQuota.findUnique({
-      where: { userId_thoughtId_day: { userId, thoughtId, day } },
-    });
-    if (existing) return true;
-
-    const usedToday = await this.prisma.thoughtTranslationQuota.count({ where: { userId, day } });
-    if (usedToday >= dailyThoughtTranslateLimit()) return false;
-
-    try {
-      await this.prisma.thoughtTranslationQuota.create({ data: { userId, thoughtId, day } });
-    } catch (err) {
-      // Lost a race to record the same (user, thought, day) — the other
-      // request already did, so this one is still allowed to proceed.
-      if (!(err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002')) throw err;
-    }
-    return true;
   }
 
   /**

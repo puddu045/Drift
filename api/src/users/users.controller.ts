@@ -52,6 +52,11 @@ export class UsersController {
     return this.users.setMyInterests(user.id, body);
   }
 
+  @Get('me/translation-usage')
+  async getMyTranslationUsage(@CurrentUser() user: AuthenticatedUser) {
+    return this.users.getTranslationUsage(user.id);
+  }
+
   @Get(':userId')
   async getPublicProfile(
     @CurrentUser() user: AuthenticatedUser,

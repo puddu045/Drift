@@ -94,3 +94,11 @@ export type Translation = { translatedText: string; language: string };
 export function translateBio(userId: string) {
   return api.post<Translation>(`/profiles/${userId}/translate-bio`);
 }
+
+export type TranslationUsage = { used: number; limit: number };
+
+/** How much of today's shared translate quota (thoughts, replies, bios —
+ * one pool) the current user has used. */
+export function getTranslationUsage() {
+  return api.get<TranslationUsage>('/profiles/me/translation-usage');
+}

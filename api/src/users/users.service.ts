@@ -3,7 +3,7 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable,
 import { BlocksService } from '../blocks/blocks.service.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { TranslationService } from '../translation/translation.service.js';
+import { dailyTranslateLimit, TranslationService } from '../translation/translation.service.js';
 import { SetInterests, UpdatePreferences, UpsertProfile } from './users.schemas.js';
 
 @Injectable()
@@ -110,10 +110,20 @@ export class UsersService {
       throw new BadRequestException('Set a preferred language in your profile before translating.');
     }
 
+    if (!(await this.translation.reserveDailyQuota(viewerId, 'profile_bio', userId))) {
+      throw new ForbiddenException(`You can translate up to ${dailyTranslateLimit()} items per day. Try again tomorrow.`);
+    }
+
     const [translatedText] = await this.translation.translateBatch([profile.bio], preferredLanguage, [
       { type: 'profile_bio', id: userId },
     ]);
     return { translatedText, language: preferredLanguage };
+  }
+
+  /** For a profile settings screen — how much of today's shared translation
+   * quota this user has used. */
+  async getTranslationUsage(userId: string) {
+    return this.translation.getDailyUsage(userId);
   }
 
   async updatePreferences(userId: string, data: UpdatePreferences) {

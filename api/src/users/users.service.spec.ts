@@ -27,6 +27,8 @@ describe('UsersService', () => {
   const translation = {
     getPreferredLanguage: vi.fn().mockResolvedValue(null),
     translateBatch: vi.fn(),
+    reserveDailyQuota: vi.fn().mockResolvedValue(true),
+    getDailyUsage: vi.fn(),
   };
   const blocks = {
     isBlockedEitherWay: vi.fn().mockResolvedValue(false),
@@ -36,6 +38,7 @@ describe('UsersService', () => {
   beforeEach(async () => {
     vi.resetAllMocks();
     translation.getPreferredLanguage.mockResolvedValue(null);
+    translation.reserveDailyQuota.mockResolvedValue(true);
     blocks.isBlockedEitherWay.mockResolvedValue(false);
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -197,6 +200,24 @@ describe('UsersService', () => {
       expect(translation.translateBatch).toHaveBeenCalledWith(['hola'], 'en', [
         { type: 'profile_bio', id: 'u1' },
       ]);
+      expect(translation.reserveDailyQuota).toHaveBeenCalledWith('viewer1', 'profile_bio', 'u1');
+    });
+
+    it('refuses once the shared daily translate quota is used up', async () => {
+      prisma.userProfile.findUnique.mockResolvedValue({ bio: 'hola' });
+      translation.getPreferredLanguage.mockResolvedValue('en');
+      translation.reserveDailyQuota.mockResolvedValue(false);
+
+      await expect(service.translateBio('viewer1', 'u1')).rejects.toThrow(ForbiddenException);
+      expect(translation.translateBatch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getTranslationUsage', () => {
+    it("delegates to TranslationService's daily usage for the given user", async () => {
+      translation.getDailyUsage.mockResolvedValue({ used: 3, limit: 5 });
+      await expect(service.getTranslationUsage('u1')).resolves.toEqual({ used: 3, limit: 5 });
+      expect(translation.getDailyUsage).toHaveBeenCalledWith('u1');
     });
   });
 

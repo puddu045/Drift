@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 
 import { Injectable, Logger } from '@nestjs/common';
 
+import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 // Google Translate v2's documented cap on `q` entries per request.
@@ -16,6 +17,18 @@ function monthlyCharLimit(): number {
   return Number(process.env.TRANSLATION_MONTHLY_CHAR_LIMIT) || 450_000;
 }
 const WARNING_THRESHOLDS = [0.8, 0.9];
+
+// Configurable via env; shared across every kind of translatable content
+// (thoughts, replies, bios) — not 5 of each.
+export function dailyTranslateLimit(): number {
+  return Number(process.env.TRANSLATE_DAILY_LIMIT) || 5;
+}
+
+function currentDayKey(): string {
+  return new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD', UTC
+}
+
+export type TranslatableContentType = 'thought' | 'reply' | 'profile_bio';
 
 const URL_ONLY_PATTERN = /^(https?:\/\/|www\.)\S+$/i;
 
@@ -328,5 +341,49 @@ export class TranslationService {
     }
 
     return true;
+  }
+
+  /**
+   * Caps each user at `dailyTranslateLimit()` *distinct* pieces of content
+   * (thoughts, replies, bios — shared pool across all of them, not 5 of
+   * each) translated per UTC day. Re-toggling something already translated
+   * today doesn't spend another slot, only content not yet touched today
+   * does. Callers: ThoughtsService (translateOne/translateReply),
+   * UsersService (translateBio).
+   *
+   * Not hardened against two concurrent first-time translate requests for
+   * two different pieces of content both reading "under limit" before
+   * either write lands (unlike the monthly character budget above, which
+   * guards real spend with a single atomic UPDATE) — this is a soft
+   * per-user product cap, not a financial boundary, and that race needs
+   * genuinely simultaneous requests from the same user to matter at all.
+   * The unique constraint on (userId, contentType, contentId, day) does
+   * still guarantee the same content is never double-counted.
+   */
+  async reserveDailyQuota(userId: string, contentType: TranslatableContentType, contentId: string): Promise<boolean> {
+    const day = currentDayKey();
+    const existing = await this.prisma.translationQuota.findUnique({
+      where: { userId_contentType_contentId_day: { userId, contentType, contentId, day } },
+    });
+    if (existing) return true;
+
+    const usedToday = await this.prisma.translationQuota.count({ where: { userId, day } });
+    if (usedToday >= dailyTranslateLimit()) return false;
+
+    try {
+      await this.prisma.translationQuota.create({ data: { userId, contentType, contentId, day } });
+    } catch (err) {
+      // Lost a race to record the same (user, content, day) — the other
+      // request already did, so this one is still allowed to proceed.
+      if (!(err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002')) throw err;
+    }
+    return true;
+  }
+
+  /** For display (e.g. a profile settings screen) — how much of today's
+   * shared translation quota this user has used. */
+  async getDailyUsage(userId: string): Promise<{ used: number; limit: number }> {
+    const used = await this.prisma.translationQuota.count({ where: { userId, day: currentDayKey() } });
+    return { used, limit: dailyTranslateLimit() };
   }
 }

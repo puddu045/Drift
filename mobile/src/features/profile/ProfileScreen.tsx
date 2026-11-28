@@ -19,9 +19,11 @@ import {
   getMyInterestIds,
   getOwnProfile,
   getPublicProfile,
+  getTranslationUsage,
   Interest,
   listInterests,
   setMyInterests,
+  TranslationUsage,
   updatePreferences,
   upsertOwnProfile,
 } from '@/features/profile/api';
@@ -76,6 +78,7 @@ export function ProfileScreen() {
   const [myInterestIds, setMyInterestIds] = useState<string[]>([]);
   const [editingInterests, setEditingInterests] = useState(false);
   const [mutedUsers, setMutedUsers] = useState<{ userId: string; name: string }[]>([]);
+  const [translationUsage, setTranslationUsage] = useState<TranslationUsage | null>(null);
 
   // First-time setup fields — a profile can't be created without these three.
   const [setupName, setSetupName] = useState('');
@@ -102,6 +105,7 @@ export function ProfileScreen() {
       .finally(() => setLoading(false));
     listInterests().then(setAllInterests).catch(() => {});
     getMyInterestIds().then(setMyInterestIds).catch(() => {});
+    getTranslationUsage().then(setTranslationUsage).catch(() => {});
     listMuted()
       .then((mutes) => {
         setMutedUsers(mutes.map((m) => ({ userId: m.mutedId, name: 'Muted user' })));
@@ -351,6 +355,23 @@ export function ProfileScreen() {
           value={languageLabel(preferredLanguage)}
           onEdit={() => setEditingLanguage(true)}
         />
+
+        {translationUsage && (
+          <>
+            <View style={styles.fieldRow}>
+              <View style={styles.fieldText}>
+                <Text style={styles.fieldLabel}>Translations used today</Text>
+                <Text style={styles.fieldValue}>
+                  {translationUsage.used} / {translationUsage.limit}
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.hint}>
+              Shared across thoughts, replies and bios — re-viewing something you already translated
+              today doesn&rsquo;t count again.
+            </Text>
+          </>
+        )}
 
         {mutedUsers.length > 0 && (
           <View style={styles.mutedSection}>

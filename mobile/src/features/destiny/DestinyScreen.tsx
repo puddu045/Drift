@@ -64,6 +64,7 @@ export function DestinyScreen() {
                     : 'Translate'}
               </Text>
             </Pressable>
+            {translation.error && <Text style={styles.error}>{translation.error}</Text>}
 
             {stage === 'drifted' && <Text style={styles.outcome}>Let it drift on by.</Text>}
           </View>

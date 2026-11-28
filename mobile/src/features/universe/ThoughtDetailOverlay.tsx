@@ -222,6 +222,7 @@ export function ThoughtDetailOverlay({
                     : 'Translate'}
               </Text>
             </Pressable>
+            {translation.error && <Text style={styles.actionMessage}>{translation.error}</Text>}
 
             {detail && <Text style={styles.engagement}>{detail._count.reactions} reactions   /   {detail.replies.length} replies</Text>}
             <View style={styles.reactionRow}>
@@ -363,6 +364,7 @@ function ReplyRow({
                 : 'Translate'}
           </Text>
         </Pressable>
+        {translation.error && <Text style={styles.actionMessage}>{translation.error}</Text>}
       </View>
 
       {translation.needsLanguage && (

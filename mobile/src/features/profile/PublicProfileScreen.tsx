@@ -95,6 +95,7 @@ export function PublicProfileScreen({ userId }: Props) {
                       : 'Translate'}
                 </Text>
               </Pressable>
+              {bioTranslation.error && <Text style={styles.actionMessage}>{bioTranslation.error}</Text>}
             </View>
           )}
           {profile.interests.length > 0 && (

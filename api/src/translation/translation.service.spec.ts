@@ -12,11 +12,13 @@ describe('TranslationService', () => {
   const prisma = {
     translation: { findMany: vi.fn(), createMany: vi.fn() },
     translationUsage: { findUnique: vi.fn(), upsert: vi.fn(), updateMany: vi.fn() },
+    translationQuota: { findUnique: vi.fn(), count: vi.fn(), create: vi.fn() },
     userPreferences: { findUnique: vi.fn() },
   };
   let service: TranslationService;
   const originalApiKey = process.env.GOOGLE_TRANSLATE_API_KEY;
   const originalLimit = process.env.TRANSLATION_MONTHLY_CHAR_LIMIT;
+  const originalDailyLimit = process.env.TRANSLATE_DAILY_LIMIT;
 
   // Cache-lookup and "known source language" queries both hit
   // prisma.translation.findMany, distinguished by whether `targetLanguage`
@@ -36,6 +38,7 @@ describe('TranslationService', () => {
     vi.resetAllMocks();
     process.env.GOOGLE_TRANSLATE_API_KEY = 'test-key';
     delete process.env.TRANSLATION_MONTHLY_CHAR_LIMIT;
+    delete process.env.TRANSLATE_DAILY_LIMIT;
     mockTranslationLookups({});
     prisma.translationUsage.findUnique.mockResolvedValue(null);
     prisma.translationUsage.updateMany.mockResolvedValue({ count: 1 });
@@ -50,6 +53,8 @@ describe('TranslationService', () => {
     process.env.GOOGLE_TRANSLATE_API_KEY = originalApiKey;
     if (originalLimit === undefined) delete process.env.TRANSLATION_MONTHLY_CHAR_LIMIT;
     else process.env.TRANSLATION_MONTHLY_CHAR_LIMIT = originalLimit;
+    if (originalDailyLimit === undefined) delete process.env.TRANSLATE_DAILY_LIMIT;
+    else process.env.TRANSLATE_DAILY_LIMIT = originalDailyLimit;
   });
 
   describe('translateBatch', () => {
@@ -252,6 +257,65 @@ describe('TranslationService', () => {
     it('returns the set language', async () => {
       prisma.userPreferences.findUnique.mockResolvedValue({ preferredLanguage: 'es' });
       await expect(service.getPreferredLanguage('u1')).resolves.toBe('es');
+    });
+  });
+
+  describe('reserveDailyQuota', () => {
+    it('allows and records a first-time translation of a piece of content today', async () => {
+      prisma.translationQuota.findUnique.mockResolvedValue(null);
+      prisma.translationQuota.count.mockResolvedValue(0);
+
+      await expect(service.reserveDailyQuota('u1', 'thought', 't1')).resolves.toBe(true);
+      expect(prisma.translationQuota.create).toHaveBeenCalledWith({
+        data: { userId: 'u1', contentType: 'thought', contentId: 't1', day: expect.any(String) },
+      });
+    });
+
+    it('allows re-translating something already recorded today without spending another slot', async () => {
+      prisma.translationQuota.findUnique.mockResolvedValue({ id: 'q1' });
+      prisma.translationQuota.count.mockResolvedValue(5); // would otherwise be at the limit
+
+      await expect(service.reserveDailyQuota('u1', 'thought', 't1')).resolves.toBe(true);
+      expect(prisma.translationQuota.create).not.toHaveBeenCalled();
+    });
+
+    it('refuses a new piece of content once the shared daily limit is reached', async () => {
+      prisma.translationQuota.findUnique.mockResolvedValue(null);
+      prisma.translationQuota.count.mockResolvedValue(5);
+
+      await expect(service.reserveDailyQuota('u1', 'reply', 'r1')).resolves.toBe(false);
+      expect(prisma.translationQuota.create).not.toHaveBeenCalled();
+    });
+
+    it('respects TRANSLATE_DAILY_LIMIT', async () => {
+      process.env.TRANSLATE_DAILY_LIMIT = '2';
+      prisma.translationQuota.findUnique.mockResolvedValue(null);
+      prisma.translationQuota.count.mockResolvedValue(2);
+
+      await expect(service.reserveDailyQuota('u1', 'profile_bio', 'u2')).resolves.toBe(false);
+    });
+
+    it('shares the pool across content types — a bio counts toward the same limit as thoughts', async () => {
+      prisma.translationQuota.findUnique.mockResolvedValue(null);
+      prisma.translationQuota.count.mockResolvedValue(3);
+
+      await expect(service.reserveDailyQuota('u1', 'profile_bio', 'u2')).resolves.toBe(true);
+      expect(prisma.translationQuota.count).toHaveBeenCalledWith({
+        where: { userId: 'u1', day: expect.any(String) },
+      });
+    });
+  });
+
+  describe('getDailyUsage', () => {
+    it('returns how much of the shared quota has been used today, and the configured limit', async () => {
+      prisma.translationQuota.count.mockResolvedValue(3);
+      await expect(service.getDailyUsage('u1')).resolves.toEqual({ used: 3, limit: 5 });
+    });
+
+    it('reflects TRANSLATE_DAILY_LIMIT', async () => {
+      process.env.TRANSLATE_DAILY_LIMIT = '10';
+      prisma.translationQuota.count.mockResolvedValue(3);
+      await expect(service.getDailyUsage('u1')).resolves.toEqual({ used: 3, limit: 10 });
     });
   });
 });

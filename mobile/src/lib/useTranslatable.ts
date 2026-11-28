@@ -32,9 +32,11 @@ export function useTranslatable(translateFn: TranslateFn, options?: { autoStart?
   const [showingTranslation, setShowingTranslation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [needsLanguage, setNeedsLanguage] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const attempt = async () => {
     setLoading(true);
+    setError(null);
     try {
       const result = await translateFn();
       setTranslatedText(result.translatedText);
@@ -43,6 +45,11 @@ export function useTranslatable(translateFn: TranslateFn, options?: { autoStart?
     } catch (err) {
       if (err instanceof ApiError && err.status === 400) {
         setNeedsLanguage(true);
+      } else if (err instanceof ApiError) {
+        // e.g. the daily translate quota being used up (403) — anything
+        // else that isn't the "set a language first" case still deserves
+        // visible feedback rather than Translate silently doing nothing.
+        setError(err.message);
       }
     } finally {
       setLoading(false);
@@ -83,6 +90,7 @@ export function useTranslatable(translateFn: TranslateFn, options?: { autoStart?
     showingTranslation,
     loading,
     needsLanguage,
+    error,
     toggle,
     onLanguageChosen,
     dismissLanguagePrompt: () => setNeedsLanguage(false),

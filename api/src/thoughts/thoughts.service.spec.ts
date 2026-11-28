@@ -23,13 +23,13 @@ describe('ThoughtsService', () => {
     report: { create: vi.fn() },
     userPreferences: { findMany: vi.fn() },
     userProfile: { findMany: vi.fn() },
-    thoughtTranslationQuota: { findUnique: vi.fn(), count: vi.fn(), create: vi.fn() },
   };
   const notifications = { create: vi.fn() };
   const mutes = { mutedAuthorIds: vi.fn() };
   const translation = {
     getPreferredLanguage: vi.fn().mockResolvedValue(null),
     translateBatch: vi.fn(),
+    reserveDailyQuota: vi.fn().mockResolvedValue(true),
   };
   const blocks = {
     isBlockedEitherWay: vi.fn().mockResolvedValue(false),
@@ -43,8 +43,7 @@ describe('ThoughtsService', () => {
     mutes.mutedAuthorIds.mockResolvedValue([]);
     translation.getPreferredLanguage.mockResolvedValue(null);
     blocks.isBlockedEitherWay.mockResolvedValue(false);
-    prisma.thoughtTranslationQuota.findUnique.mockResolvedValue(null);
-    prisma.thoughtTranslationQuota.count.mockResolvedValue(0);
+    translation.reserveDailyQuota.mockResolvedValue(true);
     const moduleRef = await Test.createTestingModule({
       providers: [
         ThoughtsService,
@@ -174,7 +173,7 @@ describe('ThoughtsService', () => {
       expect(translation.translateBatch).toHaveBeenCalledWith(['hola'], 'en', [{ type: 'thought', id: 't1' }]);
     });
 
-    it('refuses once the daily translate quota for distinct thoughts is used up', async () => {
+    it('refuses once the shared daily translate quota is used up', async () => {
       prisma.thought.findUnique.mockResolvedValue({
         id: 't1',
         text: 'hola',
@@ -183,14 +182,13 @@ describe('ThoughtsService', () => {
         deletedAt: null,
       });
       translation.getPreferredLanguage.mockResolvedValue('en');
-      prisma.thoughtTranslationQuota.findUnique.mockResolvedValue(null); // not translated yet today
-      prisma.thoughtTranslationQuota.count.mockResolvedValue(5); // already at the limit
+      translation.reserveDailyQuota.mockResolvedValue(false);
 
       await expect(service.translateOne('viewer', 't1')).rejects.toThrow(ForbiddenException);
       expect(translation.translateBatch).not.toHaveBeenCalled();
     });
 
-    it('does not spend a new quota slot re-translating a thought already translated today', async () => {
+    it("spends a quota slot keyed by 'thought' and the thought's id", async () => {
       prisma.thought.findUnique.mockResolvedValue({
         id: 't1',
         text: 'hola',
@@ -200,15 +198,12 @@ describe('ThoughtsService', () => {
       });
       translation.getPreferredLanguage.mockResolvedValue('en');
       translation.translateBatch.mockResolvedValue(['hello']);
-      // Already recorded as translated today — count would otherwise block.
-      prisma.thoughtTranslationQuota.findUnique.mockResolvedValue({ userId: 'viewer', thoughtId: 't1', day: '2024-01-01' });
-      prisma.thoughtTranslationQuota.count.mockResolvedValue(5);
 
       await expect(service.translateOne('viewer', 't1')).resolves.toEqual({
         translatedText: 'hello',
         language: 'en',
       });
-      expect(prisma.thoughtTranslationQuota.create).not.toHaveBeenCalled();
+      expect(translation.reserveDailyQuota).toHaveBeenCalledWith('viewer', 'thought', 't1');
     });
   });
 
@@ -242,6 +237,17 @@ describe('ThoughtsService', () => {
         language: 'en',
       });
       expect(translation.translateBatch).toHaveBeenCalledWith(['hola'], 'en', [{ type: 'reply', id: 'r1' }]);
+      expect(translation.reserveDailyQuota).toHaveBeenCalledWith('viewer', 'reply', 'r1');
+    });
+
+    it('refuses once the shared daily translate quota is used up', async () => {
+      prisma.thoughtReply.findUnique.mockResolvedValue({ id: 'r1', thoughtId: 't1', text: 'hola', deletedAt: null });
+      prisma.thought.findUnique.mockResolvedValue({ authorId: 'author-1', isPublic: true, deletedAt: null });
+      translation.getPreferredLanguage.mockResolvedValue('en');
+      translation.reserveDailyQuota.mockResolvedValue(false);
+
+      await expect(service.translateReply('viewer', 't1', 'r1')).rejects.toThrow(ForbiddenException);
+      expect(translation.translateBatch).not.toHaveBeenCalled();
     });
   });
 
