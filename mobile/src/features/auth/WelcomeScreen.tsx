@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { ScreenContainer } from '@/components/ScreenContainer';
+import { useTranslation } from '@/i18n';
 import { colors, spacing, typography } from '@/theme';
 
 const taglineFont = { LatoRegular: require('../../../assets/fonts/Lato_400Regular.ttf') };
@@ -18,18 +19,19 @@ type Props = {
  * actual form. Picks which of its two modes AuthScreen opens in. */
 export function WelcomeScreen({ onGetStarted, onSignIn }: Props) {
   const [fontLoaded] = useFonts(taglineFont);
+  const { t } = useTranslation();
   return (
     <ScreenContainer background="overlook">
       <View style={styles.content}>
         <View style={styles.hero}>
           <FlyingPlane welcome />
           <UnwrittenWordmark size={65} color="white" />
-          <Text style={[styles.subtitle, fontLoaded && { fontFamily: 'LatoRegular' }]}>{'The next chapter\ncould be a stranger away.'}</Text>
+          <Text style={[styles.subtitle, fontLoaded && { fontFamily: 'LatoRegular' }]}>{t('welcome.tagline')}</Text>
         </View>
 
         <View style={styles.actions}>
-          <Button label="Get Started" labelColor={colors.textPrimary} onPress={onGetStarted} style={styles.getStartedButton} />
-          <Pressable accessibilityRole="button" onPress={onSignIn} style={styles.signInButton}><Text style={styles.link}>I already have an account</Text></Pressable>
+          <Button label={t('welcome.getStarted')} labelColor={colors.textPrimary} onPress={onGetStarted} style={styles.getStartedButton} />
+          <Pressable accessibilityRole="button" onPress={onSignIn} style={styles.signInButton}><Text style={styles.link}>{t('welcome.haveAccount')}</Text></Pressable>
         </View>
       </View>
     </ScreenContainer>

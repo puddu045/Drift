@@ -5,25 +5,26 @@ import { useRouter } from 'expo-router';
 
 import { Button } from '@/components/Button';
 import { ScreenContainer } from '@/components/ScreenContainer';
+import { useTranslation } from '@/i18n';
 import { createThought } from '@/features/thoughts/api';
 import { ApiError } from '@/lib/api';
 import { colors, MoodId, moodColors, moodIcons, palette, radius, spacing, typography } from '@/theme';
-
-const MOODS: { id: MoodId; label: string }[] = [
-  { id: 'love', label: 'Love' },
-  { id: 'deep', label: 'Deep' },
-  { id: 'happy', label: 'Happy' },
-  { id: 'reflective', label: 'Reflective' },
-  { id: 'hopeful', label: 'Hopeful' },
-  { id: 'random', label: 'Random' },
-  { id: 'lonely', label: 'Lonely' },
-  { id: 'curious', label: 'Curious' },
-];
 
 const MAX_LENGTH = 280;
 
 export function ComposeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const MOODS: { id: MoodId; label: string }[] = [
+    { id: 'love', label: t('mood.love') },
+    { id: 'deep', label: t('mood.deep') },
+    { id: 'happy', label: t('mood.happy') },
+    { id: 'reflective', label: t('mood.reflective') },
+    { id: 'hopeful', label: t('mood.hopeful') },
+    { id: 'random', label: t('mood.random') },
+    { id: 'lonely', label: t('mood.lonely') },
+    { id: 'curious', label: t('mood.curious') },
+  ];
   const [text, setText] = useState('');
   const [mood, setMood] = useState<MoodId | null>(null);
   const [isPublic, setIsPublic] = useState(true);
@@ -45,7 +46,7 @@ export function ComposeScreen() {
       // Land on My Thoughts, not whatever mode Universe was last showing.
       router.navigate({ pathname: '/(tabs)', params: { mode: 'mine' } });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not release this thought.');
+      setError(err instanceof ApiError ? err.message : t('compose.couldNotRelease'));
     } finally {
       setSubmitting(false);
     }
@@ -54,21 +55,21 @@ export function ComposeScreen() {
   return (
     <ScreenContainer background="haze">
       <View style={styles.header}>
-        <Pressable onPress={onClose} accessibilityLabel="Close" style={styles.closeButton}>
+        <Pressable onPress={onClose} accessibilityLabel={t('common.close')} style={styles.closeButton}>
           <Ionicons name="close" size={22} color={colors.textPrimary} />
         </Pressable>
       </View>
 
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Release a Thought</Text>
-        <Text style={styles.subtitle}>Let your thought drift into the universe.</Text>
+        <Text style={styles.title}>{t('compose.title')}</Text>
+        <Text style={styles.subtitle}>{t('compose.subtitle')}</Text>
 
         <View>
           <TextInput
             style={styles.input}
             value={text}
             onChangeText={(value) => setText(value.slice(0, MAX_LENGTH))}
-            placeholder="What's on your mind?"
+            placeholder={t('compose.placeholder')}
             placeholderTextColor={colors.textSecondary}
             multiline
             maxLength={MAX_LENGTH}
@@ -78,7 +79,7 @@ export function ComposeScreen() {
           </Text>
         </View>
 
-        <Text style={styles.sectionLabel}>Choose a mood</Text>
+        <Text style={styles.sectionLabel}>{t('compose.chooseMood')}</Text>
         <View style={styles.moodRow}>
           {MOODS.map((item) => {
             const icon = moodIcons[item.id];
@@ -102,7 +103,7 @@ export function ComposeScreen() {
         <View style={styles.privacyRow}>
           <View style={styles.privacyLabelRow}>
             <Ionicons name="globe-outline" size={18} color={colors.textSecondary} />
-            <Text style={styles.sectionLabel}>Discoverable by others</Text>
+            <Text style={styles.sectionLabel}>{t('compose.discoverable')}</Text>
           </View>
           <Switch trackColor={{ true: '#264D7F' }} value={isPublic} onValueChange={setIsPublic} />
         </View>
@@ -110,7 +111,7 @@ export function ComposeScreen() {
         {error && <Text style={styles.error}>{error}</Text>}
 
         <Button
-          label="Release to Universe" variant="brand"
+          label={t('compose.submit')} variant="brand"
           onPress={onSubmit}
           disabled={!canSubmit}
           style={styles.submitButton}

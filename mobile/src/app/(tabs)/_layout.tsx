@@ -3,6 +3,7 @@ import { Tabs } from 'expo-router';
 import { ColorValue, StyleSheet, View } from 'react-native';
 
 import { TopRightBar } from '@/components/TopRightBar';
+import { useTranslation } from '@/i18n';
 import { colors, palette, spacing, typography } from '@/theme';
 
 type IconName = keyof typeof Ionicons.glyphMap;
@@ -31,6 +32,7 @@ function tabIcon(outlineName: IconName, filledName: IconName) {
 }
 
 export default function TabLayout() {
+  const { t } = useTranslation();
   return (
     <View style={{ flex: 1 }}>
       <Tabs
@@ -65,16 +67,16 @@ export default function TabLayout() {
       >
         <Tabs.Screen
           name="index"
-          options={{ title: 'Universe', tabBarIcon: tabIcon('planet-outline', 'planet') }}
+          options={{ title: t('tabs.universe'), tabBarIcon: tabIcon('planet-outline', 'planet') }}
         />
         <Tabs.Screen
           name="destiny"
-          options={{ title: 'Destiny', tabBarIcon: tabIcon('star-outline', 'star') }}
+          options={{ title: t('tabs.destiny'), tabBarIcon: tabIcon('star-outline', 'star') }}
         />
         <Tabs.Screen
           name="create"
           options={{
-            title: 'Create',
+            title: t('tabs.create'),
             tabBarButton: () => null,
             // Hides its layout slot too — tabBarButton alone still reserves
             // an equal-width gap between Destiny and Connections.
@@ -84,7 +86,7 @@ export default function TabLayout() {
         />
         <Tabs.Screen
           name="connections"
-          options={{ title: 'Connections', tabBarIcon: tabIcon('people-outline', 'people') }}
+          options={{ title: t('tabs.connections'), tabBarIcon: tabIcon('people-outline', 'people') }}
         />
       </Tabs>
       <TopRightBar />

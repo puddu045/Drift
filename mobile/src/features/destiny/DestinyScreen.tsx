@@ -8,6 +8,7 @@ import { Avatar } from '@/components/Avatar';
 import { LanguagePickerModal } from '@/components/LanguagePickerModal';
 import { MoodTag } from '@/components/MoodTag';
 import { ScreenContainer } from '@/components/ScreenContainer';
+import { useTranslation } from '@/i18n';
 import { translateThought } from '@/features/thoughts/api';
 import { ApiError } from '@/lib/api';
 import { useSession } from '@/features/auth/SessionProvider';
@@ -21,6 +22,7 @@ export function DestinyScreen() {
   const { height } = useWindowDimensions();
   const quoteSize = Math.max(20, Math.min(29, Math.round(height / 30)));
   useFonts({ PlayfairDisplay_400Regular_Italic });
+  const { t } = useTranslation();
 
   const userId = useSession().session?.user.id;
   const [preview, setPreview] = useState(() => userId ? cachedDestiny(userId) : undefined);
@@ -41,7 +43,7 @@ export function DestinyScreen() {
     preloadDestiny(userId).then(result => {
       if (active) setPreview(result);
     }).catch((err: unknown) => {
-      if (active) setError(err instanceof ApiError ? err.message : 'No Destiny thought available today.');
+      if (active) setError(err instanceof ApiError ? err.message : t('destiny.noneAvailable'));
     });
     return () => { active = false; };
   }, [userId]);
@@ -58,15 +60,15 @@ export function DestinyScreen() {
             <Pressable onPress={translation.toggle} disabled={translation.loading}>
               <Text style={styles.translateLink}>
                 {translation.loading
-                  ? 'Translating…'
+                  ? t('common.translating')
                   : translation.showingTranslation
-                    ? 'Show original'
-                    : 'Translate'}
+                    ? t('common.showOriginal')
+                    : t('common.translate')}
               </Text>
             </Pressable>
             {translation.error && <Text style={styles.error}>{translation.error}</Text>}
 
-            {stage === 'drifted' && <Text style={styles.outcome}>Let it drift on by.</Text>}
+            {stage === 'drifted' && <Text style={styles.outcome}>{t('destiny.drifted')}</Text>}
           </View>
         )}
 
@@ -74,7 +76,7 @@ export function DestinyScreen() {
           <View style={styles.choiceRow}>
             <Pressable style={styles.driftButton} onPress={() => setStage('drifted')}>
               <Ionicons name="shuffle-outline" size={16} color="white" />
-              <Text style={styles.driftLabel}>Let it drift</Text>
+              <Text style={styles.driftLabel}>{t('destiny.letItDrift')}</Text>
             </Pressable>
             <Pressable onPress={() => setShowReply(true)} style={styles.replyButtonWrapper}>
               <LinearGradient
@@ -84,7 +86,7 @@ export function DestinyScreen() {
                 style={styles.replyButton}
               >
                 <Ionicons name="heart-outline" size={16} color="white" />
-                <Text style={styles.replyLabel}>Reply</Text>
+                <Text style={styles.replyLabel}>{t('destiny.reply')}</Text>
               </LinearGradient>
             </Pressable>
           </View>
@@ -92,7 +94,7 @@ export function DestinyScreen() {
       </ScrollView>
       {thought && <View style={styles.byline}>
         <Avatar name={author?.displayName} photoUrl={author?.photoUrl} />
-        <Text style={{ color: 'white', fontWeight: '600' }}>{author?.displayName ?? 'Anonymous'}</Text>
+        <Text style={{ color: 'white', fontWeight: '600' }}>{author?.displayName ?? t('common.anonymous')}</Text>
       </View>}
 
       {translation.needsLanguage && (

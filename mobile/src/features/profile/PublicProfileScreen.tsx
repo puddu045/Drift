@@ -14,6 +14,7 @@ import { muteUser } from '@/features/mutes/api';
 import { reportTarget } from '@/features/thoughts/api';
 import { REPORT_REASONS } from '@/features/thoughts/reportReasons';
 import { ThoughtDetailOverlay } from '@/features/universe/ThoughtDetailOverlay';
+import { useTranslation } from '@/i18n';
 import { ApiError } from '@/lib/api';
 import { useTranslatable } from '@/lib/useTranslatable';
 import { colors, radius, spacing, typography } from '@/theme';
@@ -29,6 +30,7 @@ type Props = {
 // doesn't nest indefinitely — see ThoughtDetailOverlay's viewerContextUserId.
 export function PublicProfileScreen({ userId }: Props) {
   const router = useRouter();
+  const { t } = useTranslation();
   const { session } = useSession();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [thoughts, setThoughts] = useState<AuthoredThought[]>([]);
@@ -47,28 +49,28 @@ export function PublicProfileScreen({ userId }: Props) {
   const onConnect = async () => {
     try {
       await sendConnectionRequest(userId);
-      setActionMessage('Connection request sent.');
+      setActionMessage(t('publicProfile.connectionRequestSent'));
     } catch (err) {
-      setActionMessage(err instanceof ApiError ? err.message : 'Could not send a request.');
+      setActionMessage(err instanceof ApiError ? err.message : t('publicProfile.couldNotSendRequest'));
     }
   };
 
   const onReport = async (reason: string) => {
     await reportTarget('profile', userId, reason);
     setReporting(false);
-    setActionMessage('Report sent.');
+    setActionMessage(t('publicProfile.reportSent'));
   };
 
   const onMute = async () => {
     await muteUser(userId);
-    setActionMessage('Muted — you won’t see their thoughts anymore.');
+    setActionMessage(t('publicProfile.mutedConfirm'));
   };
 
   return (
     <ScreenContainer background="haze">
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} accessibilityLabel="Back">
-          <Text style={styles.back}>‹ Back</Text>
+        <Pressable onPress={() => router.back()} accessibilityLabel={t('common.back')}>
+          <Text style={styles.back}>‹ {t('common.back')}</Text>
         </Pressable>
       </View>
 
@@ -89,10 +91,10 @@ export function PublicProfileScreen({ userId }: Props) {
               <Pressable onPress={bioTranslation.toggle} disabled={bioTranslation.loading}>
                 <Text style={styles.translateLink}>
                   {bioTranslation.loading
-                    ? 'Translating…'
+                    ? t('common.translating')
                     : bioTranslation.showingTranslation
-                      ? 'Show original'
-                      : 'Translate'}
+                      ? t('common.showOriginal')
+                      : t('common.translate')}
                 </Text>
               </Pressable>
               {bioTranslation.error && <Text style={styles.actionMessage}>{bioTranslation.error}</Text>}
@@ -120,7 +122,7 @@ export function PublicProfileScreen({ userId }: Props) {
                   style={styles.emptyIcon}
                   resizeMode="contain"
                 />
-                <Text style={styles.empty}>No public thoughts yet.</Text>
+                <Text style={styles.empty}>{t('publicProfile.noThoughtsYet')}</Text>
               </View>
             }
             renderItem={({ item }) => (
@@ -146,10 +148,10 @@ export function PublicProfileScreen({ userId }: Props) {
                 </View>
               ) : (
                 <View style={styles.actions}>
-                  <Button label="Connect" onPress={onConnect} style={styles.actionButton} />
-                  <Button label="Mute" variant="ghost" onPress={onMute} style={styles.actionButton} />
+                  <Button label={t('publicProfile.connect')} onPress={onConnect} style={styles.actionButton} />
+                  <Button label={t('publicProfile.mute')} variant="ghost" onPress={onMute} style={styles.actionButton} />
                   <Button
-                    label="Report"
+                    label={t('publicProfile.report')}
                     variant="ghost"
                     onPress={() => setReporting(true)}
                     style={styles.actionButton}

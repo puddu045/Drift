@@ -28,31 +28,12 @@ import {
   upsertOwnProfile,
 } from '@/features/profile/api';
 import { languageLabel } from '@/features/profile/languages';
+import { useTranslation } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 import { ApiError } from '@/lib/api';
 import { colors, radius, spacing, typography } from '@/theme';
 
 type FieldKey = 'displayName' | 'username' | 'bio' | null;
-
-const FIELD_CONFIG: Record<
-  Exclude<FieldKey, null>,
-  {
-    label: string;
-    maxLength: number;
-    multiline?: boolean;
-    autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
-    hint?: string;
-  }
-> = {
-  displayName: { label: 'Display name', maxLength: 60 },
-  username: {
-    label: 'Username',
-    maxLength: 24,
-    autoCapitalize: 'none',
-    hint: 'Lowercase letters, numbers and underscores only.',
-  },
-  bio: { label: 'Bio', maxLength: 280, multiline: true },
-};
 
 function describeError(err: unknown, fallback: string) {
   return err instanceof ApiError ? err.message : fallback;
@@ -60,8 +41,28 @@ function describeError(err: unknown, fallback: string) {
 
 export function ProfileScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { session } = useSession();
   const cached = session && getCached<Profile>('profile:' + session.user.id);
+  const FIELD_CONFIG: Record<
+    Exclude<FieldKey, null>,
+    {
+      label: string;
+      maxLength: number;
+      multiline?: boolean;
+      autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+      hint?: string;
+    }
+  > = {
+    displayName: { label: t('profile.displayName'), maxLength: 60 },
+    username: {
+      label: t('profile.username'),
+      maxLength: 24,
+      autoCapitalize: 'none',
+      hint: t('profile.usernameFieldHint'),
+    },
+    bio: { label: t('profile.bio'), maxLength: 280, multiline: true },
+  };
   const [hasProfile, setHasProfile] = useState(!!cached);
   const [displayName, setDisplayName] = useState(cached?.displayName ?? '');
   const [username, setUsername] = useState(cached?.username ?? '');
@@ -249,41 +250,35 @@ export function ProfileScreen() {
     }
   };
 
-  if (loading) return <ScreenContainer background="haze"><View style={styles.content}><Text style={styles.title}>Profile</Text><Text>Loading profile...</Text></View></ScreenContainer>;
+  if (loading) return <ScreenContainer background="haze"><View style={styles.content}><Text style={styles.title}>{t('profile.title')}</Text><Text>{t('profile.loading')}</Text></View></ScreenContainer>;
 
   if (!hasProfile) {
     return (
       <ScreenContainer background="haze">
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
-          <Text style={styles.title}>Set up your profile</Text>
-          <Text style={styles.subtitle}>
-            Pick a display name and username to get started. You can change these any time.
-          </Text>
-          <TextField label="Display name" value={setupName} onChangeText={setSetupName} maxLength={60} />
+          <Text style={styles.title}>{t('profile.setupTitle')}</Text>
+          <Text style={styles.subtitle}>{t('profile.setupSubtitle')}</Text>
+          <TextField label={t('profile.displayName')} value={setupName} onChangeText={setSetupName} maxLength={60} />
           <TextField
-            label="Username"
+            label={t('profile.username')}
             value={setupUsername}
             onChangeText={setSetupUsername}
             autoCapitalize="none"
             maxLength={24}
           />
-          <Text style={styles.hint}>
-            Lowercase letters, numbers and underscores only. Always visible to others — doesn&rsquo;t
-            need to be your real name, e.g. fantasticMouse92.
-          </Text>
+          <Text style={styles.hint}>{t('profile.usernameHint')}</Text>
 
           <FieldRow
-            label="Default translation language"
-            value={setupLanguage ? languageLabel(setupLanguage) : 'Choose one'}
+            label={t('profile.defaultLanguage')}
+            value={setupLanguage ? languageLabel(setupLanguage) : t('profile.chooseOne')}
             onEdit={() => setEditingSetupLanguage(true)}
+            editLabel={t('profile.edit')}
           />
-          <Text style={styles.hint}>
-            Used whenever you tap Translate on a post, reply or bio written in another language.
-          </Text>
+          <Text style={styles.hint}>{t('profile.languageHint')}</Text>
 
           {error && <Text style={styles.error}>{error}</Text>}
           <Button
-            label="Create profile"
+            label={t('profile.createProfile')}
             onPress={onCreateProfile}
             disabled={settingUp || !setupName.trim() || !setupUsername.trim() || !setupLanguage}
           />
@@ -306,81 +301,77 @@ export function ProfileScreen() {
   return (
     <ScreenContainer background="haze">
       <ScrollView contentContainerStyle={styles.content}>
-        <Pressable onPress={() => router.back()} accessibilityLabel="Back">
-          <Text style={styles.back}>‹ Back</Text>
+        <Pressable onPress={() => router.back()} accessibilityLabel={t('common.back')}>
+          <Text style={styles.back}>‹ {t('common.back')}</Text>
         </Pressable>
-        <Text style={styles.title}>Profile</Text>
+        <Text style={styles.title}>{t('profile.title')}</Text>
 
         <Pressable onPress={onPickPhoto} style={styles.photoRow} disabled={uploadingPhoto}>
           <Avatar name={displayName} photoUrl={photoUrl} size={72} />
-          <View style={{ flex: 1, gap: 3 }}><Text style={styles.author}>{displayName}</Text><Text style={styles.photoLabel}>{uploadingPhoto ? 'Uploading...' : 'Change photo'}</Text></View>
+          <View style={{ flex: 1, gap: 3 }}><Text style={styles.author}>{displayName}</Text><Text style={styles.photoLabel}>{uploadingPhoto ? t('profile.uploading') : t('profile.changePhoto')}</Text></View>
         </Pressable>
 
-        <FieldRow label="Display name" value={displayName || 'Not set'} onEdit={() => setEditing('displayName')} />
-        <FieldRow label="Username" value={username ? `@${username}` : 'Not set'} onEdit={() => setEditing('username')} />
-        <Text style={styles.hint}>
-          Your username is always visible to others and doesn&rsquo;t need to be your real name —
-          e.g. fantasticMouse92.
-        </Text>
-        <FieldRow label="Bio" value={bio || 'Not set'} onEdit={() => setEditing('bio')} />
+        <FieldRow label={t('profile.displayName')} value={displayName || t('profile.notSet')} onEdit={() => setEditing('displayName')} editLabel={t('profile.edit')} />
+        <FieldRow label={t('profile.username')} value={username ? `@${username}` : t('profile.notSet')} onEdit={() => setEditing('username')} editLabel={t('profile.edit')} />
+        <Text style={styles.hint}>{t('profile.usernameHintShort')}</Text>
+        <FieldRow label={t('profile.bio')} value={bio || t('profile.notSet')} onEdit={() => setEditing('bio')} editLabel={t('profile.edit')} />
 
         <View style={styles.fieldRow}>
           <View style={styles.fieldText}>
-            <Text style={styles.fieldLabel}>Email</Text>
+            <Text style={styles.fieldLabel}>{t('profile.email')}</Text>
             <Text style={styles.fieldValue}>{session?.user.email}</Text>
           </View>
         </View>
-        <Text style={styles.hint}>Private — only you can see your email. It&rsquo;s never shown to anyone else.</Text>
+        <Text style={styles.hint}>{t('profile.emailHint')}</Text>
 
         <FieldRow
-          label="Interests"
+          label={t('profile.interests')}
           value={
             myInterestIds.length > 0
               ? allInterests
                   .filter((interest) => myInterestIds.includes(interest.id))
                   .map((interest) => interest.name)
                   .join(', ')
-              : 'Not set'
+              : t('profile.notSet')
           }
           onEdit={() => setEditingInterests(true)}
+          editLabel={t('profile.edit')}
         />
 
         <View style={styles.toggleRow}>
-          <Text style={styles.toggleLabel}>Show my name/photo on my public thoughts and replies</Text>
+          <Text style={styles.toggleLabel}>{t('profile.showIdentity')}</Text>
           <Switch value={showIdentity} onValueChange={onToggleIdentity} />
         </View>
 
         <FieldRow
-          label="Default translation language"
+          label={t('profile.defaultLanguage')}
           value={languageLabel(preferredLanguage)}
           onEdit={() => setEditingLanguage(true)}
+          editLabel={t('profile.edit')}
         />
 
         {translationUsage && (
           <>
             <View style={styles.fieldRow}>
               <View style={styles.fieldText}>
-                <Text style={styles.fieldLabel}>Translations used today</Text>
+                <Text style={styles.fieldLabel}>{t('profile.translationsUsedToday')}</Text>
                 <Text style={styles.fieldValue}>
                   {translationUsage.used} / {translationUsage.limit}
                 </Text>
               </View>
             </View>
-            <Text style={styles.hint}>
-              Shared across thoughts, replies and bios — re-viewing something you already translated
-              today doesn&rsquo;t count again.
-            </Text>
+            <Text style={styles.hint}>{t('profile.translationsUsedHint')}</Text>
           </>
         )}
 
         {mutedUsers.length > 0 && (
           <View style={styles.mutedSection}>
-            <Text style={styles.fieldLabel}>Muted</Text>
+            <Text style={styles.fieldLabel}>{t('profile.muted')}</Text>
             {mutedUsers.map((u) => (
               <View key={u.userId} style={styles.fieldRow}>
                 <Text style={styles.fieldValue}>{u.name}</Text>
-                <Pressable onPress={() => onUnmute(u.userId)} accessibilityLabel={`Unmute ${u.name}`}>
-                  <Text style={styles.editLink}>Unmute</Text>
+                <Pressable onPress={() => onUnmute(u.userId)} accessibilityLabel={`${t('profile.unmute')} ${u.name}`}>
+                  <Text style={styles.editLink}>{t('profile.unmute')}</Text>
                 </Pressable>
               </View>
             ))}
@@ -389,7 +380,7 @@ export function ProfileScreen() {
 
         {error && <Text style={styles.error}>{error}</Text>}
 
-        <Button label="Sign out" variant="destructive" onPress={() => supabase.auth.signOut()} />
+        <Button label={t('profile.signOut')} variant="destructive" onPress={() => supabase.auth.signOut()} />
       </ScrollView>
 
       {editing && (
@@ -426,15 +417,25 @@ export function ProfileScreen() {
   );
 }
 
-function FieldRow({ label, value, onEdit }: { label: string; value: string; onEdit: () => void }) {
+function FieldRow({
+  label,
+  value,
+  onEdit,
+  editLabel,
+}: {
+  label: string;
+  value: string;
+  onEdit: () => void;
+  editLabel: string;
+}) {
   return (
     <View style={styles.fieldRow}>
       <View style={styles.fieldText}>
         <Text style={styles.fieldLabel}>{label}</Text>
         <Text style={styles.fieldValue}>{value}</Text>
       </View>
-      <Pressable onPress={onEdit} accessibilityLabel={`Edit ${label}`}>
-        <Text style={styles.editLink}>Edit</Text>
+      <Pressable onPress={onEdit} accessibilityLabel={`${editLabel} ${label}`}>
+        <Text style={styles.editLink}>{editLabel}</Text>
       </Pressable>
     </View>
   );

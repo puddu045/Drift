@@ -1,3 +1,4 @@
+import { setPreferredLanguage } from '@/i18n/localeStore';
 import { setCached } from '@/lib/prefetchCache';
 import { api } from '@/lib/api';
 import { MoodId } from '@/theme';
@@ -30,6 +31,7 @@ export type UpsertProfileInput = {
 export function getOwnProfile() {
   return api.get<Profile>('/profiles/me').then(profile => {
     setCached('profile:' + profile.userId, profile);
+    setPreferredLanguage(profile.preferredLanguage);
     return profile;
   });
 }
@@ -71,6 +73,9 @@ export type UpdatePreferencesInput = {
 };
 
 export function updatePreferences(input: UpdatePreferencesInput) {
+  if (input.preferredLanguage !== undefined) {
+    setPreferredLanguage(input.preferredLanguage);
+  }
   return api.patch<void>('/profiles/me/preferences', input);
 }
 

@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { TextField } from '@/components/TextField';
+import { useTranslation } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 import { colors, spacing, typography } from '@/theme';
 
@@ -23,6 +24,7 @@ type Props = {
 // separate, more considered piece of UX still to design and build. The
 // welcome copy/CTA part of onboarding now lives in WelcomeScreen.tsx.
 export function AuthScreen({ initialMode = 'sign-in', onBack }: Props) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'sign-in' | 'sign-up'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,8 +45,8 @@ export function AuthScreen({ initialMode = 'sign-in', onBack }: Props) {
   return (
     <ScreenContainer background="evening">
       {onBack && (
-        <Pressable onPress={onBack} accessibilityLabel="Back" style={styles.back}>
-          <Text style={styles.backLabel}>‹ Back</Text>
+        <Pressable onPress={onBack} accessibilityLabel={t('auth.back')} style={styles.back}>
+          <Text style={styles.backLabel}>‹ {t('auth.back')}</Text>
         </Pressable>
       )}
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
@@ -53,10 +55,10 @@ export function AuthScreen({ initialMode = 'sign-in', onBack }: Props) {
 
         <View style={styles.form}>
           <View pointerEvents="none" style={styles.cardSurface} />
-          <Text style={styles.title}>{mode === 'sign-in' ? 'Welcome back' : 'Create an account'}</Text>
+          <Text style={styles.title}>{mode === 'sign-in' ? t('auth.welcomeBack') : t('auth.createAccount')}</Text>
           <TextField
             style={styles.input}
-            label="Email"
+            label={t('auth.email')}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -66,7 +68,7 @@ export function AuthScreen({ initialMode = 'sign-in', onBack }: Props) {
           />
           <TextField
             style={styles.input}
-            label="Password"
+            label={t('auth.password')}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -75,13 +77,13 @@ export function AuthScreen({ initialMode = 'sign-in', onBack }: Props) {
           />
           {error && <Text style={styles.error}>{error}</Text>}
           <Button
-            label={mode === 'sign-in' ? 'Sign in' : 'Create account'}
+            label={mode === 'sign-in' ? t('auth.signIn') : t('auth.createAccountButton')}
             variant="brand"
             onPress={submit}
             disabled={loading || !email || !password}
           />
           <Button
-            label={mode === 'sign-in' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+            label={mode === 'sign-in' ? t('auth.switchToSignUp') : t('auth.switchToSignIn')}
             variant="secondary"
             onPress={() => {
               setError(null);

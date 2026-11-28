@@ -9,6 +9,7 @@ import { AuthScreen } from '@/features/auth/AuthScreen';
 import { SessionProvider, useSession } from '@/features/auth/SessionProvider';
 import { WelcomeScreen } from '@/features/auth/WelcomeScreen';
 import { usePushRegistration } from '@/features/notifications/usePushRegistration';
+import { LocaleProvider } from '@/i18n';
 import { usePrefetchTabs } from '@/lib/usePrefetchTabs';
 import { colors } from '@/theme';
 
@@ -58,7 +59,9 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <StatusBar style="dark" />
         <SessionProvider>
-          <RootNavigator />
+          <LocaleProvider>
+            <RootNavigator />
+          </LocaleProvider>
         </SessionProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

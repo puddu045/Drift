@@ -11,6 +11,7 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { getOwnProfile } from '@/features/profile/api';
 import { useFonts, PlayfairDisplay_500Medium } from '@expo-google-fonts/playfair-display';
 import { ScreenContainer } from '@/components/ScreenContainer';
+import { useTranslation } from '@/i18n';
 import { listNotifications } from '@/features/notifications/api';
 import { listInteractions, listMyThoughts, listThoughts, Thought } from '@/features/thoughts/api';
 import { ApiError } from '@/lib/api';
@@ -21,18 +22,6 @@ import { colors, floatingTabBarSpace, radius, spacing, typography } from '@/them
 import { ThoughtDetailOverlay } from './ThoughtDetailOverlay';
 
 type Mode = 'world' | 'mine' | 'interactions';
-
-const MODES: { id: Mode; label: string }[] = [
-  { id: 'world', label: 'World' },
-  { id: 'mine', label: 'My Thoughts' },
-  { id: 'interactions', label: 'My Interactions' },
-];
-
-const SUBTITLES: Record<Mode, string> = {
-  world: 'What is on your mind today?',
-  mine: 'Everything you’ve set adrift.',
-  interactions: 'Thoughts you’ve connected with.',
-};
 
 function engagementLabel(thought: Thought, notified: boolean) {
   const label = thought._count ? `♡  ${thought._count.reactions}` : thought.mood;
@@ -65,12 +54,23 @@ const MODE_CACHE_KEYS: Record<Mode, string> = {
 
 export function UniverseScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const params = useLocalSearchParams<{ mode?: string }>();
   const [mode, setMode] = useState<Mode>('world');
   const [name, setName] = useState('');
   const [fontsLoaded] = useFonts({ PlayfairDisplay_500Medium });
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const greeting = hour < 12 ? t('universe.greetingMorning') : hour < 18 ? t('universe.greetingAfternoon') : t('universe.greetingEvening');
+  const MODES: { id: Mode; label: string }[] = [
+    { id: 'world', label: t('universe.modeWorld') },
+    { id: 'mine', label: t('universe.modeMine') },
+    { id: 'interactions', label: t('universe.modeInteractions') },
+  ];
+  const SUBTITLES: Record<Mode, string> = {
+    world: t('universe.subtitleWorld'),
+    mine: t('universe.subtitleMine'),
+    interactions: t('universe.subtitleInteractions'),
+  };
   useFocusEffect(useCallback(() => {
     let active = true;
     getOwnProfile().then(profile => {
@@ -160,7 +160,7 @@ export function UniverseScreen() {
           setCached(cacheKey, result);
         })
         .catch((err: unknown) => {
-          if (!cancelled) setError(err instanceof ApiError ? err.message : 'Could not load thoughts.');
+          if (!cancelled) setError(err instanceof ApiError ? err.message : t('universe.couldNotLoad'));
         })
         .finally(() => {
           if (!cancelled) setLoading(false);
@@ -198,7 +198,7 @@ export function UniverseScreen() {
           <View style={styles.centered}>
             <FlyingPlane />
             <Text accessibilityLiveRegion="polite" style={styles.subtitle}>
-              {mode === 'world' ? 'Loading thoughts from around the world' : mode === 'mine' ? 'Loading your thoughts' : 'Loading your interactions'}
+              {mode === 'world' ? t('universe.loadingWorld') : mode === 'mine' ? t('universe.loadingMine') : t('universe.loadingInteractions')}
             </Text>
           </View>
         )}
@@ -212,10 +212,10 @@ export function UniverseScreen() {
             {mode === 'mine' && <FlyingPlane />}
             <Text style={styles.subtitle}>
               {mode === 'mine'
-                ? 'You haven’t posted anything yet.'
+                ? t('universe.emptyMine')
                 : mode === 'interactions'
-                  ? 'Nothing here yet — react or reply to a thought to see it.'
-                  : 'Nothing to see yet. Check back soon.'}
+                  ? t('universe.emptyInteractions')
+                  : t('universe.emptyWorld')}
             </Text>
           </View>
         )}
@@ -244,7 +244,7 @@ export function UniverseScreen() {
       {mode !== 'interactions' && (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Create a thought"
+          accessibilityLabel={t('universe.createThought')}
           onPress={() => router.navigate('/(tabs)/create')}
           style={styles.fab}
         >
