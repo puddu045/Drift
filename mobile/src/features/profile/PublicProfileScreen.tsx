@@ -87,13 +87,13 @@ export function PublicProfileScreen({ userId }: Props) {
         <ActivityIndicator color={colors.accent} style={styles.loading} />
       ) : (
         <View style={styles.content}>
-          <View style={styles.profileRow}>
+          <Card style={styles.profileRow}>
             <Avatar name={profile.displayName} photoUrl={profile.photoUrl} size={56} />
             <View style={styles.profileText}>
               <Text style={styles.name}>{profile.displayName}</Text>
               <Text style={styles.username}>@{profile.username}</Text>
             </View>
-          </View>
+          </Card>
           {profile.bio && (
             <View>
               <Text style={styles.bio}>{bioTranslation.text ?? profile.bio}</Text>
@@ -157,11 +157,11 @@ export function PublicProfileScreen({ userId }: Props) {
                 </View>
               ) : (
                 <View style={styles.actions}>
-                  <Button label={t('publicProfile.connect')} onPress={onConnect} style={styles.actionButton} />
-                  <Button label={t('publicProfile.mute')} variant="ghost" onPress={onMute} style={styles.actionButton} />
+                  <Button variant="brand" label={t('publicProfile.connect')} onPress={onConnect} style={styles.actionButton} />
+                  <Button label={t('publicProfile.mute')} variant="secondary" onPress={onMute} style={styles.actionButton} />
                   <Button
                     label={t('publicProfile.report')}
-                    variant="ghost"
+                    variant="secondary"
                     onPress={() => setReporting(true)}
                     style={styles.actionButton}
                   />
@@ -258,7 +258,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: 'rgba(21, 33, 59, 0.25)',
+    backgroundColor: '#EFEBF6',
+    borderColor: 'rgba(21, 33, 59, 0.09)',
   },
   interestLabel: {
     fontFamily: typography.fontFamily,
@@ -302,6 +303,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   actions: {
+    paddingBottom: spacing.sm,
     flexDirection: 'row',
     gap: spacing.sm,
     flexWrap: 'wrap',

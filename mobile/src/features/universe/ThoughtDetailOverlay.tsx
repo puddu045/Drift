@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused, useRouter } from 'expo-router';
 import { ScreenContainer } from '@/components/ScreenContainer';
 
+import { DreamyBackground } from '@/components/DreamyBackground';
+import { SendButton } from '@/components/SendButton';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { LanguagePickerModal } from '@/components/LanguagePickerModal';
@@ -190,7 +192,7 @@ export function ThoughtDetailOverlay({
 
   return (
     <Modal visible={focused} presentationStyle="fullScreen" animationType="slide" onRequestClose={onClose}>
-      <ScreenContainer background="none">
+      <ScreenContainer background="haze">
       <View style={styles.card}>
         <View style={styles.topRow}>
           <Pressable onPress={onClose} accessibilityLabel={t('thought.closeThought')} style={styles.back}>
@@ -294,9 +296,9 @@ export function ThoughtDetailOverlay({
                 <Button label={t('thought.delete')} variant="destructive" onPress={onDelete} style={styles.actionButton} />
               ) : (
                 <>
-                  <Button label={t('thought.connect')} onPress={onConnect} style={styles.actionButton} />
-                  <Button label={t('thought.mute')} variant="ghost" onPress={onMute} style={styles.actionButton} />
-                  <Button label={t('thought.block')} variant="ghost" onPress={onBlock} style={styles.actionButton} />
+                  <Button variant="brand" label={t('thought.connect')} onPress={onConnect} style={styles.actionButton} />
+                  <Button label={t('thought.mute')} variant="secondary" onPress={onMute} style={styles.actionButton} />
+                  <Button label={t('thought.block')} variant="secondary" onPress={onBlock} style={styles.actionButton} />
                 </>
               )}
             </View>
@@ -313,7 +315,7 @@ export function ThoughtDetailOverlay({
             maxLength={280}
             autoFocus={autoFocusReply}
           />
-          <Button label={t('common.send')} labelColor="white" style={{ backgroundColor: '#19345A', borderColor: '#19345A' }} onPress={onSendReply} disabled={sendingReply || !replyText.trim()} />
+          <SendButton onPress={onSendReply} disabled={sendingReply || !replyText.trim()} />
         </View>
 
 
@@ -336,9 +338,10 @@ export function ThoughtDetailOverlay({
               accessibilityLabel={t('common.close')}
             />
             <View style={styles.previewCard}>
+              <DreamyBackground variant="haze" />
               <Avatar name={previewAuthor.displayName} photoUrl={previewAuthor.photoUrl} size={72} />
               <Text style={styles.previewName}>{previewAuthor.displayName}</Text>
-              <Button label={t('thought.viewProfile')} onPress={onOpenFullProfile} style={styles.previewButton} />
+              <Button variant="brand" label={t('thought.viewProfile')} onPress={onOpenFullProfile} style={styles.previewButton} />
               <Pressable onPress={() => setPreviewAuthor(null)}>
                 <Text style={styles.close}>{t('common.close')}</Text>
               </Pressable>
@@ -399,7 +402,7 @@ function ReplyRow({
 }
 
 const styles = StyleSheet.create({
-  card: { flex: 1, backgroundColor: '#F8F6F8', paddingHorizontal: 14, paddingBottom: 8, gap: 8 },
+  card: { flex: 1, paddingHorizontal: 14, paddingBottom: 8, gap: 8 },
   scroll: {
     flex: 1,
   },
@@ -416,7 +419,7 @@ const styles = StyleSheet.create({
   thoughtPanel: {
     gap: spacing.md,
     boxShadow: '0px 3px 10px rgba(35,42,68,0.08)',
-    backgroundColor: '#FFFCFA',
+    backgroundColor: 'rgba(255,252,250,0.85)',
     borderRadius: 26, borderWidth: 1, borderColor: 'rgba(255,255,255,0.88)',
     padding: spacing.md,
   },
@@ -525,8 +528,9 @@ const styles = StyleSheet.create({
   },
   replyInput: {
     flex: 1,
-    minHeight: 40,
-    borderRadius: radius.md,
+    minHeight: 44,
+    backgroundColor: '#FFFCFA',
+    borderRadius: radius.pill,
     borderWidth: 1.5,
     borderColor: 'rgba(21, 33, 59, 0.3)',
     paddingHorizontal: spacing.sm,
@@ -576,6 +580,7 @@ const styles = StyleSheet.create({
   previewCard: {
     width: '80%',
     maxWidth: 320,
+    overflow: 'hidden',
     backgroundColor: 'rgba(255, 255, 255, 0.92)',
     borderRadius: 28,
     borderWidth: 1,

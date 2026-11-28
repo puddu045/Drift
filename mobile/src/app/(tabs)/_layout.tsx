@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Tabs, useSegments } from 'expo-router';
 import { ColorValue, StyleSheet, View } from 'react-native';
 
 import { TopRightBar } from '@/components/TopRightBar';
@@ -32,11 +32,12 @@ function tabIcon(outlineName: IconName, filledName: IconName) {
 }
 
 export default function TabLayout() {
+  const segments = useSegments();
   const { t } = useTranslation();
   return (
     <View style={{ flex: 1 }}>
       <Tabs
-        screenOptions={{
+        screenOptions={({ route }) => ({
           headerShown: false,
           tabBarStyle: {
             position: 'absolute',
@@ -46,12 +47,8 @@ export default function TabLayout() {
             height: 64,
             borderRadius: 28,
             borderTopWidth: 0,
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            shadowColor: colors.textPrimary,
-            shadowOpacity: 0.08,
-            shadowRadius: 12,
-            shadowOffset: { width: 0, height: 4 },
-            elevation: 4,
+            backgroundColor: route.name === 'destiny' ? 'rgba(255, 255, 255, 0.8)' : '#FCFAF9',
+            boxShadow: '0px 4px 12px rgba(21,33,59,0.08)',
           },
           tabBarActiveTintColor: colors.textPrimary,
           tabBarInactiveTintColor: colors.textPrimary,
@@ -59,11 +56,8 @@ export default function TabLayout() {
             fontFamily: typography.fontFamily,
             fontSize: typography.size.xs,
             fontWeight: typography.weight.medium,
-            textShadowColor: 'rgba(255, 255, 255, 0.8)',
-            textShadowRadius: 3,
-            textShadowOffset: { width: 0, height: 0 },
           },
-        }}
+        })}
       >
         <Tabs.Screen
           name="index"
@@ -89,7 +83,7 @@ export default function TabLayout() {
           options={{ title: t('tabs.connections'), tabBarIcon: tabIcon('people-outline', 'people') }}
         />
       </Tabs>
-      <TopRightBar />
+      {segments[segments.length - 1] !== '[conversationId]' && <TopRightBar />}
     </View>
   );
 }

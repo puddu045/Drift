@@ -1,8 +1,12 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 
-import { Button } from '@/components/Button';
+import { SendButton } from '@/components/SendButton';
+import { Avatar } from '@/components/Avatar';
+import { cachedInbox, preloadInbox } from '@/features/connections/preload';
+import { getPublicProfile, PublicProfile } from '@/features/profile/api';
+import { useTranslation } from '@/i18n';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { useSession } from '@/features/auth/SessionProvider';
 import { colors, spacing, typography } from '@/theme';
@@ -11,8 +15,30 @@ import { listMessages, Message, sendMessage } from './api';
 
 export function ChatScreen({ conversationId }: { conversationId: string }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const { session } = useSession();
+  const userId = session?.user.id;
+  const inbox = userId ? cachedInbox(userId) : undefined;
+  const peerId = inbox?.connections.find(c => c.conversationId === conversationId)?.otherUserId;
+  const cachedPeer = peerId ? inbox?.profiles[peerId] : undefined;
+  const [resolved, setResolved] = useState<{ key: string; profile: PublicProfile }>();
+  const key = userId + '/' + conversationId;
+  const peer = cachedPeer ?? (resolved?.key === key ? resolved.profile : undefined);
+  useEffect(() => {
+    if (!userId || cachedPeer) return;
+    let active = true;
+    async function load(id: string) {
+      const data = await preloadInbox(id);
+      const other = data.connections.find(c => c.conversationId === conversationId)?.otherUserId
+        ?? data.summaries[conversationId]?.otherUserId;
+      if (!other) return;
+      const profile = data.profiles[other] ?? await getPublicProfile(other);
+      if (active) setResolved({ key, profile });
+    }
+    void load(userId).catch(() => {});
+    return () => { active = false; };
+  }, [userId, conversationId, cachedPeer, key]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
@@ -50,11 +76,13 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
   };
 
   return (
-    <ScreenContainer floatingTabBar>
+    <ScreenContainer background="haze">
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} accessibilityLabel="Back">
-          <Text style={styles.back}>‹ Back</Text>
+        <Pressable onPress={() => router.back()} accessibilityLabel={t('common.back')}>
+          <Text style={styles.back}>‹ {t('common.back')}</Text>
         </Pressable>
+        <Avatar name={peer?.displayName} photoUrl={peer?.photoUrl} size={38} />
+        <Text numberOfLines={1} style={styles.peerName}>{peer?.displayName ?? t('connections.someone')}</Text>
       </View>
 
       <FlatList
@@ -66,7 +94,7 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
           const isMine = item.senderId === session?.user.id;
           return (
             <View style={[styles.bubble, isMine ? styles.bubbleMine : styles.bubbleTheirs]}>
-              <Text style={styles.bubbleText}>{item.text}</Text>
+              <Text style={[styles.bubbleText, isMine && styles.myText]}>{item.text}</Text>
             </View>
           );
         }}
@@ -80,7 +108,7 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
           placeholder="Message..."
           placeholderTextColor={colors.textSecondary}
         />
-        <Button label="Send" onPress={onSend} disabled={sending || !text.trim()} />
+        <SendButton onPress={onSend} disabled={sending || !text.trim()} />
       </View>
     </ScreenContainer>
   );
@@ -91,12 +119,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.sm,
-    // Leave enough headroom to clear the notification/profile icons, which
-    // float above every tab screen (TopRightBar) and aren't part of this
-    // screen's own layout, so they don't reserve space automatically.
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     minHeight: 56,
-    justifyContent: 'center',
   },
+  peerName: { flex: 1, fontSize: typography.size.md, color: colors.textPrimary, fontWeight: '600' },
   back: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.md,
@@ -120,16 +148,17 @@ const styles = StyleSheet.create({
   },
   bubbleMine: {
     alignSelf: 'flex-end',
-    backgroundColor: `${colors.accent}80`,
-    borderWidth: 1,
-    borderColor: `${colors.accent}b0`,
+    backgroundColor: '#354E76',
+    borderBottomRightRadius: 6,
   },
   bubbleTheirs: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255, 255, 255, 0.55)',
+    backgroundColor: '#FFFCFA',
+    borderBottomLeftRadius: 6,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.7)',
   },
+  myText: { color: 'white' },
   bubbleText: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.md,
@@ -138,12 +167,14 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     gap: spacing.sm,
-    padding: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     alignItems: 'center',
   },
   input: {
     flex: 1,
     minHeight: 44,
+    backgroundColor: '#FFFCFA',
     borderRadius: 22,
     borderWidth: 1.5,
     borderColor: 'rgba(21, 33, 59, 0.3)',

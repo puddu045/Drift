@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { OnboardingCarousel } from '@/features/auth/OnboardingCarousel';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -21,17 +23,27 @@ function RootNavigator() {
   // Pre-auth flow: Welcome (sunset background, picks a mode) → AuthScreen
   // (the actual sign-in/sign-up form). Not an Expo Router route of its own
   // since there's nothing to deep-link to before a session exists.
-  const [authStep, setAuthStep] = useState<'welcome' | 'form'>('welcome');
+  const [authStep, setAuthStep] = useState<'welcome' | 'tour' | 'form'>('welcome');
+  const [tourSeen, setTourSeen] = useState<boolean | null>(null);
+  useEffect(() => {
+    AsyncStorage.getItem('unwritten.onboarding.v1').then(value => setTourSeen(value === 'done')).catch(() => setTourSeen(false));
+  }, []);
   const [formMode, setFormMode] = useState<'sign-in' | 'sign-up'>('sign-in');
 
   if (loading) return <ScreenContainer />;
   if (!session) {
+    if (tourSeen === null) return <ScreenContainer />;
+    if (authStep === 'tour') return <OnboardingCarousel onFinish={() => {
+      setTourSeen(true);
+      void AsyncStorage.setItem('unwritten.onboarding.v1', 'done').catch(() => {});
+      setAuthStep('form');
+    }} />;
     if (authStep === 'welcome') {
       return (
         <WelcomeScreen
           onGetStarted={() => {
             setFormMode('sign-up');
-            setAuthStep('form');
+            setAuthStep(tourSeen ? 'form' : 'tour');
           }}
           onSignIn={() => {
             setFormMode('sign-in');
