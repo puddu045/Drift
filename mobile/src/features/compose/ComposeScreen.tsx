@@ -51,14 +51,14 @@ export function ComposeScreen() {
   };
 
   return (
-    <ScreenContainer floatingTabBar background="pastel">
+    <ScreenContainer background="haze">
       <View style={styles.header}>
         <Pressable onPress={onClose} accessibilityLabel="Close" style={styles.closeButton}>
           <Ionicons name="close" size={22} color={colors.textPrimary} />
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
         <Text style={styles.title}>Release a Thought</Text>
         <Text style={styles.subtitle}>Let your thought drift into the universe.</Text>
 
@@ -86,7 +86,7 @@ export function ComposeScreen() {
                 key={item.id}
                 style={[
                   styles.moodOption,
-                  { backgroundColor: moodColors[item.id] },
+                  { backgroundColor: mood === item.id ? moodColors[item.id] : '#FBF8F6' },
                   mood === item.id && styles.moodOptionSelected,
                 ]}
                 onTouchEnd={() => setMood(item.id)}
@@ -103,13 +103,13 @@ export function ComposeScreen() {
             <Ionicons name="globe-outline" size={18} color={colors.textSecondary} />
             <Text style={styles.sectionLabel}>Discoverable by others</Text>
           </View>
-          <Switch value={isPublic} onValueChange={setIsPublic} />
+          <Switch trackColor={{ true: '#264D7F' }} value={isPublic} onValueChange={setIsPublic} />
         </View>
 
         {error && <Text style={styles.error}>{error}</Text>}
 
         <Button
-          label="Release to Universe"
+          label="Release to Universe" variant="brand"
           onPress={onSubmit}
           disabled={!canSubmit}
           style={styles.submitButton}
@@ -133,6 +133,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   content: {
+    flexGrow: 1,
     padding: spacing.lg,
     gap: spacing.md,
   },
@@ -151,13 +152,14 @@ const styles = StyleSheet.create({
     marginTop: -spacing.sm,
   },
   input: {
+    boxShadow: '0px 3px 10px rgba(35,42,68,0.08)',
     minHeight: 120,
     borderRadius: radius.md,
     borderWidth: 1.5,
-    borderColor: 'rgba(248, 201, 167, 0.6)',
+    borderColor: 'rgba(29,39,68,0.1)',
     // Peach, semi-transparent — a "glass" tint over whatever's behind it
     // rather than an opaque fill.
-    backgroundColor: 'rgba(248, 201, 167, 0.22)',
+    backgroundColor: '#FFFCFB',
     padding: spacing.md,
     color: colors.textPrimary,
     fontFamily: typography.fontFamily,
@@ -165,9 +167,8 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   counter: {
-    position: 'absolute',
-    right: spacing.sm,
-    bottom: spacing.sm,
+    alignSelf: 'flex-end',
+    marginTop: 4,
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xs,
     color: colors.textSecondary,
@@ -183,14 +184,16 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   moodOption: {
+    width: '31%',
+    justifyContent: 'center',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: 4,
     paddingVertical: spacing.sm,
     borderRadius: radius.pill,
     borderWidth: 1.5,
-    borderColor: 'transparent',
+    borderColor: 'rgba(29,39,68,0.10)',
   },
   moodIcon: {
     width: 16,
@@ -223,7 +226,7 @@ const styles = StyleSheet.create({
     color: colors.danger,
   },
   submitButton: {
-    backgroundColor: palette.navy,
-    borderColor: palette.navy,
+    marginTop: 'auto',
+
   },
 });

@@ -114,7 +114,7 @@ export class ThoughtsService {
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: query.limit,
       ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
-      select: { id: true, text: true, mood: true, createdAt: true },
+      select: { id: true, text: true, mood: true, createdAt: true, _count: { select: { reactions: true } } },
     });
 
     const nextCursor = thoughts.length === query.limit ? thoughts[thoughts.length - 1].id : null;
@@ -127,7 +127,7 @@ export class ThoughtsService {
       where: { authorId: userId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
       take: 200,
-      select: { id: true, text: true, mood: true, createdAt: true },
+      select: { id: true, text: true, mood: true, createdAt: true, _count: { select: { reactions: true } } },
     });
     return thoughts;
   }
@@ -153,7 +153,7 @@ export class ThoughtsService {
       },
       orderBy: { createdAt: 'desc' },
       take: 200,
-      select: { id: true, text: true, mood: true, createdAt: true },
+      select: { id: true, text: true, mood: true, createdAt: true, _count: { select: { reactions: true } } },
     });
     return thoughts;
   }

@@ -73,7 +73,7 @@ export default function TabLayout() {
         />
         <Tabs.Screen
           name="create"
-          options={{ title: 'Create', tabBarIcon: tabIcon('add-circle-outline', 'add-circle') }}
+          options={{ title: 'Create', tabBarStyle: { display: 'none' }, tabBarIcon: tabIcon('add-circle-outline', 'add-circle') }}
         />
         <Tabs.Screen
           name="connections"

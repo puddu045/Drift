@@ -1,16 +1,13 @@
 import { useEffect } from 'react';
 
-import { listConnections, listIncomingRequests } from '@/features/connections/api';
-import { getTodayDestiny } from '@/features/destiny/api';
+import { preloadInbox } from '@/features/connections/preload';
+import { preloadDestiny } from '@/features/destiny/preload';
 import { listThoughts } from '@/features/thoughts/api';
 
 import { setCached } from './prefetchCache';
 
 export const PREFETCH_KEYS = {
-  destinyToday: 'destiny:today',
   universeWorld: 'universe:world',
-  connectionsRequests: 'connections:requests',
-  connectionsList: 'connections:list',
 } as const;
 
 /**
@@ -22,9 +19,9 @@ export const PREFETCH_KEYS = {
  * is silently ignored, since the screen's own fetch will show its own
  * error state if something's genuinely wrong.
  */
-export function usePrefetchTabs(enabled: boolean) {
+export function usePrefetchTabs(userId?: string) {
   useEffect(() => {
-    if (!enabled) return;
+    if (!userId) return;
     let cancelled = false;
 
     listThoughts()
@@ -37,23 +34,12 @@ export function usePrefetchTabs(enabled: boolean) {
       })
       .catch(() => {});
 
-    getTodayDestiny()
-      .then((thought) => {
-        if (!cancelled) setCached(PREFETCH_KEYS.destinyToday, thought);
-      })
-      .catch(() => {});
+    void preloadDestiny(userId).catch(() => {});
 
-    Promise.all([listIncomingRequests(), listConnections()])
-      .then(([requests, connections]) => {
-        if (!cancelled) {
-          setCached(PREFETCH_KEYS.connectionsRequests, requests);
-          setCached(PREFETCH_KEYS.connectionsList, connections);
-        }
-      })
-      .catch(() => {});
+    void preloadInbox(userId).catch(() => {});
 
     return () => {
       cancelled = true;
     };
-  }, [enabled]);
+  }, [userId]);
 }

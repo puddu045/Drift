@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Drift",
+    "name": "Unwritten",
     "slug": "drift",
     "version": "1.0.0",
     "scheme": "drift",
@@ -12,6 +12,7 @@
       "supportsTablet": true
     },
     "android": {
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "backgroundColor": "#FFFBF7",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -29,7 +30,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Drift needs access to your photos to set a profile picture."
+          "photosPermission": "Unwritten needs access to your photos to set a profile picture."
         }
       ],
       "expo-notifications",

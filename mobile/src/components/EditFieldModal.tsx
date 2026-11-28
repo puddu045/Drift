@@ -1,5 +1,6 @@
+import { KeyboardViewport } from './KeyboardViewport';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
@@ -35,12 +36,10 @@ export function EditFieldModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <KeyboardAvoidingView
-        style={styles.backdrop}
-        behavior={Platform.select({ ios: 'padding', default: 'height' })}
-      >
+      <KeyboardViewport>
+      <View style={styles.backdrop}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} accessibilityLabel="Close" />
-        <View style={styles.card}>
+        <ScrollView style={styles.card} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <Text style={styles.label}>{label}</Text>
           <TextField
             label=""
@@ -56,8 +55,9 @@ export function EditFieldModal({
             <Button label="Cancel" variant="ghost" onPress={onCancel} style={styles.actionButton} />
             <Button label="Save" onPress={() => onSave(draft.trim())} style={styles.actionButton} />
           </View>
-        </View>
-      </KeyboardAvoidingView>
+        </ScrollView>
+      </View>
+      </KeyboardViewport>
     </Modal>
   );
 }
@@ -72,11 +72,13 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '100%',
-    maxWidth: 360,
+    maxWidth: 360, flexGrow: 0, maxHeight: '100%',
     backgroundColor: colors.background,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
+  },
+  content: {
     padding: spacing.lg,
     gap: spacing.sm,
   },

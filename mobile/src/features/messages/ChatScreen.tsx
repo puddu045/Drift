@@ -50,7 +50,7 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer floatingTabBar>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} accessibilityLabel="Back">
           <Text style={styles.back}>‹ Back</Text>

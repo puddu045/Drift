@@ -5,6 +5,7 @@ export type Thought = {
   id: string;
   text: string;
   mood: MoodId;
+  _count?: { reactions: number };
   createdAt: string;
 };
 

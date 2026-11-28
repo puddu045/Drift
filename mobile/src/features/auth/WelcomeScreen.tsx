@@ -1,8 +1,13 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { useFonts } from 'expo-font';
+import { FlyingPlane } from '@/components/FlyingPlane';
+import { UnwrittenWordmark } from '@/components/UnwrittenWordmark';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { colors, spacing, typography } from '@/theme';
+
+const taglineFont = { LatoRegular: require('../../../assets/fonts/Lato_400Regular.ttf') };
 
 type Props = {
   onGetStarted: () => void;
@@ -12,22 +17,19 @@ type Props = {
 /** First screen shown before sign-in/sign-up — see AuthScreen.tsx for the
  * actual form. Picks which of its two modes AuthScreen opens in. */
 export function WelcomeScreen({ onGetStarted, onSignIn }: Props) {
+  const [fontLoaded] = useFonts(taglineFont);
   return (
-    <ScreenContainer background="sunset">
+    <ScreenContainer background="overlook">
       <View style={styles.content}>
         <View style={styles.hero}>
-          <Image
-            source={require('../../../assets/paper-plane-flourish.png')}
-            style={styles.planeAccent}
-            resizeMode="contain"
-          />
-          <Text style={styles.title}>Drift</Text>
-          <Text style={styles.subtitle}>Somewhere, someone feels the same.</Text>
+          <FlyingPlane welcome />
+          <UnwrittenWordmark size={65} color="white" />
+          <Text style={[styles.subtitle, fontLoaded && { fontFamily: 'LatoRegular' }]}>{'The next chapter\ncould be a stranger away.'}</Text>
         </View>
 
         <View style={styles.actions}>
-          <Button label="Get Started" onPress={onGetStarted} style={styles.getStartedButton} />
-          <Button label="I already have an account" onPress={onSignIn} style={styles.signInButton} />
+          <Button label="Get Started" labelColor={colors.textPrimary} onPress={onGetStarted} style={styles.getStartedButton} />
+          <Pressable accessibilityRole="button" onPress={onSignIn} style={styles.signInButton}><Text style={styles.link}>I already have an account</Text></Pressable>
         </View>
       </View>
     </ScreenContainer>
@@ -46,21 +48,12 @@ const styles = StyleSheet.create({
     marginTop: spacing.xxl,
     gap: spacing.sm,
   },
-  planeAccent: {
-    width: 64,
-    height: 64,
-    marginBottom: spacing.xs,
-  },
-  title: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.size.xxl,
-    fontWeight: typography.weight.bold,
-    color: colors.textPrimary,
-  },
   subtitle: {
     fontFamily: typography.fontFamily,
-    fontSize: typography.size.md,
-    color: colors.textSecondary,
+    fontSize: 19,
+    maxWidth: 310,
+    lineHeight: 28,
+    color: 'white',
     textAlign: 'center',
   },
   actions: {
@@ -69,12 +62,9 @@ const styles = StyleSheet.create({
   },
   getStartedButton: {
     width: '70%',
-    backgroundColor: '#7FB2E0',
-    borderColor: '#7FB2E0',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#FFFFFF',
   },
-  signInButton: {
-    width: '70%',
-    backgroundColor: '#FDF3E0',
-    borderColor: '#FDF3E0',
-  },
+  signInButton: { minHeight: 44, justifyContent: 'center' },
+  link: { textDecorationLine: 'underline', color: 'white', fontSize: 14 },
 });

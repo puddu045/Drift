@@ -130,7 +130,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <form onSubmit={onSignIn} className="w-full max-w-sm space-y-4 rounded-lg border border-slate-200 p-6">
-          <h1 className="text-lg font-semibold">Drift Admin</h1>
+          <h1 className="text-lg font-semibold">Unwritten Admin</h1>
           <input
             type="email"
             required

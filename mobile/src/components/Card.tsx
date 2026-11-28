@@ -11,6 +11,7 @@ export function Card({ children, style }: Props) {
 
 const styles = StyleSheet.create({
   card: {
+    boxShadow: '0px 3px 10px rgba(35,42,68,0.10)',
     backgroundColor: 'rgba(255, 255, 255, 0.45)',
     borderRadius: radius.lg,
     borderWidth: 1,

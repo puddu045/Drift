@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Drift Admin",
-  description: "Drift admin portal",
+  title: "Unwritten Admin",
+  description: "Unwritten admin portal",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

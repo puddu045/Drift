@@ -103,8 +103,7 @@ export function Bubble({ thought, layout, reduceMotion, paused, onPress, hasNoti
   });
 
   const moodColor = moodColors[thought.mood];
-  const moodBubble = MOOD_BUBBLES[thought.mood];
-  const cornerRadius = layout.size * CORNER_RATIO;
+  const cornerRadius = layout.size * (layout.size >= 165 ? 0.46 : CORNER_RATIO);
 
   return (
     <Animated.View
@@ -133,31 +132,23 @@ export function Bubble({ thought, layout, reduceMotion, paused, onPress, hasNoti
               width: layout.size,
               height: layout.size,
               borderRadius: cornerRadius,
-              borderColor: moodColor,
-              // Fully opaque, unlike the gradient below — otherwise the sky
-              // background shows through and every bubble reads as the same
-              // washed-out pale color regardless of mood.
-              backgroundColor: moodColor,
+              borderColor: 'rgba(255,255,255,0.85)',
+              backgroundColor: moodColor + 'AA',
             },
           ]}
         >
-          {/* The per-mood frosted-glass bubble art already bakes in its own
-              highlight, so the generic sheen below is only needed for the
-              one mood (lonely) still falling back to a generic texture. */}
-          {!moodBubble && (
-            <LinearGradient
-              colors={['rgba(255, 255, 255, 0.65)', 'rgba(255, 255, 255, 0)']}
-              start={{ x: 0.15, y: 0.1 }}
-              end={{ x: 0.85, y: 0.9 }}
-              style={StyleSheet.absoluteFill}
-            />
-          )}
           <Image
             source={bubbleTextureFor(thought.mood, thought.id)}
             resizeMode="cover"
-            style={[StyleSheet.absoluteFill, { width: layout.size, height: layout.size }]}
+            style={[StyleSheet.absoluteFill, { opacity: 0.32, width: layout.size, height: layout.size }]}
           />
-          <Text numberOfLines={4} style={styles.text}>
+          <LinearGradient
+            pointerEvents="none"
+            colors={['rgba(255,255,255,0.78)', 'rgba(255,255,255,0.22)', 'rgba(255,246,238,0.52)']}
+            start={{ x: 0, y: 0 }} end={{ x: 0.85, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+          <Text numberOfLines={layout.size >= 165 ? 6 : 4} style={[styles.text, layout.size >= 165 && styles.featuredText]}>
             {thought.text}
           </Text>
           {hasNotification && <View style={styles.notificationDot} accessibilityLabel="New activity" />}
@@ -189,6 +180,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     textAlign: 'center',
   },
+  featuredText: { fontSize: 18, lineHeight: 23 },
   notificationDot: {
     position: 'absolute',
     top: spacing.sm,

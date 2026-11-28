@@ -1,5 +1,6 @@
+import { UnwrittenWordmark } from '@/components/UnwrittenWordmark';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { ScreenContainer } from '@/components/ScreenContainer';
@@ -40,18 +41,21 @@ export function AuthScreen({ initialMode = 'sign-in', onBack }: Props) {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer background="evening">
       {onBack && (
         <Pressable onPress={onBack} accessibilityLabel="Back" style={styles.back}>
           <Text style={styles.backLabel}>‹ Back</Text>
         </Pressable>
       )}
-      <View style={styles.content}>
-        <Text style={styles.title}>Drift</Text>
-        <Text style={styles.subtitle}>Somewhere, someone feels the same.</Text>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
+        <View style={{ alignItems: 'center' }}><UnwrittenWordmark size={54} /></View>
+        
 
         <View style={styles.form}>
+          <View pointerEvents="none" style={styles.cardSurface} />
+          <Text style={styles.title}>{mode === 'sign-in' ? 'Welcome back' : 'Create an account'}</Text>
           <TextField
+            style={styles.input}
             label="Email"
             value={email}
             onChangeText={setEmail}
@@ -61,6 +65,7 @@ export function AuthScreen({ initialMode = 'sign-in', onBack }: Props) {
             placeholder="you@example.com"
           />
           <TextField
+            style={styles.input}
             label="Password"
             value={password}
             onChangeText={setPassword}
@@ -71,19 +76,20 @@ export function AuthScreen({ initialMode = 'sign-in', onBack }: Props) {
           {error && <Text style={styles.error}>{error}</Text>}
           <Button
             label={mode === 'sign-in' ? 'Sign in' : 'Create account'}
+            variant="brand"
             onPress={submit}
             disabled={loading || !email || !password}
           />
           <Button
             label={mode === 'sign-in' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
-            variant="ghost"
+            variant="secondary"
             onPress={() => {
               setError(null);
               setMode(mode === 'sign-in' ? 'sign-up' : 'sign-in');
             }}
           />
         </View>
-      </View>
+      </ScrollView>
     </ScreenContainer>
   );
 }
@@ -100,14 +106,15 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
+    paddingVertical: spacing.lg,
     justifyContent: 'center',
     paddingHorizontal: spacing.xl,
     gap: spacing.lg,
   },
   title: {
     fontFamily: typography.fontFamily,
-    fontSize: typography.size.xxl,
+    fontSize: 24,
     fontWeight: typography.weight.bold,
     color: colors.textPrimary,
     textAlign: 'center',
@@ -119,8 +126,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   form: {
+    width: '100%',
+    maxWidth: 440,
+    alignSelf: 'center',
+    padding: 22,
     gap: spacing.md,
   },
+  cardSurface: {
+    ...StyleSheet.absoluteFill,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,252,250,0.75)',
+    boxShadow: '0px 4px 12px rgba(35,49,74,0.10)',
+  },
+  input: { backgroundColor: '#FFFCFA' },
   error: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,

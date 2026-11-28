@@ -1,3 +1,5 @@
+import { getCached } from '@/lib/prefetchCache';
+import type { Profile } from './api';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -57,15 +59,16 @@ function describeError(err: unknown, fallback: string) {
 export function ProfileScreen() {
   const router = useRouter();
   const { session } = useSession();
-  const [hasProfile, setHasProfile] = useState(false);
-  const [displayName, setDisplayName] = useState('');
-  const [username, setUsername] = useState('');
-  const [bio, setBio] = useState('');
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const [showIdentity, setShowIdentity] = useState(false);
-  const [preferredLanguage, setPreferredLanguage] = useState<string | null>(null);
+  const cached = session && getCached<Profile>('profile:' + session.user.id);
+  const [hasProfile, setHasProfile] = useState(!!cached);
+  const [displayName, setDisplayName] = useState(cached?.displayName ?? '');
+  const [username, setUsername] = useState(cached?.username ?? '');
+  const [bio, setBio] = useState(cached?.bio ?? '');
+  const [photoUrl, setPhotoUrl] = useState<string | null>(cached?.photoUrl ?? null);
+  const [showIdentity, setShowIdentity] = useState(cached?.showIdentityOnContent ?? false);
+  const [preferredLanguage, setPreferredLanguage] = useState<string | null>(cached?.preferredLanguage ?? null);
   const [editingLanguage, setEditingLanguage] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cached);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<FieldKey>(null);
@@ -242,12 +245,12 @@ export function ProfileScreen() {
     }
   };
 
-  if (loading) return <ScreenContainer />;
+  if (loading) return <ScreenContainer background="haze"><View style={styles.content}><Text style={styles.title}>Profile</Text><Text>Loading profile...</Text></View></ScreenContainer>;
 
   if (!hasProfile) {
     return (
-      <ScreenContainer>
-        <View style={styles.content}>
+      <ScreenContainer background="haze">
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
           <Text style={styles.title}>Set up your profile</Text>
           <Text style={styles.subtitle}>
             Pick a display name and username to get started. You can change these any time.
@@ -280,7 +283,7 @@ export function ProfileScreen() {
             onPress={onCreateProfile}
             disabled={settingUp || !setupName.trim() || !setupUsername.trim() || !setupLanguage}
           />
-        </View>
+        </ScrollView>
 
         {editingSetupLanguage && (
           <LanguagePickerModal
@@ -297,7 +300,7 @@ export function ProfileScreen() {
   }
 
   return (
-    <ScreenContainer>
+    <ScreenContainer background="haze">
       <ScrollView contentContainerStyle={styles.content}>
         <Pressable onPress={() => router.back()} accessibilityLabel="Back">
           <Text style={styles.back}>‹ Back</Text>
@@ -306,7 +309,7 @@ export function ProfileScreen() {
 
         <Pressable onPress={onPickPhoto} style={styles.photoRow} disabled={uploadingPhoto}>
           <Avatar name={displayName} photoUrl={photoUrl} size={72} />
-          <Text style={styles.photoLabel}>{uploadingPhoto ? 'Uploading...' : 'Change photo'}</Text>
+          <View style={{ flex: 1, gap: 3 }}><Text style={styles.author}>{displayName}</Text><Text style={styles.photoLabel}>{uploadingPhoto ? 'Uploading...' : 'Change photo'}</Text></View>
         </Pressable>
 
         <FieldRow label="Display name" value={displayName || 'Not set'} onEdit={() => setEditing('displayName')} />
@@ -365,7 +368,7 @@ export function ProfileScreen() {
 
         {error && <Text style={styles.error}>{error}</Text>}
 
-        <Button label="Sign out" variant="ghost" onPress={() => supabase.auth.signOut()} />
+        <Button label="Sign out" variant="destructive" onPress={() => supabase.auth.signOut()} />
       </ScrollView>
 
       {editing && (
@@ -418,13 +421,14 @@ function FieldRow({ label, value, onEdit }: { label: string; value: string; onEd
 
 const styles = StyleSheet.create({
   content: {
+    alignSelf: 'center', width: '100%', maxWidth: 650,
     padding: spacing.lg,
     gap: spacing.md,
   },
   back: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.md,
-    color: colors.accent,
+    color: '#25466E',
   },
   title: {
     fontFamily: typography.fontFamily,
@@ -439,16 +443,19 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   photoRow: {
+    backgroundColor: '#F2EDF5', padding: 18, borderRadius: 24,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
   },
+  author: { fontSize: 22, fontWeight: '600', color: colors.textPrimary },
   photoLabel: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
-    color: colors.accent,
+    color: '#25466E',
   },
   fieldRow: {
+    backgroundColor: '#FFFCFA', minHeight: 60, boxShadow: '0px 2px 8px rgba(35,42,68,0.08)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -476,7 +483,7 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
-    color: colors.accent,
+    color: '#25466E',
   },
   hint: {
     fontFamily: typography.fontFamily,

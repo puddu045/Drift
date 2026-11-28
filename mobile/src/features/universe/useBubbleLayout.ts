@@ -23,6 +23,22 @@ function seededRandom(seed: number): number {
 }
 
 function computeLayout(count: number, width: number, height: number, pinnedCount: number): BubbleLayout[] {
+  if (count <= 5) {
+    const anchors = [[0.5, 0.5], [0.19, 0.17], [0.81, 0.18], [0.19, 0.82], [0.81, 0.82]];
+    return Array.from({ length: count }, (_, i) => {
+      const order = pinnedCount > 0 ? [1, 2, 0, 3, 4] : [0, 1, 2, 3, 4];
+      const slot = order[i];
+      const [cx, cy] = anchors[slot];
+      const size = slot === 0 ? Math.min(width * 0.56, height * 0.48, 232)
+        : Math.min(width * 0.32, height * 0.28, 142);
+      return {
+        x: width * cx - size / 2, y: height * cy - size / 2, size,
+        driftRadiusX: 4, driftRadiusY: 5,
+        periodMs: 10000 + (i % 7) * 900, phase: i * 1.7,
+      };
+    });
+  }
+
   const columns = Math.max(1, Math.round(Math.sqrt((count * width) / height)));
   const rows = Math.ceil(count / columns);
   const cellWidth = width / columns;

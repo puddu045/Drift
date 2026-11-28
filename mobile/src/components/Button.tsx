@@ -1,3 +1,4 @@
+import { PillGradient } from './PillGradient';
 import { ReactNode } from 'react';
 import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
@@ -6,7 +7,7 @@ import { colors, radius, spacing, typography } from '@/theme';
 type Props = {
   label: string;
   onPress: () => void;
-  variant?: 'primary' | 'ghost';
+  variant?: 'primary' | 'ghost' | 'destructive' | 'brand' | 'accept' | 'secondary';
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
   /** Rendered to the left of the label — for a one-off like a paper-plane
@@ -28,17 +29,22 @@ export function Button({ label, onPress, variant = 'primary', style, disabled, i
       style={({ pressed }) => [
         styles.base,
         isPrimary ? styles.primary : styles.ghost,
+        variant === 'destructive' && styles.destructive,
         pressed && styles.pressed,
         disabled && styles.disabled,
         style,
       ]}
     >
+      {variant !== 'primary' && variant !== 'ghost' && <PillGradient tone={variant} />}
       <View style={styles.row}>
         {icon}
         <Text
           style={[
             styles.label,
             isPrimary ? styles.labelPrimary : styles.labelGhost,
+            variant === 'brand' && { color: 'white' },
+            variant === 'accept' && { color: '#20523A' },
+            variant === 'destructive' && styles.destructiveLabel,
             labelColor && { color: labelColor },
           ]}
           numberOfLines={1}
@@ -75,6 +81,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  destructive: { backgroundColor: '#FBE6E7', borderColor: '#E7B6BA' },
+  destructiveLabel: { color: '#893D49' },
   pressed: {
     opacity: 0.8,
   },

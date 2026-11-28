@@ -49,9 +49,10 @@ const styles = StyleSheet.create({
   wrapper: {
     position: 'absolute',
     top: 8,
-    right: 8,
-    width: 88,
-    height: 88,
+    left: '50%',
+    marginLeft: -24,
+    width: 48,
+    height: 48,
   },
   image: {
     width: '100%',

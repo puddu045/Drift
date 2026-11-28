@@ -1,9 +1,10 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useState } from 'react';
 import { Image, ImageSourcePropType, LayoutChangeEvent, StyleSheet, View } from 'react-native';
 
 import { colors } from '@/theme';
 
-export type BackgroundVariant = 'day' | 'sunset' | 'pastel' | 'night' | 'none';
+export type BackgroundVariant = 'evening' | 'haze' | 'overlook' | 'twilight' | 'day' | 'sunset' | 'pastel' | 'night' | 'none';
 
 type VariantConfig = {
   source: ImageSourcePropType;
@@ -15,12 +16,16 @@ type VariantConfig = {
 };
 
 const VARIANTS: Partial<Record<BackgroundVariant, VariantConfig>> = {
+  evening: { source: require('../../assets/unwritten-twilight.jpg'), width: 941, height: 1672, overlayColor: 'rgba(255,247,244,0.67)' },
+  haze: { source: require('../../assets/unwritten-meadow.jpg'), width: 1774, height: 887, overlayColor: 'rgba(255,250,247,0.86)' },
+  overlook: { source: require('../../assets/unwritten-overlook.jpg'), width: 941, height: 1672, overlayColor: 'rgba(24,28,62,0.16)' },
+  twilight: { source: require('../../assets/unwritten-twilight.jpg'), width: 941, height: 1672, overlayColor: 'rgba(18,22,51,0.17)' },
   day: { source: require('../../assets/drift-sky-day.webp'), width: 969, height: 1624 },
   sunset: {
     source: require('../../assets/drift-sunset.webp'),
     width: 1024,
     height: 1536,
-    overlayColor: 'rgba(255, 251, 247, 0.35)',
+    overlayColor: 'rgba(255, 251, 247, 0.06)',
   },
   pastel: { source: require('../../assets/drift-sky-pastel.webp'), width: 971, height: 1620 },
   night: { source: require('../../assets/drift-night.webp'), width: 1024, height: 1536 },
@@ -67,6 +72,9 @@ export function DreamyBackground({ variant = 'day' }: { variant?: BackgroundVari
               height: renderedHeight,
             }}
           />
+          {variant === 'sunset' && (
+            <LinearGradient colors={['transparent', 'rgba(255,241,229,0.95)']} style={styles.sunsetFade} />
+          )}
           {config.overlayColor && (
             <View style={[StyleSheet.absoluteFill, { backgroundColor: config.overlayColor }]} />
           )}
@@ -77,6 +85,7 @@ export function DreamyBackground({ variant = 'day' }: { variant?: BackgroundVari
 }
 
 const styles = StyleSheet.create({
+  sunsetFade: { position: 'absolute', bottom: 0, width: '100%', height: '22%' },
   base: {
     backgroundColor: colors.background,
     overflow: 'hidden',

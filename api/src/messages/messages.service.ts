@@ -30,7 +30,7 @@ export class MessagesService {
         conversation: {
           include: {
             participants: { where: { userId: { not: userId } }, select: { userId: true } },
-            messages: { orderBy: { createdAt: 'desc' }, take: 1 },
+            messages: { where: { deletedAt: null }, orderBy: { createdAt: 'desc' }, take: 1 },
           },
         },
       },

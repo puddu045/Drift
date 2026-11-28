@@ -12,7 +12,7 @@ export function Avatar({ name, photoUrl, size = 36 }: Props) {
   const dimension = { width: size, height: size, borderRadius: size / 2 };
 
   if (photoUrl) {
-    return <Image source={{ uri: photoUrl }} style={[styles.image, dimension]} />;
+    return <Image source={{ uri: photoUrl }} resizeMode="cover" style={dimension} />;
   }
 
   const initial = name?.trim()?.[0]?.toUpperCase() ?? '?';
@@ -24,13 +24,8 @@ export function Avatar({ name, photoUrl, size = 36 }: Props) {
 }
 
 const styles = StyleSheet.create({
-  image: {
-    backgroundColor: colors.surface,
-  },
   placeholder: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: '#EEECEF',
     alignItems: 'center',
     justifyContent: 'center',
   },

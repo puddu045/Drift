@@ -65,7 +65,7 @@ export function PublicProfileScreen({ userId }: Props) {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer background="haze">
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} accessibilityLabel="Back">
           <Text style={styles.back}>‹ Back</Text>
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
-    color: colors.accent,
+    color: '#25466E',
     marginTop: 4,
   },
   interests: {

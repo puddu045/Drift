@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
+import { useIsFocused, useRouter } from 'expo-router';
+import { ScreenContainer } from '@/components/ScreenContainer';
 
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
-import { DreamyBackground } from '@/components/DreamyBackground';
 import { LanguagePickerModal } from '@/components/LanguagePickerModal';
 import { MoodTag } from '@/components/MoodTag';
 import { blockUser } from '@/features/blocks/api';
@@ -61,7 +60,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
   const [reporting, setReporting] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [previewAuthor, setPreviewAuthor] = useState<{ id: string } & AuthorIdentity | null>(null);
-  const [expanded, setExpanded] = useState(false);
+  const focused = useIsFocused();
   const translation = useTranslatable(() => translateThought(thought.id));
 
   useEffect(() => {
@@ -78,6 +77,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
 
   const onReact = async (type: (typeof REACTIONS)[number]['type']) => {
     const { reacted } = await toggleReaction(thought.id, type);
+    setDetail(prev => prev && ({ ...prev, _count: { reactions: Math.max(0, prev._count.reactions + (reacted ? 1 : -1)) } }));
     setMyReactions((prev) => {
       const next = new Set(prev);
       if (reacted) next.add(type);
@@ -155,34 +155,13 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
   };
 
   return (
-    <Animated.View
-      entering={FadeIn.duration(180)}
-      exiting={FadeOut.duration(150)}
-      style={[styles.backdrop, expanded && styles.backdropExpanded]}
-    >
-      <DreamyBackground variant="pastel" />
-      <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
-      <Animated.View
-        entering={ZoomIn.duration(220)}
-        exiting={ZoomOut.duration(160)}
-        style={[styles.card, expanded && styles.cardExpanded]}
-      >
+    <Modal visible={focused} presentationStyle="fullScreen" animationType="slide" onRequestClose={onClose}>
+      <ScreenContainer background="none">
+      <View style={styles.card}>
         <View style={styles.topRow}>
-          {detail ? (
-            detail.authorId === viewerContextUserId ? (
-              <View style={styles.authorRow}>
-                <Avatar name={detail.author?.displayName} photoUrl={detail.author?.photoUrl} size={28} />
-                <Text style={styles.authorName}>{detail.author?.displayName ?? 'Anonymous'}</Text>
-              </View>
-            ) : (
-              <Pressable style={styles.authorRow} onPress={() => onViewAuthor(detail.authorId, detail.author)}>
-                <Avatar name={detail.author?.displayName} photoUrl={detail.author?.photoUrl} size={28} />
-                <Text style={styles.authorName}>{detail.author?.displayName ?? 'Anonymous'}</Text>
-              </Pressable>
-            )
-          ) : (
-            <View />
-          )}
+          <Pressable onPress={onClose} accessibilityLabel="Close thought" style={styles.back}>
+            <Ionicons name="chevron-back" size={25} color={colors.textPrimary} />
+          </Pressable>
           <View style={styles.topRowActions}>
             {!isOwnThought && (
               <Pressable
@@ -193,13 +172,6 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
                 <Text style={styles.quickReportLabel}>⚑ Report</Text>
               </Pressable>
             )}
-            <Pressable
-              style={styles.expandButton}
-              onPress={() => setExpanded((prev) => !prev)}
-              accessibilityLabel={expanded ? 'Shrink thought' : 'Expand thought to full screen'}
-            >
-              <Ionicons name={expanded ? 'contract-outline' : 'expand-outline'} size={18} color={colors.textPrimary} />
-            </Pressable>
           </View>
         </View>
 
@@ -208,35 +180,54 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          <MoodTag mood={thought.mood} />
-          <Text style={styles.text}>{translation.text ?? thought.text}</Text>
-          <Pressable onPress={translation.toggle} disabled={translation.loading}>
-            <Text style={styles.translateLink}>
-              {translation.loading
-                ? 'Translating…'
-                : translation.showingTranslation
-                  ? 'Show original'
-                  : 'Translate'}
-            </Text>
-          </Pressable>
-
-          <View style={styles.reactionRow}>
-            {REACTIONS.map((reaction) => (
-              <Pressable
-                key={reaction.type}
-                style={[styles.reactionPill, myReactions.has(reaction.type) && styles.reactionPillActive]}
-                onPress={() => onReact(reaction.type)}
-                accessibilityLabel={reaction.label}
-              >
-                <Text style={styles.reactionLabel}>{reaction.label}</Text>
+          <View style={styles.thoughtPanel}>
+          {detail ? (
+            detail.authorId === viewerContextUserId ? (
+              <View style={styles.authorRow}>
+                <Avatar name={detail.author?.displayName} photoUrl={detail.author?.photoUrl} size={40} />
+                <Text style={styles.authorName}>{detail.author?.displayName ?? 'Anonymous'}</Text>
+              </View>
+            ) : (
+              <Pressable style={styles.authorRow} onPress={() => onViewAuthor(detail.authorId, detail.author)}>
+                <Avatar name={detail.author?.displayName} photoUrl={detail.author?.photoUrl} size={40} />
+                <Text style={styles.authorName}>{detail.author?.displayName ?? 'Anonymous'}</Text>
               </Pressable>
-            ))}
-          </View>
+            )
+          ) : (
+            <View />
+          )}
+            <MoodTag mood={thought.mood} />
+            <Text style={styles.text}>{translation.text ?? thought.text}</Text>
+            <Pressable onPress={translation.toggle} disabled={translation.loading}>
+              <Text style={styles.translateLink}>
+                {translation.loading
+                  ? 'Translating…'
+                  : translation.showingTranslation
+                    ? 'Show original'
+                    : 'Translate'}
+              </Text>
+            </Pressable>
 
+            {detail && <Text style={styles.engagement}>{detail._count.reactions} reactions   /   {detail.replies.length} replies</Text>}
+            <View style={styles.reactionRow}>
+              {REACTIONS.map((reaction) => (
+                <Pressable
+                  key={reaction.type}
+                  style={[styles.reactionPill, myReactions.has(reaction.type) && styles.reactionPillActive]}
+                  onPress={() => onReact(reaction.type)}
+                  accessibilityLabel={reaction.label}
+                >
+                  <Text style={styles.reactionLabel}>{reaction.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+
+          </View>
           {!detail ? (
             <ActivityIndicator color={colors.accent} />
           ) : (
             <View style={styles.replies}>
+              <Text style={styles.repliesTitle}>Replies ({detail.replies.length})</Text>
               {detail.replies.length === 0 ? (
                 <Text style={styles.emptyReplies}>No replies yet.</Text>
               ) : (
@@ -265,7 +256,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
           ) : (
             <View style={styles.actions}>
               {isOwnThought ? (
-                <Button label="Delete" variant="ghost" onPress={onDelete} style={styles.actionButton} />
+                <Button label="Delete" variant="destructive" onPress={onDelete} style={styles.actionButton} />
               ) : (
                 <>
                   <Button label="Connect" onPress={onConnect} style={styles.actionButton} />
@@ -286,13 +277,11 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
             placeholderTextColor={colors.textSecondary}
             maxLength={280}
           />
-          <Button label="Send" onPress={onSendReply} disabled={sendingReply || !replyText.trim()} />
+          <Button label="Send" labelColor="white" style={{ backgroundColor: '#19345A', borderColor: '#19345A' }} onPress={onSendReply} disabled={sendingReply || !replyText.trim()} />
         </View>
 
-        <Pressable onPress={onClose} accessibilityLabel="Close thought">
-          <Text style={styles.close}>Let it drift away</Text>
-        </Pressable>
-      </Animated.View>
+
+      </View>
 
       {translation.needsLanguage && (
         <LanguagePickerModal
@@ -321,7 +310,8 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
           </View>
         </Modal>
       )}
-    </Animated.View>
+      </ScreenContainer>
+    </Modal>
   );
 }
 
@@ -339,13 +329,14 @@ function ReplyRow({
   return (
     <View style={styles.replyItem}>
       {isContextAuthor ? (
-        <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={26} />
+        <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={38} />
       ) : (
         <Pressable onPress={() => onViewAuthor(reply.authorId, reply.author)}>
           <Avatar name={reply.author?.displayName} photoUrl={reply.author?.photoUrl} size={26} />
         </Pressable>
       )}
       <View style={styles.replyTextCol}>
+        <Text style={styles.authorName}>{reply.author?.displayName ?? 'Anonymous'}</Text>
         <Text style={styles.reply}>{translation.text ?? reply.text}</Text>
         <Pressable onPress={translation.toggle} disabled={translation.loading}>
           <Text style={styles.translateLink}>
@@ -370,37 +361,7 @@ function ReplyRow({
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(16, 26, 53, 0.45)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.lg,
-  },
-  backdropExpanded: {
-    padding: 0,
-  },
-  card: {
-    width: '92%',
-    maxWidth: 400,
-    height: '72%',
-    backgroundColor: 'rgba(255, 255, 255, 0.88)',
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.95)',
-    padding: spacing.lg,
-    gap: spacing.md,
-  },
-  cardExpanded: {
-    width: '100%',
-    maxWidth: undefined,
-    height: '100%',
-    borderRadius: 0,
-  },
+  card: { flex: 1, backgroundColor: '#F8F6F8', paddingHorizontal: 14, paddingBottom: 8, gap: 8 },
   scroll: {
     flex: 1,
   },
@@ -412,8 +373,16 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.lg,
     color: colors.textPrimary,
-    lineHeight: 28,
+    lineHeight: 26,
   },
+  thoughtPanel: {
+    gap: spacing.md,
+    boxShadow: '0px 3px 10px rgba(35,42,68,0.08)',
+    backgroundColor: '#FFFCFA',
+    borderRadius: 26, borderWidth: 1, borderColor: 'rgba(255,255,255,0.88)',
+    padding: spacing.md,
+  },
+  back: { width: 44, height: 44, justifyContent: 'center' },
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -458,10 +427,12 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   replyItem: {
+    paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border,
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
   },
+  engagement: { fontSize: 13, color: colors.textPrimary, fontWeight: '600' },
   reactionRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -483,6 +454,7 @@ const styles = StyleSheet.create({
     fontSize: typography.size.xs,
     color: colors.textSecondary,
   },
+  repliesTitle: { fontSize: 18, fontWeight: '600', color: colors.textPrimary, marginBottom: spacing.sm },
   replies: {
     gap: spacing.xs,
   },
@@ -506,7 +478,7 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
-    color: colors.accent,
+    color: '#234A74',
   },
   replyRow: {
     flexDirection: 'row',
@@ -567,7 +539,7 @@ const styles = StyleSheet.create({
     width: '80%',
     maxWidth: 320,
     backgroundColor: 'rgba(255, 255, 255, 0.92)',
-    borderRadius: radius.lg,
+    borderRadius: 28,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.95)',
     padding: spacing.lg,

@@ -15,7 +15,7 @@ import { colors } from '@/theme';
 function RootNavigator() {
   const { session, loading } = useSession();
   usePushRegistration(!!session);
-  usePrefetchTabs(!!session);
+  usePrefetchTabs(session?.user.id);
 
   // Pre-auth flow: Welcome (sunset background, picks a mode) → AuthScreen
   // (the actual sign-in/sign-up form). Not an Expo Router route of its own

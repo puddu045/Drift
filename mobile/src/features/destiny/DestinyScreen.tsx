@@ -1,30 +1,30 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, useWindowDimensions, ScrollView, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useFonts, PlayfairDisplay_700Bold, PlayfairDisplay_400Regular_Italic } from '@expo-google-fonts/playfair-display';
+import { useFonts, PlayfairDisplay_400Regular_Italic } from '@expo-google-fonts/playfair-display';
 
 import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { Avatar } from '@/components/Avatar';
 import { LanguagePickerModal } from '@/components/LanguagePickerModal';
 import { MoodTag } from '@/components/MoodTag';
 import { ScreenContainer } from '@/components/ScreenContainer';
-import { replyToThought, Thought, translateThought } from '@/features/thoughts/api';
+import { replyToThought, translateThought } from '@/features/thoughts/api';
 import { ApiError } from '@/lib/api';
-import { getCached, setCached } from '@/lib/prefetchCache';
+import { useSession } from '@/features/auth/SessionProvider';
 import { useTranslatable } from '@/lib/useTranslatable';
-import { PREFETCH_KEYS } from '@/lib/usePrefetchTabs';
 import { colors, spacing, typography } from '@/theme';
 
-import { getTodayDestiny } from './api';
+import { cachedDestiny, preloadDestiny } from './preload';
 
 export function DestinyScreen() {
-  useFonts({ PlayfairDisplay_700Bold, PlayfairDisplay_400Regular_Italic });
+  const { height } = useWindowDimensions();
+  const quoteSize = Math.max(20, Math.min(29, Math.round(height / 30)));
+  useFonts({ PlayfairDisplay_400Regular_Italic });
 
-  // Seeded from usePrefetchTabs (warmed right after sign-in) when present,
-  // so a first visit this session can render immediately instead of a
-  // spinner — the fetch below still runs regardless, to keep it fresh.
-  const [thought, setThought] = useState<Thought | null>(() => getCached(PREFETCH_KEYS.destinyToday) ?? null);
+  const userId = useSession().session?.user.id;
+  const [preview, setPreview] = useState(() => userId ? cachedDestiny(userId) : undefined);
+  const { thought, author } = preview ?? {};
   const [error, setError] = useState<string | null>(null);
   // 'choosing': the "Let it drift" / "Reply" choice. 'replying': the open
   // text input. 'sent'/'drifted': the two terminal states.
@@ -35,15 +35,15 @@ export function DestinyScreen() {
   );
 
   useEffect(() => {
-    getTodayDestiny()
-      .then((result) => {
-        setThought(result);
-        setCached(PREFETCH_KEYS.destinyToday, result);
-      })
-      .catch((err: unknown) =>
-        setError(err instanceof ApiError ? err.message : 'No Destiny thought available today.'),
-      );
-  }, []);
+    if (!userId) return;
+    let active = true;
+    preloadDestiny(userId).then(result => {
+      if (active) setPreview(result);
+    }).catch((err: unknown) => {
+      if (active) setError(err instanceof ApiError ? err.message : 'No Destiny thought available today.');
+    });
+    return () => { active = false; };
+  }, [userId]);
 
   const onReply = async () => {
     if (!thought || !replyText.trim()) return;
@@ -53,24 +53,14 @@ export function DestinyScreen() {
   };
 
   return (
-    <ScreenContainer floatingTabBar background="night">
-      <View style={styles.header}>
-        <Image
-          source={require('../../../assets/destiny-sparkle.webp')}
-          style={styles.sparkle}
-          resizeMode="contain"
-        />
-        <Text style={styles.title}>Destiny</Text>
-        <Text style={styles.subtitle}>One stranger&rsquo;s thought, just for you today.</Text>
-      </View>
-
-      <View style={styles.content}>
+    <ScreenContainer floatingTabBar background="twilight">
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
         {!thought && !error && <ActivityIndicator color={colors.accent} />}
         {error && <Text style={styles.error}>{error}</Text>}
         {thought && (
-          <Card style={styles.card}>
+          <View style={styles.card}>
             <MoodTag mood={thought.mood} />
-            <Text style={styles.text}>{translation.text ?? thought.text}</Text>
+            <Text style={[styles.text, { fontSize: quoteSize, lineHeight: Math.round(quoteSize * 1.34) }]}>&ldquo;{translation.text ?? thought.text}&rdquo;</Text>
             <Pressable onPress={translation.toggle} disabled={translation.loading}>
               <Text style={styles.translateLink}>
                 {translation.loading
@@ -98,29 +88,33 @@ export function DestinyScreen() {
                 <Button label="Send" onPress={onReply} disabled={!replyText.trim()} />
               </View>
             )}
-          </Card>
+          </View>
         )}
 
         {thought && stage === 'choosing' && (
           <View style={styles.choiceRow}>
             <Pressable style={styles.driftButton} onPress={() => setStage('drifted')}>
-              <Ionicons name="shuffle-outline" size={16} color={colors.textPrimary} />
+              <Ionicons name="shuffle-outline" size={16} color="white" />
               <Text style={styles.driftLabel}>Let it drift</Text>
             </Pressable>
             <Pressable onPress={() => setStage('replying')} style={styles.replyButtonWrapper}>
               <LinearGradient
-                colors={['#FADCC4', '#F3B88F']}
+                colors={['rgba(255,255,255,0.24)', 'rgba(255,255,255,0.12)']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.replyButton}
               >
-                <Ionicons name="heart-outline" size={16} color="#FFFFFF" />
+                <Ionicons name="heart-outline" size={16} color="white" />
                 <Text style={styles.replyLabel}>Reply</Text>
               </LinearGradient>
             </Pressable>
           </View>
         )}
-      </View>
+      </ScrollView>
+      {thought && <View style={styles.byline}>
+        <Avatar name={author?.displayName} photoUrl={author?.photoUrl} />
+        <Text style={{ color: 'white', fontWeight: '600' }}>{author?.displayName ?? 'Anonymous'}</Text>
+      </View>}
 
       {translation.needsLanguage && (
         <LanguagePickerModal
@@ -134,49 +128,20 @@ export function DestinyScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.md,
-  },
-  sparkle: {
-    width: 32,
-    height: 32,
-    marginBottom: spacing.xs,
-  },
-  title: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: typography.size.xxl,
-    // White, not the usual dark textPrimary — this header sits directly on
-    // the dark night-sky background, not a card.
-    color: '#FFFFFF',
-  },
-  subtitle: {
-    fontFamily: typography.fontFamily,
-    fontSize: typography.size.sm,
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginTop: spacing.xs,
-    textAlign: 'center',
-  },
+  byline: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 24, paddingBottom: 12 },
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: spacing.lg,
     justifyContent: 'center',
   },
-  card: {
-    gap: spacing.md,
-    // Peach, with a little transparency — not the plain white/opaque card
-    // used elsewhere, but still opaque enough for the dark-navy text inside
-    // it to stay legible over the night-sky background.
-    backgroundColor: 'rgba(248, 201, 167, 0.72)',
-    borderColor: 'rgba(255, 255, 255, 0.7)',
-  },
+  card: { width: '90%', maxWidth: 420, alignSelf: 'center', alignItems: 'center', gap: 10, paddingHorizontal: spacing.md },
   text: {
     fontFamily: 'PlayfairDisplay_400Regular_Italic',
-    fontSize: typography.size.lg,
-    color: colors.textPrimary,
-    lineHeight: 28,
+
+    color: 'white',
+
+    textAlign: 'center',
+    paddingVertical: spacing.md,
   },
   error: {
     fontFamily: typography.fontFamily,
@@ -187,17 +152,18 @@ const styles = StyleSheet.create({
   outcome: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
-    color: colors.textPrimary,
+    color: 'white',
   },
   translateLink: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
-    color: colors.accent,
+    color: 'white',
   },
   choiceRow: {
+    alignSelf: 'center', width: '84%', maxWidth: 320,
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: spacing.md,
     marginTop: spacing.md,
   },
   driftButton: {
@@ -216,9 +182,10 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
-    color: colors.textPrimary,
+    color: 'white',
   },
   replyButtonWrapper: {
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.65)',
     flex: 1,
     borderRadius: 22,
     overflow: 'hidden',
@@ -234,7 +201,7 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
-    color: '#FFFFFF',
+    color: 'white',
   },
   replyRow: {
     flexDirection: 'row',
@@ -244,11 +211,12 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     minHeight: 40,
+    backgroundColor: 'rgba(24,31,53,0.72)',
     borderRadius: 20,
     borderWidth: 1,
     borderColor: colors.border,
     paddingHorizontal: spacing.md,
-    color: colors.textPrimary,
+    color: 'white',
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
   },

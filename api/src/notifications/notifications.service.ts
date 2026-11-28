@@ -44,7 +44,7 @@ export class NotificationsService {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
-          tokens.map((t) => ({ to: t.token, title: 'Drift', body: PUSH_BODY[type], data })),
+          tokens.map((t) => ({ to: t.token, title: 'Unwritten', body: PUSH_BODY[type], data })),
         ),
       });
     } catch {

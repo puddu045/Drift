@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -17,6 +18,11 @@ const LABELS: Record<Notification['type'], string> = {
   destiny_ready: 'Your daily Destiny thought is ready',
 };
 
+const icons: Record<Notification['type'], keyof typeof Ionicons.glyphMap> = {
+  reaction: 'heart-outline', reply: 'chatbubble-outline', message: 'mail-outline',
+  connection_request: 'person-add-outline', connection_accepted: 'people-outline', destiny_ready: 'star-outline',
+};
+
 export function NotificationsScreen() {
   const router = useRouter();
   const [items, setItems] = useState<Notification[]>([]);
@@ -33,7 +39,7 @@ export function NotificationsScreen() {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer background="haze">
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} accessibilityLabel="Back">
           <Text style={styles.back}>‹ Back</Text>
@@ -48,7 +54,12 @@ export function NotificationsScreen() {
         renderItem={({ item }) => (
           <Pressable onPress={() => onPress(item)}>
             <Card style={[styles.card, !item.readAt && styles.unread]}>
-              <Text style={styles.label}>{LABELS[item.type]}</Text>
+              <View style={styles.icon}><Ionicons name={icons[item.type]} size={21} color="#30496D" /></View>
+              <View style={{ flex: 1, gap: 3 }}>
+                <Text style={styles.label}>{LABELS[item.type]}</Text>
+                <Text style={styles.time}>{new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</Text>
+              </View>
+              {!item.readAt && <View accessibilityLabel="Unread" style={styles.dot} />}
             </Card>
           </Pressable>
         )}
@@ -67,7 +78,7 @@ const styles = StyleSheet.create({
   back: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.md,
-    color: colors.accent,
+    color: '#28466B',
   },
   title: {
     fontFamily: typography.fontFamily,
@@ -79,11 +90,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     gap: spacing.sm,
   },
+  icon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#EFEDF5', alignItems: 'center', justifyContent: 'center' },
+  time: { color: colors.textSecondary, fontSize: 12 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#355981' },
   card: {
+    flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFCFA',
     marginBottom: spacing.sm,
   },
   unread: {
-    borderColor: colors.accent,
+    borderColor: '#D6DEE9',
   },
   label: {
     fontFamily: typography.fontFamily,

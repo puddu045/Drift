@@ -1,5 +1,6 @@
+import { KeyboardViewport } from './KeyboardViewport';
 import { PropsWithChildren } from 'react';
-import { KeyboardAvoidingView, Platform, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BackgroundVariant, DreamyBackground } from '@/components/DreamyBackground';
@@ -23,17 +24,14 @@ export function ScreenContainer({
   background = 'day',
 }: Props) {
   return (
-    <SafeAreaView style={styles.safeArea} edges={edges}>
-      <DreamyBackground variant={background} />
-      <KeyboardAvoidingView
-        style={styles.content}
-        behavior={Platform.select({ ios: 'padding', default: 'height' })}
-      >
+    <KeyboardViewport>
+      <SafeAreaView style={styles.safeArea} edges={edges}>
+        <DreamyBackground variant={background} />
         <View style={[styles.content, floatingTabBar && { paddingBottom: floatingTabBarSpace }, style]}>
           {children}
         </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </KeyboardViewport>
   );
 }
 

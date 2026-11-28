@@ -1,7 +1,14 @@
+import { PillGradient } from '@/components/PillGradient';
+import { FlyingPlane } from '@/components/FlyingPlane';
+import { LinearGradient } from 'expo-linear-gradient';
+import type { MoodId } from '@/theme';
+import { UnwrittenWordmark } from '@/components/UnwrittenWordmark';
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect, useIsFocused } from 'expo-router';
+import { ScrollView, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 
+import { getOwnProfile } from '@/features/profile/api';
+import { useFonts, PlayfairDisplay_500Medium } from '@expo-google-fonts/playfair-display';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { listNotifications } from '@/features/notifications/api';
 import { listInteractions, listMyThoughts, listThoughts, Thought } from '@/features/thoughts/api';
@@ -10,11 +17,7 @@ import { getCached, setCached } from '@/lib/prefetchCache';
 import { PREFETCH_KEYS } from '@/lib/usePrefetchTabs';
 import { colors, radius, spacing, typography } from '@/theme';
 
-import { Bubble } from './Bubble';
-import { FloatingBalloon } from './FloatingBalloon';
 import { ThoughtDetailOverlay } from './ThoughtDetailOverlay';
-import { useBubbleLayout } from './useBubbleLayout';
-import { useReducedMotion } from './useReducedMotion';
 
 type Mode = 'world' | 'mine' | 'interactions';
 
@@ -25,9 +28,27 @@ const MODES: { id: Mode; label: string }[] = [
 ];
 
 const SUBTITLES: Record<Mode, string> = {
-  world: 'Somewhere, someone feels the same.',
+  world: 'What is on your mind today?',
   mine: 'Everything you’ve set adrift.',
   interactions: 'Thoughts you’ve connected with.',
+};
+
+function engagementLabel(thought: Thought, notified: boolean) {
+  const label = thought._count ? `♡  ${thought._count.reactions}` : thought.mood;
+  return notified ? label + '  /  New activity' : label;
+}
+
+const moodGradients: Record<MoodId, readonly [string, string, string]> = {
+  love: ['#FFF5EE', '#F2DCE6', '#E7D8EC'], deep: ['#EEF0FF', '#DDDDF1', '#CDDDE9'],
+  happy: ['#FFF9D9', '#FBE7BF', '#F7D5C4'], reflective: ['#EDF7F4', '#D4E9E4', '#DADFEF'],
+  hopeful: ['#FFF4DC', '#F4E4F3', '#D4E6F9'], random: ['#EAF6FA', '#EFDBE8', '#FCE6D0'],
+  lonely: ['#EDF0FA', '#DBE1EF', '#D6CFE6'], curious: ['#E0F5FF', '#DBE8F3', '#F6E2D4'],
+};
+const landscapes: Record<MoodId, number> = {
+  love: require('../../../assets/unwritten-meadow.jpg'), hopeful: require('../../../assets/unwritten-meadow.jpg'),
+  lonely: require('../../../assets/drift-sky-pastel.webp'), reflective: require('../../../assets/drift-sky-pastel.webp'),
+  happy: require('../../../assets/drift-sky-day.webp'), curious: require('../../../assets/unwritten-meadow.jpg'),
+  deep: require('../../../assets/drift-sky-day.webp'), random: require('../../../assets/drift-sky-pastel.webp'),
 };
 
 type ModeData = { thoughts: Thought[]; notifiedIds: Set<string> };
@@ -43,18 +64,24 @@ const MODE_CACHE_KEYS: Record<Mode, string> = {
 
 export function UniverseScreen() {
   const [mode, setMode] = useState<Mode>('world');
-  const [size, setSize] = useState({ width: 0, height: 0 });
+  const [name, setName] = useState('');
+  const [fontsLoaded] = useFonts({ PlayfairDisplay_500Medium });
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    getOwnProfile().then(profile => {
+      if (active) setName(profile.displayName.trim().split(/\s+/)[0]);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []));
   const [selected, setSelected] = useState<Thought | null>(null);
   const initialData = getCached<ModeData>(MODE_CACHE_KEYS.world);
   const [thoughts, setThoughts] = useState<Thought[]>(() => initialData?.thoughts ?? []);
   const [notifiedIds, setNotifiedIds] = useState<Set<string>>(() => initialData?.notifiedIds ?? new Set());
   const [loading, setLoading] = useState(() => initialData === undefined);
   const [error, setError] = useState<string | null>(null);
-  const reduceMotion = useReducedMotion();
-  // A screen that's been visited once stays mounted in the background when
-  // you switch tabs — without this, its bubbles would keep animating (and
-  // burning battery) even while a different tab is on screen.
-  const isFocused = useIsFocused();
+
 
   // Only "My Thoughts" pins notified bubbles to the top — World and My
   // Interactions keep the usual loosely-random placement.
@@ -65,12 +92,7 @@ export function UniverseScreen() {
     return [...notified, ...rest];
   }, [thoughts, notifiedIds, mode]);
 
-  const layouts = useBubbleLayout(ordered.length, size.width, size.height, mode === 'mine' ? notifiedIds.size : 0);
 
-  const onLayout = useCallback((event: LayoutChangeEvent) => {
-    const { width, height } = event.nativeEvent.layout;
-    setSize({ width, height });
-  }, []);
 
   // Refetch whenever the Universe tab regains focus (e.g. after posting a new
   // thought from Create), and whenever the mode toggle changes.
@@ -86,6 +108,8 @@ export function UniverseScreen() {
         setNotifiedIds(cached.notifiedIds);
         setLoading(false);
       } else {
+        setThoughts([]);
+        setNotifiedIds(new Set());
         setLoading(true);
       }
       setError(null);
@@ -134,9 +158,10 @@ export function UniverseScreen() {
   );
 
   return (
-    <ScreenContainer edges={['top']} floatingTabBar>
+    <ScreenContainer edges={['top']} floatingTabBar background="none">
       <View style={styles.header}>
-        <Text style={styles.title}>Universe</Text>
+        <UnwrittenWordmark size={34} />
+        <Text style={styles.title}>{greeting}{name ? ', ' + name : ''}</Text>
         <Text style={styles.subtitle}>{SUBTITLES[mode]}</Text>
       </View>
 
@@ -147,15 +172,19 @@ export function UniverseScreen() {
             style={[styles.modePill, mode === m.id && styles.modePillActive]}
             onPress={() => setMode(m.id)}
           >
+            {mode === m.id && <PillGradient />}
             <Text style={[styles.modeLabel, mode === m.id && styles.modeLabelActive]}>{m.label}</Text>
           </Pressable>
         ))}
       </View>
 
-      <View style={styles.field} onLayout={onLayout}>
+      <View style={styles.field}>
         {loading && thoughts.length === 0 && (
           <View style={styles.centered}>
-            <ActivityIndicator color={colors.accent} />
+            <FlyingPlane />
+            <Text accessibilityLiveRegion="polite" style={styles.subtitle}>
+              {mode === 'world' ? 'Loading thoughts from around the world' : mode === 'mine' ? 'Loading your thoughts' : 'Loading your interactions'}
+            </Text>
           </View>
         )}
         {error && (
@@ -174,19 +203,26 @@ export function UniverseScreen() {
             </Text>
           </View>
         )}
-        {layouts.length > 0 &&
-          ordered.map((thought, i) => (
-            <Bubble
-              key={thought.id}
-              thought={thought}
-              layout={layouts[i]}
-              reduceMotion={reduceMotion}
-              paused={selected?.id === thought.id || !isFocused}
-              onPress={() => setSelected(thought)}
-              hasNotification={mode === 'mine' && notifiedIds.has(thought.id)}
-            />
-          ))}
-        <FloatingBalloon reduceMotion={reduceMotion} />
+        <ScrollView contentContainerStyle={styles.feed}>
+          {ordered[0] && (
+            <Pressable style={styles.featureFrame} accessibilityRole="button" onPress={() => setSelected(ordered[0])}>
+              <ImageBackground source={landscapes[ordered[0].mood]} style={styles.feature}>
+                <Text style={[styles.quote, fontsLoaded && { fontFamily: 'PlayfairDisplay_500Medium' }]}>&ldquo;{ordered[0].text}&rdquo;</Text>
+                <Text style={styles.caption}>{engagementLabel(ordered[0], notifiedIds.has(ordered[0].id))}</Text>
+              </ImageBackground>
+            </Pressable>
+          )}
+          <View style={styles.grid}>
+            {ordered.slice(1).map(thought => (
+              <Pressable key={thought.id} accessibilityRole="button" onPress={() => setSelected(thought)}
+                style={styles.tile}>
+                <LinearGradient pointerEvents="none" colors={moodGradients[thought.mood]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: 22 }]} />
+                <Text numberOfLines={5} style={styles.tileText}>{thought.text}</Text>
+                <Text style={styles.caption}>{engagementLabel(thought, notifiedIds.has(thought.id))}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
       </View>
 
       {selected && (
@@ -204,6 +240,14 @@ export function UniverseScreen() {
 }
 
 const styles = StyleSheet.create({
+  feed: { paddingHorizontal: 16, paddingBottom: 16, gap: 12 },
+  featureFrame: { borderRadius: 22, boxShadow: '0px 3px 10px rgba(35,42,68,0.14)' },
+  feature: { minHeight: 205, padding: 26, borderRadius: 22, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', gap: 12 },
+  quote: { color: '#131D39', fontSize: 16, lineHeight: 23, textAlign: 'center', letterSpacing: -0.35 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  tile: { boxShadow: '0px 3px 8px rgba(35,42,68,0.12)', width: '48%', minHeight: 125, borderRadius: 22, padding: 16, justifyContent: 'space-between', gap: 12 },
+  tileText: { color: colors.textPrimary, fontSize: 16, lineHeight: 21 },
+  caption: { color: colors.textPrimary, fontSize: 12, textTransform: 'capitalize' },
   header: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
@@ -211,7 +255,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: typography.fontFamily,
-    fontSize: typography.size.xxl,
+    marginTop: 18,
+    fontSize: 23,
+    letterSpacing: -0.5,
     fontWeight: typography.weight.bold,
     color: colors.textPrimary,
   },
@@ -233,12 +279,12 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    backgroundColor: 'rgba(255, 255, 255, 0.55)',
     alignItems: 'center',
   },
   modePillActive: {
-    borderColor: colors.accent,
-    backgroundColor: 'rgba(255, 255, 255, 0.45)',
+    borderColor: '#294D72',
+    backgroundColor: '#204B76',
     shadowColor: colors.accent,
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -252,7 +298,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   modeLabelActive: {
-    color: colors.textPrimary,
+    color: '#FFFFFF',
     fontWeight: typography.weight.semibold,
   },
   field: {

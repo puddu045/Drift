@@ -19,7 +19,7 @@ export function Nav() {
   return (
     <nav className="flex items-center justify-between border-b border-slate-200 px-6 py-3">
       <div className="flex items-center gap-6">
-        <span className="font-semibold">Drift Admin</span>
+        <span className="font-semibold">Unwritten Admin</span>
         {LINKS.map((link) => (
           <Link
             key={link.href}

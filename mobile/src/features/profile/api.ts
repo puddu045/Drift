@@ -1,3 +1,4 @@
+import { setCached } from '@/lib/prefetchCache';
 import { api } from '@/lib/api';
 import { MoodId } from '@/theme';
 
@@ -27,7 +28,10 @@ export type UpsertProfileInput = {
 };
 
 export function getOwnProfile() {
-  return api.get<Profile>('/profiles/me');
+  return api.get<Profile>('/profiles/me').then(profile => {
+    setCached('profile:' + profile.userId, profile);
+    return profile;
+  });
 }
 
 export function upsertOwnProfile(input: UpsertProfileInput) {
