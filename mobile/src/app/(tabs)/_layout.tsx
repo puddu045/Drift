@@ -71,10 +71,7 @@ export default function TabLayout() {
           name="destiny"
           options={{ title: 'Destiny', tabBarIcon: tabIcon('star-outline', 'star') }}
         />
-        <Tabs.Screen
-          name="create"
-          options={{ title: 'Create', tabBarStyle: { display: 'none' }, tabBarIcon: tabIcon('add-circle-outline', 'add-circle') }}
-        />
+        <Tabs.Screen name="create" options={{ title: 'Create', href: null }} />
         <Tabs.Screen
           name="connections"
           options={{ title: 'Connections', tabBarIcon: tabIcon('people-outline', 'people') }}

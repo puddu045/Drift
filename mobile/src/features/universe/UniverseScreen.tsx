@@ -1,11 +1,12 @@
 import { PillGradient } from '@/components/PillGradient';
 import { FlyingPlane } from '@/components/FlyingPlane';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { MoodId } from '@/theme';
 import { UnwrittenWordmark } from '@/components/UnwrittenWordmark';
 import { useCallback, useMemo, useState } from 'react';
 import { ScrollView, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 
 import { getOwnProfile } from '@/features/profile/api';
 import { useFonts, PlayfairDisplay_500Medium } from '@expo-google-fonts/playfair-display';
@@ -63,6 +64,7 @@ const MODE_CACHE_KEYS: Record<Mode, string> = {
 };
 
 export function UniverseScreen() {
+  const router = useRouter();
   const [mode, setMode] = useState<Mode>('world');
   const [name, setName] = useState('');
   const [fontsLoaded] = useFonts({ PlayfairDisplay_500Medium });
@@ -225,6 +227,18 @@ export function UniverseScreen() {
         </ScrollView>
       </View>
 
+      {mode !== 'interactions' && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Create a thought"
+          onPress={() => router.navigate('/(tabs)/create')}
+          style={styles.fab}
+        >
+          <PillGradient tone="brand" />
+          <Ionicons name="add" size={28} color="#FFFFFF" />
+        </Pressable>
+      )}
+
       {selected && (
         <ThoughtDetailOverlay
           thought={selected}
@@ -313,5 +327,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.xl,
+  },
+  fab: {
+    position: 'absolute',
+    right: spacing.lg,
+    // ScreenContainer's floatingTabBar paddingBottom already reserves space
+    // for the tab bar below the content box, so this only needs a small gap
+    // above that — not the tab bar's own height on top of it again.
+    bottom: spacing.lg,
+    width: 56,
+    height: 56,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.textPrimary,
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
   },
 });
