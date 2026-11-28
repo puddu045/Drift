@@ -234,16 +234,18 @@ export function ThoughtDetailOverlay({
           )}
             <MoodTag mood={thought.mood} />
             <Text style={styles.text}>{translation.text ?? thought.text}</Text>
-            <Pressable style={styles.translateRow} onPress={translation.toggle} disabled={translation.loading}>
-              <Text style={styles.translateLink}>
-                {translation.loading
-                  ? t('common.translating')
-                  : translation.showingTranslation
-                    ? t('common.showOriginal')
-                    : t('common.translate')}
-              </Text>
-              <MaterialIcons name="translate" size={14} color="#234A74" />
-            </Pressable>
+            {!isOwnThought && (
+              <Pressable style={styles.translateRow} onPress={translation.toggle} disabled={translation.loading}>
+                <Text style={styles.translateLink}>
+                  {translation.loading
+                    ? t('common.translating')
+                    : translation.showingTranslation
+                      ? t('common.showOriginal')
+                      : t('common.translate')}
+                </Text>
+                <MaterialIcons name="translate" size={14} color="#234A74" />
+              </Pressable>
+            )}
             {translation.error && <Text style={styles.actionMessage}>{translation.error}</Text>}
 
             {detail && <Text style={styles.engagement}>{detail._count.reactions} {t('thought.reactionsLabel')}   /   {detail.replies.length} {t('thought.repliesLabel')}</Text>}

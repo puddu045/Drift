@@ -107,7 +107,7 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
     <ScreenContainer background="haze">
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} accessibilityLabel={t('common.back')}>
-          <Text style={styles.back}>‹ {t('common.back')}</Text>
+          <Text style={styles.back}>‹</Text>
         </Pressable>
         <Avatar name={peer?.displayName} photoUrl={peer?.photoUrl} size={38} />
         <Text numberOfLines={1} style={styles.peerName}>{peer?.displayName ?? t('connections.someone')}</Text>
