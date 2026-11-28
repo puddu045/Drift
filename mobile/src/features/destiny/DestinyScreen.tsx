@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, useWindowDimensions, ScrollView, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts, PlayfairDisplay_400Regular_Italic } from '@expo-google-fonts/playfair-display';
 
@@ -57,7 +57,7 @@ export function DestinyScreen() {
           <View style={styles.card}>
             <MoodTag mood={thought.mood} />
             <Text style={[styles.text, { fontSize: quoteSize, lineHeight: Math.round(quoteSize * 1.34) }]}>&ldquo;{translation.text ?? thought.text}&rdquo;</Text>
-            <Pressable onPress={translation.toggle} disabled={translation.loading}>
+            <Pressable style={styles.translateRow} onPress={translation.toggle} disabled={translation.loading}>
               <Text style={styles.translateLink}>
                 {translation.loading
                   ? t('common.translating')
@@ -65,6 +65,7 @@ export function DestinyScreen() {
                     ? t('common.showOriginal')
                     : t('common.translate')}
               </Text>
+              <MaterialIcons name="translate" size={14} color="white" />
             </Pressable>
             {translation.error && <Text style={styles.error}>{translation.error}</Text>}
 
@@ -144,6 +145,11 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
     color: 'white',
+  },
+  translateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   translateLink: {
     fontFamily: typography.fontFamily,
