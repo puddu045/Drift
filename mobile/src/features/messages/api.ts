@@ -28,3 +28,10 @@ export function listMessages(conversationId: string, cursor?: string) {
 export function sendMessage(conversationId: string, text: string) {
   return api.post<Message>(`/conversations/${conversationId}/messages`, { text });
 }
+
+export type Translation = { translatedText: string; language: string };
+
+/** On-demand only — never called automatically, just from a "Translate" tap. */
+export function translateMessage(conversationId: string, messageId: string) {
+  return api.post<Translation>(`/conversations/${conversationId}/messages/${messageId}/translate`);
+}

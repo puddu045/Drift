@@ -28,7 +28,7 @@ function currentDayKey(): string {
   return new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD', UTC
 }
 
-export type TranslatableContentType = 'thought' | 'reply' | 'profile_bio';
+export type TranslatableContentType = 'thought' | 'reply' | 'profile_bio' | 'message';
 
 const URL_ONLY_PATTERN = /^(https?:\/\/|www\.)\S+$/i;
 

@@ -1,7 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { dailyTranslateLimit, TranslationService } from '../translation/translation.service.js';
 import { MessagesQuery } from './messages.schemas.js';
 
 @Injectable()
@@ -9,6 +10,7 @@ export class MessagesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly translation: TranslationService,
   ) {}
 
   private async requireActiveParticipant(userId: string, conversationId: string) {
@@ -68,5 +70,33 @@ export class MessagesService {
       await this.notifications.create(other.userId, 'message', { conversationId, messageId: message.id });
     }
     return message;
+  }
+
+  /** On-demand only — never called automatically, just from a "Translate" tap. */
+  async translateMessage(viewerId: string, conversationId: string, messageId: string) {
+    await this.requireActiveParticipant(viewerId, conversationId);
+    const message = await this.prisma.message.findUnique({
+      where: { id: messageId },
+      select: { id: true, conversationId: true, text: true, deletedAt: true },
+    });
+    if (!message || message.deletedAt || message.conversationId !== conversationId) {
+      throw new NotFoundException('Message not found');
+    }
+
+    const preferredLanguage = await this.translation.getPreferredLanguage(viewerId);
+    if (!preferredLanguage) {
+      throw new BadRequestException('Set a preferred language in your profile before translating.');
+    }
+
+    if (!(await this.translation.reserveDailyQuota(viewerId, 'message', message.id))) {
+      throw new ForbiddenException(
+        `You can translate up to ${dailyTranslateLimit()} items per day. Try again tomorrow.`,
+      );
+    }
+
+    const [translatedText] = await this.translation.translateBatch([message.text], preferredLanguage, [
+      { type: 'message', id: message.id },
+    ]);
+    return { translatedText, language: preferredLanguage };
   }
 }
