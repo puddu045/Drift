@@ -3,11 +3,9 @@
   "tabs.destiny": "Destin",
   "tabs.create": "Créer",
   "tabs.connections": "Connexions",
-
   "welcome.tagline": "Le prochain chapitre\npourrait n'être qu'à un inconnu de vous.",
   "welcome.getStarted": "Commencer",
   "welcome.haveAccount": "J'ai déjà un compte",
-
   "auth.welcomeBack": "Bon retour",
   "auth.createAccount": "Créer un compte",
   "auth.email": "E-mail",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Pas de compte ? Inscrivez-vous",
   "auth.switchToSignIn": "Déjà un compte ? Connectez-vous",
   "auth.back": "Retour",
-
   "universe.greetingMorning": "Bonjour",
   "universe.greetingAfternoon": "Bon après-midi",
   "universe.greetingEvening": "Bonsoir",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Rien à voir pour l'instant. Revenez bientôt.",
   "universe.couldNotLoad": "Impossible de charger les pensées.",
   "universe.createThought": "Créer une pensée",
-
   "destiny.title": "Destin",
   "destiny.subtitle": "La pensée d'un inconnu, juste pour vous aujourd'hui.",
   "destiny.letItDrift": "Laissez-la dériver",
   "destiny.reply": "Répondre",
   "destiny.drifted": "Vous l'avez laissée dériver.",
   "destiny.noneAvailable": "Aucune pensée Destin disponible aujourd'hui.",
-
   "common.translate": "Traduire",
   "common.showOriginal": "Afficher l'original",
   "common.translating": "Traduction…",
   "common.back": "Retour",
   "common.anonymous": "Anonyme",
   "common.close": "Fermer",
-
   "compose.title": "Partagez une pensée",
   "compose.subtitle": "Laissez votre pensée dériver dans l'univers.",
   "compose.placeholder": "Qu'avez-vous en tête ?",
@@ -65,7 +59,6 @@
   "mood.random": "Aléatoire",
   "mood.lonely": "Seul",
   "mood.curious": "Curieux",
-
   "profile.title": "Profil",
   "profile.loading": "Chargement du profil...",
   "profile.changePhoto": "Changer la photo",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Privé — vous seul pouvez voir votre e-mail. Il n'est jamais montré à personne d'autre.",
   "profile.createProfile": "Créer le profil",
   "profile.usernameFieldHint": "Lettres minuscules, chiffres et underscores uniquement.",
-
   "publicProfile.connectionRequestSent": "Demande de connexion envoyée.",
   "publicProfile.couldNotSendRequest": "Impossible d'envoyer la demande.",
   "publicProfile.reportSent": "Signalement envoyé.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Aucune pensée publique pour l'instant.",
   "publicProfile.connect": "Se connecter",
   "publicProfile.mute": "Masquer",
-  "publicProfile.report": "Signaler"
+  "publicProfile.report": "Signaler",
+  "connections.title": "Connexions",
+  "connections.subtitle": "Les personnes avec qui vous êtes connecté.",
+  "connections.chats": "Discussions",
+  "connections.requests": "Demandes",
+  "connections.noRequests": "Aucune demande entrante.",
+  "connections.accept": "Accepter",
+  "connections.decline": "Refuser",
+  "connections.someone": "Quelqu'un",
+  "connections.noConnections": "Aucune connexion pour l'instant.",
+  "connections.loadingChats": "Chargement des discussions...",
+  "connections.couldNotLoad": "Impossible de charger les connexions.",
+  "connections.unreadSuffix": "notifications de messages non lus"
 }

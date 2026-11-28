@@ -3,11 +3,9 @@
   "tabs.destiny": "Πεπρωμένο",
   "tabs.create": "Δημιουργία",
   "tabs.connections": "Συνδέσεις",
-
   "welcome.tagline": "Το επόμενο κεφάλαιο\nμπορεί να απέχει μόνο έναν άγνωστο.",
   "welcome.getStarted": "Ξεκινήστε",
   "welcome.haveAccount": "Έχω ήδη λογαριασμό",
-
   "auth.welcomeBack": "Καλώς ήρθατε ξανά",
   "auth.createAccount": "Δημιουργία λογαριασμού",
   "auth.email": "E-mail",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Δεν έχετε λογαριασμό; Εγγραφή",
   "auth.switchToSignIn": "Έχετε ήδη λογαριασμό; Σύνδεση",
   "auth.back": "Πίσω",
-
   "universe.greetingMorning": "Καλημέρα",
   "universe.greetingAfternoon": "Καλό απόγευμα",
   "universe.greetingEvening": "Καλησπέρα",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Τίποτα να δεις ακόμα. Έλα ξανά σύντομα.",
   "universe.couldNotLoad": "Δεν ήταν δυνατή η φόρτωση των σκέψεων.",
   "universe.createThought": "Δημιουργία σκέψης",
-
   "destiny.title": "Πεπρωμένο",
   "destiny.subtitle": "Η σκέψη ενός αγνώστου, μόνο για εσένα σήμερα.",
   "destiny.letItDrift": "Άσε την να παρασυρθεί",
   "destiny.reply": "Απάντηση",
   "destiny.drifted": "Την άφησες να παρασυρθεί.",
   "destiny.noneAvailable": "Δεν υπάρχει διαθέσιμη σκέψη Πεπρωμένου σήμερα.",
-
   "common.translate": "Μετάφραση",
   "common.showOriginal": "Εμφάνιση πρωτοτύπου",
   "common.translating": "Μετάφραση σε εξέλιξη…",
   "common.back": "Πίσω",
   "common.anonymous": "Ανώνυμος",
   "common.close": "Κλείσιμο",
-
   "compose.title": "Μοιράσου μια σκέψη",
   "compose.subtitle": "Άσε τη σκέψη σου να παρασυρθεί στο σύμπαν.",
   "compose.placeholder": "Τι σκέφτεσαι;",
@@ -65,7 +59,6 @@
   "mood.random": "Τυχαία",
   "mood.lonely": "Μοναχική",
   "mood.curious": "Περίεργη",
-
   "profile.title": "Προφίλ",
   "profile.loading": "Φόρτωση προφίλ...",
   "profile.changePhoto": "Αλλαγή φωτογραφίας",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Ιδιωτικό — μόνο εσύ μπορείς να δεις το e-mail σου. Δεν εμφανίζεται ποτέ σε κανέναν άλλον.",
   "profile.createProfile": "Δημιουργία προφίλ",
   "profile.usernameFieldHint": "Μόνο πεζά γράμματα, αριθμοί και κάτω παύλες.",
-
   "publicProfile.connectionRequestSent": "Το αίτημα σύνδεσης στάλθηκε.",
   "publicProfile.couldNotSendRequest": "Δεν ήταν δυνατή η αποστολή του αιτήματος.",
   "publicProfile.reportSent": "Η αναφορά στάλθηκε.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Καμία δημόσια σκέψη ακόμα.",
   "publicProfile.connect": "Σύνδεση",
   "publicProfile.mute": "Σίγαση",
-  "publicProfile.report": "Αναφορά"
+  "publicProfile.report": "Αναφορά",
+  "connections.title": "Συνδέσεις",
+  "connections.subtitle": "Άτομα με τα οποία έχεις συνδεθεί.",
+  "connections.chats": "Συνομιλίες",
+  "connections.requests": "Αιτήματα",
+  "connections.noRequests": "Δεν υπάρχουν εισερχόμενα αιτήματα.",
+  "connections.accept": "Αποδοχή",
+  "connections.decline": "Απόρριψη",
+  "connections.someone": "Κάποιος",
+  "connections.noConnections": "Καμία σύνδεση ακόμα.",
+  "connections.loadingChats": "Φόρτωση συνομιλιών…",
+  "connections.couldNotLoad": "Δεν ήταν δυνατή η φόρτωση των συνδέσεων.",
+  "connections.unreadSuffix": "ειδοποιήσεις μη αναγνωσμένων μηνυμάτων"
 }

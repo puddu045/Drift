@@ -3,11 +3,9 @@
   "tabs.destiny": "Öde",
   "tabs.create": "Skapa",
   "tabs.connections": "Kontakter",
-
   "welcome.tagline": "Nästa kapitel\nkan vara bara en främling bort.",
   "welcome.getStarted": "Kom igång",
   "welcome.haveAccount": "Jag har redan ett konto",
-
   "auth.welcomeBack": "Välkommen tillbaka",
   "auth.createAccount": "Skapa ett konto",
   "auth.email": "E-post",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Inget konto? Registrera dig",
   "auth.switchToSignIn": "Har du redan ett konto? Logga in",
   "auth.back": "Tillbaka",
-
   "universe.greetingMorning": "God morgon",
   "universe.greetingAfternoon": "God eftermiddag",
   "universe.greetingEvening": "God kväll",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Inget att se än. Kom tillbaka snart.",
   "universe.couldNotLoad": "Kunde inte läsa in tankar.",
   "universe.createThought": "Skapa en tanke",
-
   "destiny.title": "Öde",
   "destiny.subtitle": "En främlings tanke, bara för dig idag.",
   "destiny.letItDrift": "Låt den driva iväg",
   "destiny.reply": "Svara",
   "destiny.drifted": "Du lät den driva iväg.",
   "destiny.noneAvailable": "Ingen Öde-tanke tillgänglig idag.",
-
   "common.translate": "Översätt",
   "common.showOriginal": "Visa original",
   "common.translating": "Översätter…",
   "common.back": "Tillbaka",
   "common.anonymous": "Anonym",
   "common.close": "Stäng",
-
   "compose.title": "Dela en tanke",
   "compose.subtitle": "Låt din tanke driva iväg i universum.",
   "compose.placeholder": "Vad tänker du på?",
@@ -65,7 +59,6 @@
   "mood.random": "Slumpmässig",
   "mood.lonely": "Ensam",
   "mood.curious": "Nyfiken",
-
   "profile.title": "Profil",
   "profile.loading": "Läser in profil...",
   "profile.changePhoto": "Byt foto",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Privat — bara du kan se din e-post. Den visas aldrig för någon annan.",
   "profile.createProfile": "Skapa profil",
   "profile.usernameFieldHint": "Endast gemener, siffror och understreck.",
-
   "publicProfile.connectionRequestSent": "Kontaktförfrågan skickad.",
   "publicProfile.couldNotSendRequest": "Kunde inte skicka förfrågan.",
   "publicProfile.reportSent": "Rapport skickad.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Inga offentliga tankar än.",
   "publicProfile.connect": "Anslut",
   "publicProfile.mute": "Tysta",
-  "publicProfile.report": "Rapportera"
+  "publicProfile.report": "Rapportera",
+  "connections.title": "Kontakter",
+  "connections.subtitle": "Personer du har anslutit med.",
+  "connections.chats": "Chattar",
+  "connections.requests": "Förfrågningar",
+  "connections.noRequests": "Inga inkommande förfrågningar.",
+  "connections.accept": "Acceptera",
+  "connections.decline": "Avvisa",
+  "connections.someone": "Någon",
+  "connections.noConnections": "Inga kontakter än.",
+  "connections.loadingChats": "Läser in chattar...",
+  "connections.couldNotLoad": "Kunde inte läsa in kontakter.",
+  "connections.unreadSuffix": "olästa meddelandeaviseringar"
 }

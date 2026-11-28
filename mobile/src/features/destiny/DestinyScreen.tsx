@@ -163,6 +163,8 @@ const styles = StyleSheet.create({
     gap: 6,
     flex: 1,
     minHeight: 44,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
     borderRadius: 22,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.8)',
@@ -170,10 +172,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   driftLabel: {
+    flexShrink: 1,
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
     color: 'white',
+    textAlign: 'center',
   },
   replyButtonWrapper: {
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.65)',
@@ -187,11 +191,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     minHeight: 44,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   replyLabel: {
+    flexShrink: 1,
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
     color: 'white',
+    textAlign: 'center',
   },
 });

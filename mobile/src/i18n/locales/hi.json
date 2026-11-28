@@ -3,11 +3,9 @@
   "tabs.destiny": "नियति",
   "tabs.create": "बनाएं",
   "tabs.connections": "कनेक्शन",
-
   "welcome.tagline": "अगला अध्याय\nशायद बस एक अजनबी जितनी दूर हो।",
   "welcome.getStarted": "शुरू करें",
   "welcome.haveAccount": "मेरे पास पहले से खाता है",
-
   "auth.welcomeBack": "वापसी पर स्वागत है",
   "auth.createAccount": "खाता बनाएं",
   "auth.email": "ईमेल",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "खाता नहीं है? साइन अप करें",
   "auth.switchToSignIn": "पहले से खाता है? साइन इन करें",
   "auth.back": "वापस",
-
   "universe.greetingMorning": "सुप्रभात",
   "universe.greetingAfternoon": "नमस्कार",
   "universe.greetingEvening": "शुभ संध्या",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "अभी देखने के लिए कुछ नहीं है। जल्द ही फिर देखें।",
   "universe.couldNotLoad": "विचार लोड नहीं हो सके।",
   "universe.createThought": "एक विचार बनाएं",
-
   "destiny.title": "नियति",
   "destiny.subtitle": "एक अजनबी का विचार, आज सिर्फ आपके लिए।",
   "destiny.letItDrift": "इसे बहने दें",
   "destiny.reply": "जवाब दें",
   "destiny.drifted": "आपने इसे बहने दिया।",
   "destiny.noneAvailable": "आज कोई नियति विचार उपलब्ध नहीं है।",
-
   "common.translate": "अनुवाद करें",
   "common.showOriginal": "मूल दिखाएं",
   "common.translating": "अनुवाद हो रहा है…",
   "common.back": "वापस",
   "common.anonymous": "अज्ञात",
   "common.close": "बंद करें",
-
   "compose.title": "एक विचार साझा करें",
   "compose.subtitle": "अपने विचार को ब्रह्मांड में बहने दें।",
   "compose.placeholder": "आपके मन में क्या है?",
@@ -65,7 +59,6 @@
   "mood.random": "यादृच्छिक",
   "mood.lonely": "अकेला",
   "mood.curious": "जिज्ञासु",
-
   "profile.title": "प्रोफ़ाइल",
   "profile.loading": "प्रोफ़ाइल लोड हो रही है...",
   "profile.changePhoto": "फ़ोटो बदलें",
@@ -93,7 +86,6 @@
   "profile.emailHint": "निजी — केवल आप अपना ईमेल देख सकते हैं। यह कभी किसी और को नहीं दिखाया जाता।",
   "profile.createProfile": "प्रोफ़ाइल बनाएं",
   "profile.usernameFieldHint": "केवल छोटे अक्षर, संख्याएं और अंडरस्कोर।",
-
   "publicProfile.connectionRequestSent": "कनेक्शन अनुरोध भेजा गया।",
   "publicProfile.couldNotSendRequest": "अनुरोध नहीं भेजा जा सका।",
   "publicProfile.reportSent": "रिपोर्ट भेजी गई।",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "अभी तक कोई सार्वजनिक विचार नहीं है।",
   "publicProfile.connect": "कनेक्ट करें",
   "publicProfile.mute": "म्यूट करें",
-  "publicProfile.report": "रिपोर्ट करें"
+  "publicProfile.report": "रिपोर्ट करें",
+  "connections.title": "कनेक्शन",
+  "connections.subtitle": "वे लोग जिनसे आप जुड़े हैं।",
+  "connections.chats": "चैट",
+  "connections.requests": "अनुरोध",
+  "connections.noRequests": "कोई आने वाला अनुरोध नहीं है।",
+  "connections.accept": "स्वीकार करें",
+  "connections.decline": "अस्वीकार करें",
+  "connections.someone": "कोई",
+  "connections.noConnections": "अभी तक कोई कनेक्शन नहीं है।",
+  "connections.loadingChats": "चैट लोड हो रही हैं...",
+  "connections.couldNotLoad": "कनेक्शन लोड नहीं हो सके।",
+  "connections.unreadSuffix": "अपठित संदेश सूचनाएं"
 }

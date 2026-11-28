@@ -3,11 +3,9 @@
   "tabs.destiny": "Lot",
   "tabs.create": "Maken",
   "tabs.connections": "Connecties",
-
   "welcome.tagline": "Het volgende hoofdstuk\nkan zomaar een vreemde verderop zijn.",
   "welcome.getStarted": "Aan de slag",
   "welcome.haveAccount": "Ik heb al een account",
-
   "auth.welcomeBack": "Welkom terug",
   "auth.createAccount": "Account aanmaken",
   "auth.email": "E-mail",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Nog geen account? Registreren",
   "auth.switchToSignIn": "Al een account? Inloggen",
   "auth.back": "Terug",
-
   "universe.greetingMorning": "Goedemorgen",
   "universe.greetingAfternoon": "Goedemiddag",
   "universe.greetingEvening": "Goedenavond",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Nog niets te zien. Kom snel terug.",
   "universe.couldNotLoad": "Gedachten konden niet worden geladen.",
   "universe.createThought": "Een gedachte maken",
-
   "destiny.title": "Lot",
   "destiny.subtitle": "De gedachte van een vreemde, vandaag alleen voor jou.",
   "destiny.letItDrift": "Laat het wegdrijven",
   "destiny.reply": "Reageren",
   "destiny.drifted": "Je hebt het laten wegdrijven.",
   "destiny.noneAvailable": "Vandaag geen Lot-gedachte beschikbaar.",
-
   "common.translate": "Vertalen",
   "common.showOriginal": "Origineel tonen",
   "common.translating": "Bezig met vertalen…",
   "common.back": "Terug",
   "common.anonymous": "Anoniem",
   "common.close": "Sluiten",
-
   "compose.title": "Deel een gedachte",
   "compose.subtitle": "Laat je gedachte wegdrijven in het universum.",
   "compose.placeholder": "Wat houdt je bezig?",
@@ -65,7 +59,6 @@
   "mood.random": "Willekeurig",
   "mood.lonely": "Eenzaam",
   "mood.curious": "Nieuwsgierig",
-
   "profile.title": "Profiel",
   "profile.loading": "Profiel wordt geladen...",
   "profile.changePhoto": "Foto wijzigen",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Privé — alleen jij kunt je e-mail zien. Deze wordt nooit aan iemand anders getoond.",
   "profile.createProfile": "Profiel aanmaken",
   "profile.usernameFieldHint": "Alleen kleine letters, cijfers en underscores.",
-
   "publicProfile.connectionRequestSent": "Connectieverzoek verzonden.",
   "publicProfile.couldNotSendRequest": "Verzoek kon niet worden verzonden.",
   "publicProfile.reportSent": "Melding verzonden.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Nog geen openbare gedachten.",
   "publicProfile.connect": "Connecten",
   "publicProfile.mute": "Dempen",
-  "publicProfile.report": "Melden"
+  "publicProfile.report": "Melden",
+  "connections.title": "Connecties",
+  "connections.subtitle": "Mensen met wie je verbonden bent.",
+  "connections.chats": "Chats",
+  "connections.requests": "Verzoeken",
+  "connections.noRequests": "Geen inkomende verzoeken.",
+  "connections.accept": "Accepteren",
+  "connections.decline": "Weigeren",
+  "connections.someone": "Iemand",
+  "connections.noConnections": "Nog geen connecties.",
+  "connections.loadingChats": "Chats worden geladen...",
+  "connections.couldNotLoad": "Connecties konden niet worden geladen.",
+  "connections.unreadSuffix": "ongelezen berichtmeldingen"
 }

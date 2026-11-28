@@ -3,11 +3,9 @@
   "tabs.destiny": "命运",
   "tabs.create": "创建",
   "tabs.connections": "连接",
-
   "welcome.tagline": "下一章\n也许只隔着一个陌生人。",
   "welcome.getStarted": "开始使用",
   "welcome.haveAccount": "我已经有账户了",
-
   "auth.welcomeBack": "欢迎回来",
   "auth.createAccount": "创建账户",
   "auth.email": "电子邮箱",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "还没有账户？注册",
   "auth.switchToSignIn": "已经有账户？登录",
   "auth.back": "返回",
-
   "universe.greetingMorning": "早上好",
   "universe.greetingAfternoon": "下午好",
   "universe.greetingEvening": "晚上好",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "还没有可看的内容，请稍后再来看看。",
   "universe.couldNotLoad": "无法加载想法。",
   "universe.createThought": "创建一个想法",
-
   "destiny.title": "命运",
   "destiny.subtitle": "一个陌生人的想法，今天只属于你。",
   "destiny.letItDrift": "让它漂走",
   "destiny.reply": "回复",
   "destiny.drifted": "你让它漂走了。",
   "destiny.noneAvailable": "今天没有可用的命运想法。",
-
   "common.translate": "翻译",
   "common.showOriginal": "显示原文",
   "common.translating": "正在翻译…",
   "common.back": "返回",
   "common.anonymous": "匿名",
   "common.close": "关闭",
-
   "compose.title": "分享一个想法",
   "compose.subtitle": "让你的想法在宇宙中漂流。",
   "compose.placeholder": "你在想什么？",
@@ -65,7 +59,6 @@
   "mood.random": "随机",
   "mood.lonely": "孤独",
   "mood.curious": "好奇",
-
   "profile.title": "个人资料",
   "profile.loading": "正在加载个人资料...",
   "profile.changePhoto": "更换照片",
@@ -93,7 +86,6 @@
   "profile.emailHint": "隐私 — 只有你能看到你的电子邮箱，永远不会向其他任何人显示。",
   "profile.createProfile": "创建个人资料",
   "profile.usernameFieldHint": "仅限小写字母、数字和下划线。",
-
   "publicProfile.connectionRequestSent": "连接请求已发送。",
   "publicProfile.couldNotSendRequest": "无法发送请求。",
   "publicProfile.reportSent": "举报已发送。",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "还没有公开想法。",
   "publicProfile.connect": "连接",
   "publicProfile.mute": "屏蔽",
-  "publicProfile.report": "举报"
+  "publicProfile.report": "举报",
+  "connections.title": "连接",
+  "connections.subtitle": "与你建立连接的人。",
+  "connections.chats": "聊天",
+  "connections.requests": "请求",
+  "connections.noRequests": "没有收到的请求。",
+  "connections.accept": "接受",
+  "connections.decline": "拒绝",
+  "connections.someone": "某人",
+  "connections.noConnections": "还没有连接。",
+  "connections.loadingChats": "正在加载聊天...",
+  "connections.couldNotLoad": "无法加载连接。",
+  "connections.unreadSuffix": "条未读消息通知"
 }

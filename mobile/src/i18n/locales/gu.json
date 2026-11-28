@@ -3,11 +3,9 @@
   "tabs.destiny": "નિયતિ",
   "tabs.create": "બનાવો",
   "tabs.connections": "જોડાણો",
-
   "welcome.tagline": "આગામી પ્રકરણ\nકદાચ ફક્ત એક અજાણ્યા વ્યક્તિ જેટલું દૂર હોઈ શકે.",
   "welcome.getStarted": "શરૂ કરો",
   "welcome.haveAccount": "મારી પાસે પહેલેથી જ ખાતું છે",
-
   "auth.welcomeBack": "ફરી સ્વાગત છે",
   "auth.createAccount": "ખાતું બનાવો",
   "auth.email": "ઈમેલ",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "ખાતું નથી? સાઇન અપ કરો",
   "auth.switchToSignIn": "પહેલેથી ખાતું છે? સાઇન ઇન કરો",
   "auth.back": "પાછા",
-
   "universe.greetingMorning": "શુભ સવાર",
   "universe.greetingAfternoon": "શુભ બપોર",
   "universe.greetingEvening": "શુભ સાંજ",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "જોવા માટે હજી કંઈ નથી. ટૂંક સમયમાં ફરી તપાસો.",
   "universe.couldNotLoad": "વિચારો લોડ કરી શકાયા નહીં.",
   "universe.createThought": "એક વિચાર બનાવો",
-
   "destiny.title": "નિયતિ",
   "destiny.subtitle": "એક અજાણ્યા વ્યક્તિનો વિચાર, આજે ફક્ત તમારા માટે.",
   "destiny.letItDrift": "તેને વહેવા દો",
   "destiny.reply": "જવાબ આપો",
   "destiny.drifted": "તમે તેને વહેવા દીધું.",
   "destiny.noneAvailable": "આજે કોઈ નિયતિ વિચાર ઉપલબ્ધ નથી.",
-
   "common.translate": "અનુવાદ કરો",
   "common.showOriginal": "મૂળ બતાવો",
   "common.translating": "અનુવાદ થઈ રહ્યો છે…",
   "common.back": "પાછા",
   "common.anonymous": "અજ્ઞાત",
   "common.close": "બંધ કરો",
-
   "compose.title": "એક વિચાર શેર કરો",
   "compose.subtitle": "તમારા વિચારને બ્રહ્માંડમાં વહેવા દો.",
   "compose.placeholder": "તમારા મનમાં શું છે?",
@@ -65,7 +59,6 @@
   "mood.random": "અવ્યવસ્થિત",
   "mood.lonely": "એકલું",
   "mood.curious": "જિજ્ઞાસુ",
-
   "profile.title": "પ્રોફાઇલ",
   "profile.loading": "પ્રોફાઇલ લોડ થઈ રહી છે...",
   "profile.changePhoto": "ફોટો બદલો",
@@ -93,7 +86,6 @@
   "profile.emailHint": "ખાનગી — ફક્ત તમે તમારું ઈમેલ જોઈ શકો છો. તે ક્યારેય બીજા કોઈને બતાવાતું નથી.",
   "profile.createProfile": "પ્રોફાઇલ બનાવો",
   "profile.usernameFieldHint": "ફક્ત નાના અક્ષરો, સંખ્યાઓ અને અન્ડરસ્કોર.",
-
   "publicProfile.connectionRequestSent": "જોડાણ વિનંતી મોકલાઈ.",
   "publicProfile.couldNotSendRequest": "વિનંતી મોકલી શકાઈ નહીં.",
   "publicProfile.reportSent": "રિપોર્ટ મોકલાયો.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "હજી સુધી કોઈ જાહેર વિચારો નથી.",
   "publicProfile.connect": "જોડાઓ",
   "publicProfile.mute": "મ્યૂટ કરો",
-  "publicProfile.report": "રિપોર્ટ કરો"
+  "publicProfile.report": "રિપોર્ટ કરો",
+  "connections.title": "જોડાણો",
+  "connections.subtitle": "જે લોકો સાથે તમે જોડાયેલા છો.",
+  "connections.chats": "ચેટ્સ",
+  "connections.requests": "વિનંતીઓ",
+  "connections.noRequests": "કોઈ આવતી વિનંતી નથી.",
+  "connections.accept": "સ્વીકારો",
+  "connections.decline": "નકારો",
+  "connections.someone": "કોઈ",
+  "connections.noConnections": "હજી સુધી કોઈ જોડાણ નથી.",
+  "connections.loadingChats": "ચેટ્સ લોડ થઈ રહી છે...",
+  "connections.couldNotLoad": "જોડાણો લોડ કરી શકાયા નહીં.",
+  "connections.unreadSuffix": "ન વંચાયેલ સંદેશ સૂચનાઓ"
 }

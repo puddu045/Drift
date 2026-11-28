@@ -101,5 +101,18 @@
   "publicProfile.noThoughtsYet": "No public thoughts yet.",
   "publicProfile.connect": "Connect",
   "publicProfile.mute": "Mute",
-  "publicProfile.report": "Report"
+  "publicProfile.report": "Report",
+
+  "connections.title": "Connections",
+  "connections.subtitle": "People you've connected with.",
+  "connections.chats": "Chats",
+  "connections.requests": "Requests",
+  "connections.noRequests": "No incoming requests.",
+  "connections.accept": "Accept",
+  "connections.decline": "Decline",
+  "connections.someone": "Someone",
+  "connections.noConnections": "No connections yet.",
+  "connections.loadingChats": "Loading chats...",
+  "connections.couldNotLoad": "Could not load connections.",
+  "connections.unreadSuffix": "unread message notifications"
 }

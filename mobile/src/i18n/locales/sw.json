@@ -3,11 +3,9 @@
   "tabs.destiny": "Hatima",
   "tabs.create": "Unda",
   "tabs.connections": "Miunganisho",
-
   "welcome.tagline": "Sura inayofuata\ninaweza kuwa mbali tu na mgeni mmoja.",
   "welcome.getStarted": "Anza",
   "welcome.haveAccount": "Tayari nina akaunti",
-
   "auth.welcomeBack": "Karibu tena",
   "auth.createAccount": "Unda akaunti",
   "auth.email": "Barua pepe",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Huna akaunti? Jisajili",
   "auth.switchToSignIn": "Tayari una akaunti? Ingia",
   "auth.back": "Rudi",
-
   "universe.greetingMorning": "Habari za asubuhi",
   "universe.greetingAfternoon": "Habari za mchana",
   "universe.greetingEvening": "Habari za jioni",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Bado hakuna cha kuona. Rudi hivi karibuni.",
   "universe.couldNotLoad": "Imeshindwa kupakia mawazo.",
   "universe.createThought": "Unda wazo",
-
   "destiny.title": "Hatima",
   "destiny.subtitle": "Wazo la mgeni, kwa ajili yako pekee leo.",
   "destiny.letItDrift": "Liache liende mbali",
   "destiny.reply": "Jibu",
   "destiny.drifted": "Umeliacha liende mbali.",
   "destiny.noneAvailable": "Hakuna wazo la Hatima linalopatikana leo.",
-
   "common.translate": "Tafsiri",
   "common.showOriginal": "Onyesha asili",
   "common.translating": "Inatafsiri…",
   "common.back": "Rudi",
   "common.anonymous": "Asiyejulikana",
   "common.close": "Funga",
-
   "compose.title": "Shiriki wazo",
   "compose.subtitle": "Acha wazo lako liende mbali katika ulimwengu.",
   "compose.placeholder": "Una nini akilini?",
@@ -65,7 +59,6 @@
   "mood.random": "Bila mpangilio",
   "mood.lonely": "Upweke",
   "mood.curious": "Udadisi",
-
   "profile.title": "Wasifu",
   "profile.loading": "Inapakia wasifu...",
   "profile.changePhoto": "Badilisha picha",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Faragha — wewe pekee unaweza kuona barua pepe yako. Hayawahi kuonyeshwa kwa mtu mwingine yeyote.",
   "profile.createProfile": "Unda wasifu",
   "profile.usernameFieldHint": "Herufi ndogo, nambari, na mistari ya chini pekee.",
-
   "publicProfile.connectionRequestSent": "Ombi la muunganisho limetumwa.",
   "publicProfile.couldNotSendRequest": "Imeshindwa kutuma ombi.",
   "publicProfile.reportSent": "Ripoti imetumwa.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Bado hakuna mawazo ya umma.",
   "publicProfile.connect": "Unganisha",
   "publicProfile.mute": "Zima sauti",
-  "publicProfile.report": "Ripoti"
+  "publicProfile.report": "Ripoti",
+  "connections.title": "Miunganisho",
+  "connections.subtitle": "Watu uliounganishwa nao.",
+  "connections.chats": "Mazungumzo",
+  "connections.requests": "Maombi",
+  "connections.noRequests": "Hakuna maombi yanayoingia.",
+  "connections.accept": "Kubali",
+  "connections.decline": "Kataa",
+  "connections.someone": "Mtu fulani",
+  "connections.noConnections": "Bado hakuna miunganisho.",
+  "connections.loadingChats": "Inapakia mazungumzo...",
+  "connections.couldNotLoad": "Imeshindwa kupakia miunganisho.",
+  "connections.unreadSuffix": "arifa za ujumbe ambao haujasomwa"
 }

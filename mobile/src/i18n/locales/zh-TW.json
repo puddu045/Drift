@@ -3,11 +3,9 @@
   "tabs.destiny": "命運",
   "tabs.create": "建立",
   "tabs.connections": "連結",
-
   "welcome.tagline": "下一章\n也許只隔著一個陌生人。",
   "welcome.getStarted": "開始使用",
   "welcome.haveAccount": "我已經有帳戶了",
-
   "auth.welcomeBack": "歡迎回來",
   "auth.createAccount": "建立帳戶",
   "auth.email": "電子郵件",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "還沒有帳戶？註冊",
   "auth.switchToSignIn": "已經有帳戶？登入",
   "auth.back": "返回",
-
   "universe.greetingMorning": "早安",
   "universe.greetingAfternoon": "午安",
   "universe.greetingEvening": "晚安",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "還沒有可看的內容，請稍後再來看看。",
   "universe.couldNotLoad": "無法載入想法。",
   "universe.createThought": "建立一個想法",
-
   "destiny.title": "命運",
   "destiny.subtitle": "一個陌生人的想法，今天只屬於你。",
   "destiny.letItDrift": "讓它漂走",
   "destiny.reply": "回覆",
   "destiny.drifted": "你讓它漂走了。",
   "destiny.noneAvailable": "今天沒有可用的命運想法。",
-
   "common.translate": "翻譯",
   "common.showOriginal": "顯示原文",
   "common.translating": "正在翻譯…",
   "common.back": "返回",
   "common.anonymous": "匿名",
   "common.close": "關閉",
-
   "compose.title": "分享一個想法",
   "compose.subtitle": "讓你的想法在宇宙中漂流。",
   "compose.placeholder": "你在想什麼？",
@@ -65,7 +59,6 @@
   "mood.random": "隨機",
   "mood.lonely": "孤獨",
   "mood.curious": "好奇",
-
   "profile.title": "個人檔案",
   "profile.loading": "正在載入個人檔案...",
   "profile.changePhoto": "更換照片",
@@ -93,7 +86,6 @@
   "profile.emailHint": "隱私 — 只有你能看到你的電子郵件，永遠不會向其他任何人顯示。",
   "profile.createProfile": "建立個人檔案",
   "profile.usernameFieldHint": "僅限小寫字母、數字和底線。",
-
   "publicProfile.connectionRequestSent": "連結請求已傳送。",
   "publicProfile.couldNotSendRequest": "無法傳送請求。",
   "publicProfile.reportSent": "檢舉已傳送。",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "還沒有公開想法。",
   "publicProfile.connect": "連結",
   "publicProfile.mute": "靜音",
-  "publicProfile.report": "檢舉"
+  "publicProfile.report": "檢舉",
+  "connections.title": "連結",
+  "connections.subtitle": "與你建立連結的人。",
+  "connections.chats": "聊天",
+  "connections.requests": "請求",
+  "connections.noRequests": "沒有收到的請求。",
+  "connections.accept": "接受",
+  "connections.decline": "拒絕",
+  "connections.someone": "某人",
+  "connections.noConnections": "還沒有連結。",
+  "connections.loadingChats": "正在載入聊天...",
+  "connections.couldNotLoad": "無法載入連結。",
+  "connections.unreadSuffix": "則未讀訊息通知"
 }

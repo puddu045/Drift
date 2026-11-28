@@ -1,24 +1,26 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
 
+import { useTranslation } from '@/i18n';
 import { moodColors, moodIcons, MoodId, palette, radius, spacing, typography } from '@/theme';
 
-const moodLabels: Record<MoodId, string> = {
-  love: 'Love',
-  deep: 'Deep',
-  happy: 'Happy',
-  reflective: 'Reflective',
-  hopeful: 'Hopeful',
-  random: 'Random',
-  lonely: 'Lonely',
-  curious: 'Curious',
+const moodKeys: Record<MoodId, 'mood.love' | 'mood.deep' | 'mood.happy' | 'mood.reflective' | 'mood.hopeful' | 'mood.random' | 'mood.lonely' | 'mood.curious'> = {
+  love: 'mood.love',
+  deep: 'mood.deep',
+  happy: 'mood.happy',
+  reflective: 'mood.reflective',
+  hopeful: 'mood.hopeful',
+  random: 'mood.random',
+  lonely: 'mood.lonely',
+  curious: 'mood.curious',
 };
 
 export function MoodTag({ mood }: { mood: MoodId }) {
+  const { t } = useTranslation();
   const icon = moodIcons[mood];
   return (
     <View style={[styles.tag, { backgroundColor: moodColors[mood] }]}>
       {icon && <Image source={icon} style={styles.icon} resizeMode="contain" />}
-      <Text style={styles.label}>{moodLabels[mood]}</Text>
+      <Text style={styles.label}>{t(moodKeys[mood])}</Text>
     </View>
   );
 }

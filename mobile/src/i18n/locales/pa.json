@@ -3,11 +3,9 @@
   "tabs.destiny": "ਨਿਯਤੀ",
   "tabs.create": "ਬਣਾਓ",
   "tabs.connections": "ਕਨੈਕਸ਼ਨ",
-
   "welcome.tagline": "ਅਗਲਾ ਅਧਿਆਇ\nਸ਼ਾਇਦ ਸਿਰਫ਼ ਇੱਕ ਅਜਨਬੀ ਜਿੰਨੀ ਦੂਰ ਹੋਵੇ।",
   "welcome.getStarted": "ਸ਼ੁਰੂ ਕਰੋ",
   "welcome.haveAccount": "ਮੇਰੇ ਕੋਲ ਪਹਿਲਾਂ ਹੀ ਖਾਤਾ ਹੈ",
-
   "auth.welcomeBack": "ਵਾਪਸੀ 'ਤੇ ਸੁਆਗਤ ਹੈ",
   "auth.createAccount": "ਖਾਤਾ ਬਣਾਓ",
   "auth.email": "ਈਮੇਲ",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "ਖਾਤਾ ਨਹੀਂ ਹੈ? ਸਾਈਨ ਅੱਪ ਕਰੋ",
   "auth.switchToSignIn": "ਪਹਿਲਾਂ ਹੀ ਖਾਤਾ ਹੈ? ਸਾਈਨ ਇਨ ਕਰੋ",
   "auth.back": "ਵਾਪਸ",
-
   "universe.greetingMorning": "ਸ਼ੁਭ ਸਵੇਰ",
   "universe.greetingAfternoon": "ਸ਼ੁਭ ਦੁਪਹਿਰ",
   "universe.greetingEvening": "ਸ਼ੁਭ ਸ਼ਾਮ",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "ਅਜੇ ਦੇਖਣ ਲਈ ਕੁਝ ਨਹੀਂ ਹੈ। ਜਲਦੀ ਹੀ ਵਾਪਸ ਆਓ।",
   "universe.couldNotLoad": "ਵਿਚਾਰ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ।",
   "universe.createThought": "ਇੱਕ ਵਿਚਾਰ ਬਣਾਓ",
-
   "destiny.title": "ਨਿਯਤੀ",
   "destiny.subtitle": "ਇੱਕ ਅਜਨਬੀ ਦਾ ਵਿਚਾਰ, ਅੱਜ ਸਿਰਫ਼ ਤੁਹਾਡੇ ਲਈ।",
   "destiny.letItDrift": "ਇਸਨੂੰ ਵਹਿਣ ਦਿਓ",
   "destiny.reply": "ਜਵਾਬ ਦਿਓ",
   "destiny.drifted": "ਤੁਸੀਂ ਇਸਨੂੰ ਵਹਿਣ ਦਿੱਤਾ।",
   "destiny.noneAvailable": "ਅੱਜ ਕੋਈ ਨਿਯਤੀ ਵਿਚਾਰ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।",
-
   "common.translate": "ਅਨੁਵਾਦ ਕਰੋ",
   "common.showOriginal": "ਮੂਲ ਦਿਖਾਓ",
   "common.translating": "ਅਨੁਵਾਦ ਹੋ ਰਿਹਾ ਹੈ…",
   "common.back": "ਵਾਪਸ",
   "common.anonymous": "ਅਗਿਆਤ",
   "common.close": "ਬੰਦ ਕਰੋ",
-
   "compose.title": "ਇੱਕ ਵਿਚਾਰ ਸਾਂਝਾ ਕਰੋ",
   "compose.subtitle": "ਆਪਣੇ ਵਿਚਾਰ ਨੂੰ ਬ੍ਰਹਿਮੰਡ ਵਿੱਚ ਵਹਿਣ ਦਿਓ।",
   "compose.placeholder": "ਤੁਹਾਡੇ ਮਨ ਵਿੱਚ ਕੀ ਹੈ?",
@@ -65,7 +59,6 @@
   "mood.random": "ਬੇਤਰਤੀਬ",
   "mood.lonely": "ਇਕੱਲਾ",
   "mood.curious": "ਉਤਸੁਕ",
-
   "profile.title": "ਪ੍ਰੋਫਾਈਲ",
   "profile.loading": "ਪ੍ਰੋਫਾਈਲ ਲੋਡ ਹੋ ਰਹੀ ਹੈ...",
   "profile.changePhoto": "ਫੋਟੋ ਬਦਲੋ",
@@ -93,7 +86,6 @@
   "profile.emailHint": "ਨਿੱਜੀ — ਸਿਰਫ਼ ਤੁਸੀਂ ਆਪਣਾ ਈਮੇਲ ਦੇਖ ਸਕਦੇ ਹੋ। ਇਹ ਕਦੇ ਕਿਸੇ ਹੋਰ ਨੂੰ ਨਹੀਂ ਦਿਖਾਇਆ ਜਾਂਦਾ।",
   "profile.createProfile": "ਪ੍ਰੋਫਾਈਲ ਬਣਾਓ",
   "profile.usernameFieldHint": "ਸਿਰਫ਼ ਛੋਟੇ ਅੱਖਰ, ਨੰਬਰ ਅਤੇ ਅੰਡਰਸਕੋਰ।",
-
   "publicProfile.connectionRequestSent": "ਕਨੈਕਸ਼ਨ ਬੇਨਤੀ ਭੇਜੀ ਗਈ।",
   "publicProfile.couldNotSendRequest": "ਬੇਨਤੀ ਨਹੀਂ ਭੇਜੀ ਜਾ ਸਕੀ।",
   "publicProfile.reportSent": "ਰਿਪੋਰਟ ਭੇਜੀ ਗਈ।",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "ਅਜੇ ਤੱਕ ਕੋਈ ਜਨਤਕ ਵਿਚਾਰ ਨਹੀਂ ਹੈ।",
   "publicProfile.connect": "ਕਨੈਕਟ ਕਰੋ",
   "publicProfile.mute": "ਮਿਊਟ ਕਰੋ",
-  "publicProfile.report": "ਰਿਪੋਰਟ ਕਰੋ"
+  "publicProfile.report": "ਰਿਪੋਰਟ ਕਰੋ",
+  "connections.title": "ਕਨੈਕਸ਼ਨ",
+  "connections.subtitle": "ਉਹ ਲੋਕ ਜਿਨ੍ਹਾਂ ਨਾਲ ਤੁਸੀਂ ਜੁੜੇ ਹੋ।",
+  "connections.chats": "ਚੈਟਾਂ",
+  "connections.requests": "ਬੇਨਤੀਆਂ",
+  "connections.noRequests": "ਕੋਈ ਆਉਣ ਵਾਲੀ ਬੇਨਤੀ ਨਹੀਂ ਹੈ।",
+  "connections.accept": "ਸਵੀਕਾਰ ਕਰੋ",
+  "connections.decline": "ਅਸਵੀਕਾਰ ਕਰੋ",
+  "connections.someone": "ਕੋਈ",
+  "connections.noConnections": "ਅਜੇ ਤੱਕ ਕੋਈ ਕਨੈਕਸ਼ਨ ਨਹੀਂ ਹੈ।",
+  "connections.loadingChats": "ਚੈਟਾਂ ਲੋਡ ਹੋ ਰਹੀਆਂ ਹਨ...",
+  "connections.couldNotLoad": "ਕਨੈਕਸ਼ਨ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ।",
+  "connections.unreadSuffix": "ਨਾ ਪੜ੍ਹੇ ਸੁਨੇਹਾ ਸੂਚਨਾਵਾਂ"
 }

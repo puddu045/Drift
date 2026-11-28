@@ -3,11 +3,9 @@
   "tabs.destiny": "Kader",
   "tabs.create": "Oluştur",
   "tabs.connections": "Bağlantılar",
-
   "welcome.tagline": "Bir sonraki bölüm\nsadece bir yabancı kadar uzakta olabilir.",
   "welcome.getStarted": "Başlayın",
   "welcome.haveAccount": "Zaten bir hesabım var",
-
   "auth.welcomeBack": "Tekrar hoş geldin",
   "auth.createAccount": "Hesap oluştur",
   "auth.email": "E-posta",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Hesabın yok mu? Kayıt ol",
   "auth.switchToSignIn": "Zaten hesabın var mı? Giriş yap",
   "auth.back": "Geri",
-
   "universe.greetingMorning": "Günaydın",
   "universe.greetingAfternoon": "İyi günler",
   "universe.greetingEvening": "İyi akşamlar",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Henüz görülecek bir şey yok. Yakında tekrar bak.",
   "universe.couldNotLoad": "Düşünceler yüklenemedi.",
   "universe.createThought": "Bir düşünce oluştur",
-
   "destiny.title": "Kader",
   "destiny.subtitle": "Bir yabancının düşüncesi, bugün sadece senin için.",
   "destiny.letItDrift": "Sürüklenmeye bırak",
   "destiny.reply": "Yanıtla",
   "destiny.drifted": "Sürüklenmeye bıraktın.",
   "destiny.noneAvailable": "Bugün için Kader düşüncesi yok.",
-
   "common.translate": "Çevir",
   "common.showOriginal": "Orijinali göster",
   "common.translating": "Çevriliyor…",
   "common.back": "Geri",
   "common.anonymous": "Anonim",
   "common.close": "Kapat",
-
   "compose.title": "Bir düşünce paylaş",
   "compose.subtitle": "Düşüncenin evrende sürüklenmesine izin ver.",
   "compose.placeholder": "Aklında ne var?",
@@ -65,7 +59,6 @@
   "mood.random": "Rastgele",
   "mood.lonely": "Yalnız",
   "mood.curious": "Meraklı",
-
   "profile.title": "Profil",
   "profile.loading": "Profil yükleniyor...",
   "profile.changePhoto": "Fotoğrafı değiştir",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Gizli — e-postanı yalnızca sen görebilirsin. Başka kimseye hiçbir zaman gösterilmez.",
   "profile.createProfile": "Profil oluştur",
   "profile.usernameFieldHint": "Yalnızca küçük harfler, sayılar ve alt çizgiler.",
-
   "publicProfile.connectionRequestSent": "Bağlantı isteği gönderildi.",
   "publicProfile.couldNotSendRequest": "İstek gönderilemedi.",
   "publicProfile.reportSent": "Rapor gönderildi.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Henüz herkese açık düşünce yok.",
   "publicProfile.connect": "Bağlan",
   "publicProfile.mute": "Sustur",
-  "publicProfile.report": "Rapor et"
+  "publicProfile.report": "Rapor et",
+  "connections.title": "Bağlantılar",
+  "connections.subtitle": "Bağlantı kurduğun kişiler.",
+  "connections.chats": "Sohbetler",
+  "connections.requests": "İstekler",
+  "connections.noRequests": "Gelen istek yok.",
+  "connections.accept": "Kabul et",
+  "connections.decline": "Reddet",
+  "connections.someone": "Birisi",
+  "connections.noConnections": "Henüz bağlantı yok.",
+  "connections.loadingChats": "Sohbetler yükleniyor...",
+  "connections.couldNotLoad": "Bağlantılar yüklenemedi.",
+  "connections.unreadSuffix": "okunmamış mesaj bildirimi"
 }

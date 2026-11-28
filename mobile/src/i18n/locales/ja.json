@@ -3,11 +3,9 @@
   "tabs.destiny": "デスティニー",
   "tabs.create": "作成",
   "tabs.connections": "コネクション",
-
   "welcome.tagline": "次の章は\nたった一人の知らない人の先にあるかもしれない。",
   "welcome.getStarted": "始める",
   "welcome.haveAccount": "すでにアカウントをお持ちです",
-
   "auth.welcomeBack": "おかえりなさい",
   "auth.createAccount": "アカウントを作成",
   "auth.email": "メールアドレス",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "アカウントをお持ちでないですか？新規登録",
   "auth.switchToSignIn": "すでにアカウントをお持ちですか？サインイン",
   "auth.back": "戻る",
-
   "universe.greetingMorning": "おはようございます",
   "universe.greetingAfternoon": "こんにちは",
   "universe.greetingEvening": "こんばんは",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "まだ見るものがありません。またすぐに確認してください。",
   "universe.couldNotLoad": "思考を読み込めませんでした。",
   "universe.createThought": "思考を作成",
-
   "destiny.title": "デスティニー",
   "destiny.subtitle": "知らない人の思考、今日はあなただけに。",
   "destiny.letItDrift": "漂わせる",
   "destiny.reply": "返信",
   "destiny.drifted": "漂わせました。",
   "destiny.noneAvailable": "今日利用できるデスティニーの思考はありません。",
-
   "common.translate": "翻訳",
   "common.showOriginal": "元の文を表示",
   "common.translating": "翻訳中…",
   "common.back": "戻る",
   "common.anonymous": "匿名",
   "common.close": "閉じる",
-
   "compose.title": "思考を共有する",
   "compose.subtitle": "あなたの思考を宇宙へ漂わせましょう。",
   "compose.placeholder": "今何を考えていますか？",
@@ -65,7 +59,6 @@
   "mood.random": "ランダム",
   "mood.lonely": "孤独",
   "mood.curious": "好奇心",
-
   "profile.title": "プロフィール",
   "profile.loading": "プロフィールを読み込み中...",
   "profile.changePhoto": "写真を変更",
@@ -93,7 +86,6 @@
   "profile.emailHint": "非公開 — あなたのメールアドレスはあなただけが見ることができます。他の人には決して表示されません。",
   "profile.createProfile": "プロフィールを作成",
   "profile.usernameFieldHint": "小文字、数字、アンダースコアのみ。",
-
   "publicProfile.connectionRequestSent": "コネクションリクエストを送信しました。",
   "publicProfile.couldNotSendRequest": "リクエストを送信できませんでした。",
   "publicProfile.reportSent": "通報を送信しました。",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "まだ公開の思考はありません。",
   "publicProfile.connect": "コネクトする",
   "publicProfile.mute": "ミュート",
-  "publicProfile.report": "通報"
+  "publicProfile.report": "通報",
+  "connections.title": "コネクション",
+  "connections.subtitle": "つながった人たち。",
+  "connections.chats": "チャット",
+  "connections.requests": "リクエスト",
+  "connections.noRequests": "受信したリクエストはありません。",
+  "connections.accept": "承認",
+  "connections.decline": "拒否",
+  "connections.someone": "誰か",
+  "connections.noConnections": "まだコネクションはありません。",
+  "connections.loadingChats": "チャットを読み込み中...",
+  "connections.couldNotLoad": "コネクションを読み込めませんでした。",
+  "connections.unreadSuffix": "未読メッセージ通知"
 }

@@ -3,11 +3,9 @@
   "tabs.destiny": "విధి",
   "tabs.create": "సృష్టించు",
   "tabs.connections": "కనెక్షన్‌లు",
-
   "welcome.tagline": "తదుపరి అధ్యాయం\nఒక అపరిచితుడి దూరంలో ఉండవచ్చు.",
   "welcome.getStarted": "ప్రారంభించండి",
   "welcome.haveAccount": "నాకు ఇప్పటికే ఖాతా ఉంది",
-
   "auth.welcomeBack": "తిరిగి స్వాగతం",
   "auth.createAccount": "ఖాతాను సృష్టించండి",
   "auth.email": "ఇమెయిల్",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "ఖాతా లేదా? సైన్ అప్ చేయండి",
   "auth.switchToSignIn": "ఇప్పటికే ఖాతా ఉందా? సైన్ ఇన్ చేయండి",
   "auth.back": "వెనుకకు",
-
   "universe.greetingMorning": "శుభోదయం",
   "universe.greetingAfternoon": "శుభ మధ్యాహ్నం",
   "universe.greetingEvening": "శుభ సాయంత్రం",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "చూడటానికి ఇంకా ఏమీ లేదు. త్వరలో తిరిగి చూడండి.",
   "universe.couldNotLoad": "ఆలోచనలను లోడ్ చేయలేకపోయింది.",
   "universe.createThought": "ఒక ఆలోచనను సృష్టించండి",
-
   "destiny.title": "విధి",
   "destiny.subtitle": "ఒక అపరిచితుడి ఆలోచన, ఈరోజు మీ కోసం మాత్రమే.",
   "destiny.letItDrift": "దాన్ని వదిలేయండి",
   "destiny.reply": "సమాధానం ఇవ్వండి",
   "destiny.drifted": "మీరు దాన్ని వదిలేశారు.",
   "destiny.noneAvailable": "ఈరోజు విధి ఆలోచన అందుబాటులో లేదు.",
-
   "common.translate": "అనువదించు",
   "common.showOriginal": "అసలైనది చూపించు",
   "common.translating": "అనువదిస్తోంది…",
   "common.back": "వెనుకకు",
   "common.anonymous": "అనామక",
   "common.close": "మూసివేయండి",
-
   "compose.title": "ఒక ఆలోచనను పంచుకోండి",
   "compose.subtitle": "మీ ఆలోచనను విశ్వంలో తేలియాడనివ్వండి.",
   "compose.placeholder": "మీ మనసులో ఏముంది?",
@@ -65,7 +59,6 @@
   "mood.random": "యాదృచ్ఛికం",
   "mood.lonely": "ఒంటరితనం",
   "mood.curious": "ఆసక్తికరం",
-
   "profile.title": "ప్రొఫైల్",
   "profile.loading": "ప్రొఫైల్ లోడ్ అవుతోంది...",
   "profile.changePhoto": "ఫోటోను మార్చండి",
@@ -93,7 +86,6 @@
   "profile.emailHint": "ప్రైవేట్ — మీరు మాత్రమే మీ ఇమెయిల్‌ను చూడగలరు. ఇది ఎవరికీ ఎప్పుడూ చూపించబడదు.",
   "profile.createProfile": "ప్రొఫైల్‌ను సృష్టించండి",
   "profile.usernameFieldHint": "చిన్న అక్షరాలు, సంఖ్యలు మరియు అండర్‌స్కోర్‌లు మాత్రమే.",
-
   "publicProfile.connectionRequestSent": "కనెక్షన్ రిక్వెస్ట్ పంపబడింది.",
   "publicProfile.couldNotSendRequest": "రిక్వెస్ట్ పంపలేకపోయింది.",
   "publicProfile.reportSent": "రిపోర్ట్ పంపబడింది.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "ఇంకా పబ్లిక్ ఆలోచనలు లేవు.",
   "publicProfile.connect": "కనెక్ట్ చేయండి",
   "publicProfile.mute": "మ్యూట్ చేయండి",
-  "publicProfile.report": "రిపోర్ట్ చేయండి"
+  "publicProfile.report": "రిపోర్ట్ చేయండి",
+  "connections.title": "కనెక్షన్‌లు",
+  "connections.subtitle": "మీరు కనెక్ట్ అయిన వ్యక్తులు.",
+  "connections.chats": "చాట్‌లు",
+  "connections.requests": "అభ్యర్థనలు",
+  "connections.noRequests": "ఇన్‌కమింగ్ అభ్యర్థనలు లేవు.",
+  "connections.accept": "అంగీకరించు",
+  "connections.decline": "తిరస్కరించు",
+  "connections.someone": "ఎవరో",
+  "connections.noConnections": "ఇంకా కనెక్షన్‌లు లేవు.",
+  "connections.loadingChats": "చాట్‌లు లోడ్ అవుతున్నాయి...",
+  "connections.couldNotLoad": "కనెక్షన్‌లను లోడ్ చేయలేకపోయింది.",
+  "connections.unreadSuffix": "చదవని సందేశ నోటిఫికేషన్‌లు"
 }

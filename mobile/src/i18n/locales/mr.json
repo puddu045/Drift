@@ -3,11 +3,9 @@
   "tabs.destiny": "नियती",
   "tabs.create": "तयार करा",
   "tabs.connections": "कनेक्शन्स",
-
   "welcome.tagline": "पुढील अध्याय\nकदाचित फक्त एका अनोळखी व्यक्तीइतका दूर असेल.",
   "welcome.getStarted": "सुरुवात करा",
   "welcome.haveAccount": "माझे आधीच खाते आहे",
-
   "auth.welcomeBack": "पुन्हा स्वागत आहे",
   "auth.createAccount": "खाते तयार करा",
   "auth.email": "ईमेल",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "खाते नाही? साइन अप करा",
   "auth.switchToSignIn": "आधीच खाते आहे? साइन इन करा",
   "auth.back": "मागे",
-
   "universe.greetingMorning": "शुभ सकाळ",
   "universe.greetingAfternoon": "शुभ दुपार",
   "universe.greetingEvening": "शुभ संध्याकाळ",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "अजून पाहण्यासाठी काही नाही. लवकरच पुन्हा तपासा.",
   "universe.couldNotLoad": "विचार लोड होऊ शकले नाहीत.",
   "universe.createThought": "एक विचार तयार करा",
-
   "destiny.title": "नियती",
   "destiny.subtitle": "एका अनोळखी व्यक्तीचा विचार, आज फक्त तुमच्यासाठी.",
   "destiny.letItDrift": "त्याला वाहू द्या",
   "destiny.reply": "उत्तर द्या",
   "destiny.drifted": "तुम्ही त्याला वाहू दिले.",
   "destiny.noneAvailable": "आज कोणताही नियती विचार उपलब्ध नाही.",
-
   "common.translate": "भाषांतर करा",
   "common.showOriginal": "मूळ दाखवा",
   "common.translating": "भाषांतर होत आहे…",
   "common.back": "मागे",
   "common.anonymous": "अनामिक",
   "common.close": "बंद करा",
-
   "compose.title": "एक विचार शेअर करा",
   "compose.subtitle": "तुमच्या विचाराला विश्वात वाहू द्या.",
   "compose.placeholder": "तुमच्या मनात काय आहे?",
@@ -65,7 +59,6 @@
   "mood.random": "यादृच्छिक",
   "mood.lonely": "एकाकी",
   "mood.curious": "उत्सुक",
-
   "profile.title": "प्रोफाइल",
   "profile.loading": "प्रोफाइल लोड होत आहे...",
   "profile.changePhoto": "फोटो बदला",
@@ -93,7 +86,6 @@
   "profile.emailHint": "खासगी — फक्त तुम्हीच तुमचा ईमेल पाहू शकता. तो इतर कोणालाही कधीही दाखवला जात नाही.",
   "profile.createProfile": "प्रोफाइल तयार करा",
   "profile.usernameFieldHint": "फक्त लहान अक्षरे, संख्या आणि अंडरस्कोर.",
-
   "publicProfile.connectionRequestSent": "कनेक्शन विनंती पाठवली.",
   "publicProfile.couldNotSendRequest": "विनंती पाठवली जाऊ शकली नाही.",
   "publicProfile.reportSent": "रिपोर्ट पाठवला.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "अजून कोणतेही सार्वजनिक विचार नाहीत.",
   "publicProfile.connect": "कनेक्ट करा",
   "publicProfile.mute": "म्यूट करा",
-  "publicProfile.report": "रिपोर्ट करा"
+  "publicProfile.report": "रिपोर्ट करा",
+  "connections.title": "कनेक्शन्स",
+  "connections.subtitle": "ज्या लोकांशी तुम्ही जोडले आहात.",
+  "connections.chats": "चॅट्स",
+  "connections.requests": "विनंत्या",
+  "connections.noRequests": "कोणतीही येणारी विनंती नाही.",
+  "connections.accept": "स्वीकारा",
+  "connections.decline": "नाकारा",
+  "connections.someone": "कोणीतरी",
+  "connections.noConnections": "अजून कोणतेही कनेक्शन नाही.",
+  "connections.loadingChats": "चॅट्स लोड होत आहेत...",
+  "connections.couldNotLoad": "कनेक्शन्स लोड होऊ शकले नाहीत.",
+  "connections.unreadSuffix": "न वाचलेल्या संदेश सूचना"
 }

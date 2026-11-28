@@ -3,11 +3,9 @@
   "tabs.destiny": "Định mệnh",
   "tabs.create": "Tạo",
   "tabs.connections": "Kết nối",
-
   "welcome.tagline": "Chương tiếp theo\ncó thể chỉ cách một người lạ.",
   "welcome.getStarted": "Bắt đầu",
   "welcome.haveAccount": "Tôi đã có tài khoản",
-
   "auth.welcomeBack": "Chào mừng trở lại",
   "auth.createAccount": "Tạo tài khoản",
   "auth.email": "Email",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Chưa có tài khoản? Đăng ký",
   "auth.switchToSignIn": "Đã có tài khoản? Đăng nhập",
   "auth.back": "Quay lại",
-
   "universe.greetingMorning": "Chào buổi sáng",
   "universe.greetingAfternoon": "Chào buổi chiều",
   "universe.greetingEvening": "Chào buổi tối",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Chưa có gì để xem. Hãy quay lại sớm.",
   "universe.couldNotLoad": "Không thể tải suy nghĩ.",
   "universe.createThought": "Tạo một suy nghĩ",
-
   "destiny.title": "Định mệnh",
   "destiny.subtitle": "Suy nghĩ của một người lạ, chỉ dành cho bạn hôm nay.",
   "destiny.letItDrift": "Để nó trôi đi",
   "destiny.reply": "Trả lời",
   "destiny.drifted": "Bạn đã để nó trôi đi.",
   "destiny.noneAvailable": "Hôm nay không có suy nghĩ Định mệnh nào.",
-
   "common.translate": "Dịch",
   "common.showOriginal": "Hiện bản gốc",
   "common.translating": "Đang dịch…",
   "common.back": "Quay lại",
   "common.anonymous": "Ẩn danh",
   "common.close": "Đóng",
-
   "compose.title": "Chia sẻ một suy nghĩ",
   "compose.subtitle": "Hãy để suy nghĩ của bạn trôi vào vũ trụ.",
   "compose.placeholder": "Bạn đang nghĩ gì?",
@@ -65,7 +59,6 @@
   "mood.random": "Ngẫu nhiên",
   "mood.lonely": "Cô đơn",
   "mood.curious": "Tò mò",
-
   "profile.title": "Hồ sơ",
   "profile.loading": "Đang tải hồ sơ...",
   "profile.changePhoto": "Đổi ảnh",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Riêng tư — chỉ bạn có thể thấy email của mình. Không bao giờ hiển thị cho người khác.",
   "profile.createProfile": "Tạo hồ sơ",
   "profile.usernameFieldHint": "Chỉ chữ thường, số và gạch dưới.",
-
   "publicProfile.connectionRequestSent": "Đã gửi yêu cầu kết nối.",
   "publicProfile.couldNotSendRequest": "Không thể gửi yêu cầu.",
   "publicProfile.reportSent": "Đã gửi báo cáo.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Chưa có suy nghĩ công khai nào.",
   "publicProfile.connect": "Kết nối",
   "publicProfile.mute": "Tắt tiếng",
-  "publicProfile.report": "Báo cáo"
+  "publicProfile.report": "Báo cáo",
+  "connections.title": "Kết nối",
+  "connections.subtitle": "Những người bạn đã kết nối.",
+  "connections.chats": "Trò chuyện",
+  "connections.requests": "Yêu cầu",
+  "connections.noRequests": "Không có yêu cầu nào.",
+  "connections.accept": "Chấp nhận",
+  "connections.decline": "Từ chối",
+  "connections.someone": "Ai đó",
+  "connections.noConnections": "Chưa có kết nối nào.",
+  "connections.loadingChats": "Đang tải cuộc trò chuyện...",
+  "connections.couldNotLoad": "Không thể tải kết nối.",
+  "connections.unreadSuffix": "thông báo tin nhắn chưa đọc"
 }

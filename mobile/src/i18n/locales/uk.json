@@ -3,11 +3,9 @@
   "tabs.destiny": "Доля",
   "tabs.create": "Створити",
   "tabs.connections": "Зв'язки",
-
   "welcome.tagline": "Наступний розділ\nможе бути лише за одного незнайомця від тебе.",
   "welcome.getStarted": "Почати",
   "welcome.haveAccount": "У мене вже є акаунт",
-
   "auth.welcomeBack": "З поверненням",
   "auth.createAccount": "Створити акаунт",
   "auth.email": "Ел. пошта",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Немає акаунта? Зареєструватися",
   "auth.switchToSignIn": "Вже є акаунт? Увійти",
   "auth.back": "Назад",
-
   "universe.greetingMorning": "Доброго ранку",
   "universe.greetingAfternoon": "Доброго дня",
   "universe.greetingEvening": "Доброго вечора",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Поки що нічого не видно. Загляни пізніше.",
   "universe.couldNotLoad": "Не вдалося завантажити думки.",
   "universe.createThought": "Створити думку",
-
   "destiny.title": "Доля",
   "destiny.subtitle": "Думка незнайомця, сьогодні лише для тебе.",
   "destiny.letItDrift": "Відпустити в дрейф",
   "destiny.reply": "Відповісти",
   "destiny.drifted": "Ти відпустив її в дрейф.",
   "destiny.noneAvailable": "Сьогодні немає доступної думки Долі.",
-
   "common.translate": "Перекласти",
   "common.showOriginal": "Показати оригінал",
   "common.translating": "Перекладається…",
   "common.back": "Назад",
   "common.anonymous": "Анонім",
   "common.close": "Закрити",
-
   "compose.title": "Поділись думкою",
   "compose.subtitle": "Відпусти свою думку в дрейф по всесвіту.",
   "compose.placeholder": "Про що ти думаєш?",
@@ -65,7 +59,6 @@
   "mood.random": "Випадкова",
   "mood.lonely": "Самотня",
   "mood.curious": "Допитлива",
-
   "profile.title": "Профіль",
   "profile.loading": "Завантаження профілю...",
   "profile.changePhoto": "Змінити фото",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Приватно — лише ти бачиш свою пошту. Вона ніколи не показується нікому іншому.",
   "profile.createProfile": "Створити профіль",
   "profile.usernameFieldHint": "Лише малі літери, цифри та підкреслення.",
-
   "publicProfile.connectionRequestSent": "Запит на з'єднання надіслано.",
   "publicProfile.couldNotSendRequest": "Не вдалося надіслати запит.",
   "publicProfile.reportSent": "Скаргу надіслано.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Поки що немає публічних думок.",
   "publicProfile.connect": "З'єднатися",
   "publicProfile.mute": "Заглушити",
-  "publicProfile.report": "Поскаржитися"
+  "publicProfile.report": "Поскаржитися",
+  "connections.title": "Зв'язки",
+  "connections.subtitle": "Люди, з якими ти з'єднався.",
+  "connections.chats": "Чати",
+  "connections.requests": "Запити",
+  "connections.noRequests": "Немає вхідних запитів.",
+  "connections.accept": "Прийняти",
+  "connections.decline": "Відхилити",
+  "connections.someone": "Хтось",
+  "connections.noConnections": "Поки що немає зв'язків.",
+  "connections.loadingChats": "Завантаження чатів...",
+  "connections.couldNotLoad": "Не вдалося завантажити зв'язки.",
+  "connections.unreadSuffix": "сповіщень про непрочитані повідомлення"
 }

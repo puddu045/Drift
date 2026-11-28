@@ -3,11 +3,9 @@
   "tabs.destiny": "নিয়তি",
   "tabs.create": "তৈরি করুন",
   "tabs.connections": "সংযোগ",
-
   "welcome.tagline": "পরবর্তী অধ্যায়\nহয়তো কেবল একজন অপরিচিতের দূরত্বে।",
   "welcome.getStarted": "শুরু করুন",
   "welcome.haveAccount": "আমার ইতিমধ্যে একটি অ্যাকাউন্ট আছে",
-
   "auth.welcomeBack": "আবার স্বাগতম",
   "auth.createAccount": "অ্যাকাউন্ট তৈরি করুন",
   "auth.email": "ইমেইল",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "অ্যাকাউন্ট নেই? সাইন আপ করুন",
   "auth.switchToSignIn": "ইতিমধ্যে অ্যাকাউন্ট আছে? সাইন ইন করুন",
   "auth.back": "ফিরে যান",
-
   "universe.greetingMorning": "শুভ সকাল",
   "universe.greetingAfternoon": "শুভ অপরাহ্ন",
   "universe.greetingEvening": "শুভ সন্ধ্যা",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "এখনও দেখার মতো কিছু নেই। শীঘ্রই আবার দেখুন।",
   "universe.couldNotLoad": "চিন্তাভাবনা লোড করা যায়নি।",
   "universe.createThought": "একটি চিন্তা তৈরি করুন",
-
   "destiny.title": "নিয়তি",
   "destiny.subtitle": "একজন অপরিচিতের চিন্তা, আজ শুধু আপনার জন্য।",
   "destiny.letItDrift": "এটি ভাসিয়ে দিন",
   "destiny.reply": "উত্তর দিন",
   "destiny.drifted": "আপনি এটি ভাসিয়ে দিয়েছেন।",
   "destiny.noneAvailable": "আজ কোনো নিয়তি চিন্তা উপলব্ধ নেই।",
-
   "common.translate": "অনুবাদ করুন",
   "common.showOriginal": "মূল দেখান",
   "common.translating": "অনুবাদ হচ্ছে…",
   "common.back": "ফিরে যান",
   "common.anonymous": "অজ্ঞাত",
   "common.close": "বন্ধ করুন",
-
   "compose.title": "একটি চিন্তা শেয়ার করুন",
   "compose.subtitle": "আপনার চিন্তাকে মহাবিশ্বে ভাসতে দিন।",
   "compose.placeholder": "আপনার মনে কী আছে?",
@@ -65,7 +59,6 @@
   "mood.random": "এলোমেলো",
   "mood.lonely": "একাকী",
   "mood.curious": "কৌতূহলী",
-
   "profile.title": "প্রোফাইল",
   "profile.loading": "প্রোফাইল লোড হচ্ছে...",
   "profile.changePhoto": "ছবি পরিবর্তন করুন",
@@ -93,7 +86,6 @@
   "profile.emailHint": "ব্যক্তিগত — শুধু আপনি আপনার ইমেইল দেখতে পারেন। এটি অন্য কাউকে কখনো দেখানো হয় না।",
   "profile.createProfile": "প্রোফাইল তৈরি করুন",
   "profile.usernameFieldHint": "শুধু ছোট হাতের অক্ষর, সংখ্যা এবং আন্ডারস্কোর।",
-
   "publicProfile.connectionRequestSent": "সংযোগের অনুরোধ পাঠানো হয়েছে।",
   "publicProfile.couldNotSendRequest": "অনুরোধ পাঠানো যায়নি।",
   "publicProfile.reportSent": "রিপোর্ট পাঠানো হয়েছে।",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "এখনও কোনো সর্বজনীন চিন্তা নেই।",
   "publicProfile.connect": "সংযোগ করুন",
   "publicProfile.mute": "নিঃশব্দ করুন",
-  "publicProfile.report": "রিপোর্ট করুন"
+  "publicProfile.report": "রিপোর্ট করুন",
+  "connections.title": "কানেকশন",
+  "connections.subtitle": "যাদের সাথে আপনি সংযুক্ত হয়েছেন।",
+  "connections.chats": "চ্যাট",
+  "connections.requests": "অনুরোধ",
+  "connections.noRequests": "কোনো আগত অনুরোধ নেই।",
+  "connections.accept": "গ্রহণ করুন",
+  "connections.decline": "প্রত্যাখ্যান করুন",
+  "connections.someone": "কেউ",
+  "connections.noConnections": "এখনও কোনো সংযোগ নেই।",
+  "connections.loadingChats": "চ্যাট লোড হচ্ছে...",
+  "connections.couldNotLoad": "সংযোগ লোড করা যায়নি।",
+  "connections.unreadSuffix": "অপঠিত বার্তা বিজ্ঞপ্তি"
 }

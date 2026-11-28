@@ -3,11 +3,9 @@
   "tabs.destiny": "운명",
   "tabs.create": "만들기",
   "tabs.connections": "연결",
-
   "welcome.tagline": "다음 장은\n낯선 사람 한 명만큼 가까이 있을지도 몰라요.",
   "welcome.getStarted": "시작하기",
   "welcome.haveAccount": "이미 계정이 있어요",
-
   "auth.welcomeBack": "다시 오신 것을 환영합니다",
   "auth.createAccount": "계정 만들기",
   "auth.email": "이메일",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "계정이 없으신가요? 가입하기",
   "auth.switchToSignIn": "이미 계정이 있으신가요? 로그인",
   "auth.back": "뒤로",
-
   "universe.greetingMorning": "좋은 아침이에요",
   "universe.greetingAfternoon": "안녕하세요",
   "universe.greetingEvening": "좋은 저녁이에요",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "아직 볼 것이 없어요. 곧 다시 확인해 보세요.",
   "universe.couldNotLoad": "생각을 불러올 수 없어요.",
   "universe.createThought": "생각 만들기",
-
   "destiny.title": "운명",
   "destiny.subtitle": "오늘 당신만을 위한, 낯선 사람의 생각.",
   "destiny.letItDrift": "흘러가게 하기",
   "destiny.reply": "답장",
   "destiny.drifted": "흘러가게 했어요.",
   "destiny.noneAvailable": "오늘은 운명 생각이 없어요.",
-
   "common.translate": "번역",
   "common.showOriginal": "원문 보기",
   "common.translating": "번역 중…",
   "common.back": "뒤로",
   "common.anonymous": "익명",
   "common.close": "닫기",
-
   "compose.title": "생각 공유하기",
   "compose.subtitle": "당신의 생각이 우주로 흘러가게 하세요.",
   "compose.placeholder": "무슨 생각을 하고 있나요?",
@@ -65,7 +59,6 @@
   "mood.random": "무작위",
   "mood.lonely": "외로운",
   "mood.curious": "궁금한",
-
   "profile.title": "프로필",
   "profile.loading": "프로필을 불러오는 중...",
   "profile.changePhoto": "사진 변경",
@@ -93,7 +86,6 @@
   "profile.emailHint": "비공개 — 본인만 이메일을 볼 수 있어요. 다른 사람에게는 절대 표시되지 않아요.",
   "profile.createProfile": "프로필 만들기",
   "profile.usernameFieldHint": "소문자, 숫자, 밑줄만 사용 가능해요.",
-
   "publicProfile.connectionRequestSent": "연결 요청을 보냈어요.",
   "publicProfile.couldNotSendRequest": "요청을 보낼 수 없어요.",
   "publicProfile.reportSent": "신고를 보냈어요.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "아직 공개 생각이 없어요.",
   "publicProfile.connect": "연결",
   "publicProfile.mute": "음소거",
-  "publicProfile.report": "신고"
+  "publicProfile.report": "신고",
+  "connections.title": "연결",
+  "connections.subtitle": "연결된 사람들.",
+  "connections.chats": "채팅",
+  "connections.requests": "요청",
+  "connections.noRequests": "들어온 요청이 없어요.",
+  "connections.accept": "수락",
+  "connections.decline": "거절",
+  "connections.someone": "누군가",
+  "connections.noConnections": "아직 연결이 없어요.",
+  "connections.loadingChats": "채팅을 불러오는 중...",
+  "connections.couldNotLoad": "연결을 불러올 수 없어요.",
+  "connections.unreadSuffix": "읽지 않은 메시지 알림"
 }

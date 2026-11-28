@@ -3,11 +3,9 @@
   "tabs.destiny": "Schicksal",
   "tabs.create": "Erstellen",
   "tabs.connections": "Verbindungen",
-
   "welcome.tagline": "Das nächste Kapitel\nkönnte nur einen Fremden entfernt sein.",
   "welcome.getStarted": "Los geht's",
   "welcome.haveAccount": "Ich habe schon ein Konto",
-
   "auth.welcomeBack": "Willkommen zurück",
   "auth.createAccount": "Konto erstellen",
   "auth.email": "E-Mail",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Noch kein Konto? Registrieren",
   "auth.switchToSignIn": "Schon ein Konto? Anmelden",
   "auth.back": "Zurück",
-
   "universe.greetingMorning": "Guten Morgen",
   "universe.greetingAfternoon": "Guten Tag",
   "universe.greetingEvening": "Guten Abend",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Hier gibt es noch nichts zu sehen. Schau bald wieder vorbei.",
   "universe.couldNotLoad": "Gedanken konnten nicht geladen werden.",
   "universe.createThought": "Einen Gedanken erstellen",
-
   "destiny.title": "Schicksal",
   "destiny.subtitle": "Der Gedanke eines Fremden, heute nur für dich.",
   "destiny.letItDrift": "Abtreiben lassen",
   "destiny.reply": "Antworten",
   "destiny.drifted": "Du hast ihn abtreiben lassen.",
   "destiny.noneAvailable": "Heute ist kein Schicksal-Gedanke verfügbar.",
-
   "common.translate": "Übersetzen",
   "common.showOriginal": "Original anzeigen",
   "common.translating": "Wird übersetzt…",
   "common.back": "Zurück",
   "common.anonymous": "Anonym",
   "common.close": "Schließen",
-
   "compose.title": "Teile einen Gedanken",
   "compose.subtitle": "Lass deinen Gedanken ins Universum abtreiben.",
   "compose.placeholder": "Was geht dir im Kopf herum?",
@@ -65,7 +59,6 @@
   "mood.random": "Zufällig",
   "mood.lonely": "Einsam",
   "mood.curious": "Neugierig",
-
   "profile.title": "Profil",
   "profile.loading": "Profil wird geladen...",
   "profile.changePhoto": "Foto ändern",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Privat — nur du kannst deine E-Mail sehen. Sie wird niemandem sonst angezeigt.",
   "profile.createProfile": "Profil erstellen",
   "profile.usernameFieldHint": "Nur Kleinbuchstaben, Zahlen und Unterstriche.",
-
   "publicProfile.connectionRequestSent": "Verbindungsanfrage gesendet.",
   "publicProfile.couldNotSendRequest": "Anfrage konnte nicht gesendet werden.",
   "publicProfile.reportSent": "Meldung gesendet.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Noch keine öffentlichen Gedanken.",
   "publicProfile.connect": "Verbinden",
   "publicProfile.mute": "Stummschalten",
-  "publicProfile.report": "Melden"
+  "publicProfile.report": "Melden",
+  "connections.title": "Verbindungen",
+  "connections.subtitle": "Personen, mit denen du dich verbunden hast.",
+  "connections.chats": "Chats",
+  "connections.requests": "Anfragen",
+  "connections.noRequests": "Keine eingehenden Anfragen.",
+  "connections.accept": "Annehmen",
+  "connections.decline": "Ablehnen",
+  "connections.someone": "Jemand",
+  "connections.noConnections": "Noch keine Verbindungen.",
+  "connections.loadingChats": "Chats werden geladen...",
+  "connections.couldNotLoad": "Verbindungen konnten nicht geladen werden.",
+  "connections.unreadSuffix": "ungelesene Nachrichtenbenachrichtigungen"
 }

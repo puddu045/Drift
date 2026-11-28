@@ -3,11 +3,9 @@
   "tabs.destiny": "Kapalaran",
   "tabs.create": "Likhain",
   "tabs.connections": "Mga Koneksyon",
-
   "welcome.tagline": "Ang susunod na kabanata\nmaaaring isang estranghero lang ang layo.",
   "welcome.getStarted": "Magsimula",
   "welcome.haveAccount": "May account na ako",
-
   "auth.welcomeBack": "Maligayang pagbabalik",
   "auth.createAccount": "Gumawa ng account",
   "auth.email": "Email",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Walang account? Mag-sign up",
   "auth.switchToSignIn": "May account na? Mag-sign in",
   "auth.back": "Bumalik",
-
   "universe.greetingMorning": "Magandang umaga",
   "universe.greetingAfternoon": "Magandang hapon",
   "universe.greetingEvening": "Magandang gabi",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Walang pa makikita. Bumalik ka ulit sa lalong madaling panahon.",
   "universe.couldNotLoad": "Hindi ma-load ang mga saloobin.",
   "universe.createThought": "Lumikha ng isang saloobin",
-
   "destiny.title": "Kapalaran",
   "destiny.subtitle": "Ang saloobin ng isang estranghero, para sa'yo lang ngayon.",
   "destiny.letItDrift": "Hayaan itong lutang",
   "destiny.reply": "Sagot",
   "destiny.drifted": "Pinabayaan mo itong lutang.",
   "destiny.noneAvailable": "Walang available na saloobin ng Kapalaran ngayon.",
-
   "common.translate": "Isalin",
   "common.showOriginal": "Ipakita ang orihinal",
   "common.translating": "Isinasalin…",
   "common.back": "Bumalik",
   "common.anonymous": "Anonimo",
   "common.close": "Isara",
-
   "compose.title": "Magbahagi ng isang saloobin",
   "compose.subtitle": "Hayaan ang iyong saloobin na lutang sa sansinukob.",
   "compose.placeholder": "Ano ang nasa isip mo?",
@@ -65,7 +59,6 @@
   "mood.random": "Random",
   "mood.lonely": "Nag-iisa",
   "mood.curious": "Mausisa",
-
   "profile.title": "Profile",
   "profile.loading": "Naglo-load ng profile...",
   "profile.changePhoto": "Palitan ang larawan",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Pribado — ikaw lang ang makakakita ng iyong email. Hindi ito ipinapakita kahit kanino.",
   "profile.createProfile": "Gumawa ng profile",
   "profile.usernameFieldHint": "Maliit na letra, numero, at underscore lamang.",
-
   "publicProfile.connectionRequestSent": "Naipadala ang connection request.",
   "publicProfile.couldNotSendRequest": "Hindi naipadala ang request.",
   "publicProfile.reportSent": "Naipadala ang report.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Walang pampublikong saloobin pa.",
   "publicProfile.connect": "Kumonekta",
   "publicProfile.mute": "I-mute",
-  "publicProfile.report": "I-report"
+  "publicProfile.report": "I-report",
+  "connections.title": "Mga Koneksyon",
+  "connections.subtitle": "Mga taong nakonekta mo.",
+  "connections.chats": "Mga Chat",
+  "connections.requests": "Mga Kahilingan",
+  "connections.noRequests": "Walang papasok na kahilingan.",
+  "connections.accept": "Tanggapin",
+  "connections.decline": "Tanggihan",
+  "connections.someone": "Isang tao",
+  "connections.noConnections": "Wala pang koneksyon.",
+  "connections.loadingChats": "Naglo-load ng mga chat...",
+  "connections.couldNotLoad": "Hindi ma-load ang mga koneksyon.",
+  "connections.unreadSuffix": "hindi pa nababasang abiso ng mensahe"
 }

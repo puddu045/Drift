@@ -3,11 +3,9 @@
   "tabs.destiny": "ಹಣೆಬರಹ",
   "tabs.create": "ರಚಿಸಿ",
   "tabs.connections": "ಸಂಪರ್ಕಗಳು",
-
   "welcome.tagline": "ಮುಂದಿನ ಅಧ್ಯಾಯ\nಒಬ್ಬ ಅಪರಿಚಿತರಷ್ಟೇ ದೂರದಲ್ಲಿರಬಹುದು.",
   "welcome.getStarted": "ಪ್ರಾರಂಭಿಸಿ",
   "welcome.haveAccount": "ನನ್ನಲ್ಲಿ ಈಗಾಗಲೇ ಖಾತೆ ಇದೆ",
-
   "auth.welcomeBack": "ಮರಳಿ ಸ್ವಾಗತ",
   "auth.createAccount": "ಖಾತೆ ರಚಿಸಿ",
   "auth.email": "ಇಮೇಲ್",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "ಖಾತೆ ಇಲ್ಲವೇ? ಸೈನ್ ಅಪ್ ಮಾಡಿ",
   "auth.switchToSignIn": "ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ? ಸೈನ್ ಇನ್ ಮಾಡಿ",
   "auth.back": "ಹಿಂದೆ",
-
   "universe.greetingMorning": "ಶುಭೋದಯ",
   "universe.greetingAfternoon": "ಶುಭ ಮಧ್ಯಾಹ್ನ",
   "universe.greetingEvening": "ಶುಭ ಸಂಜೆ",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "ನೋಡಲು ಇನ್ನೂ ಏನೂ ಇಲ್ಲ. ಶೀಘ್ರದಲ್ಲೇ ಮರಳಿ ಬನ್ನಿ.",
   "universe.couldNotLoad": "ಆಲೋಚನೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
   "universe.createThought": "ಒಂದು ಆಲೋಚನೆಯನ್ನು ರಚಿಸಿ",
-
   "destiny.title": "ಹಣೆಬರಹ",
   "destiny.subtitle": "ಒಬ್ಬ ಅಪರಿಚಿತರ ಆಲೋಚನೆ, ಇಂದು ನಿಮಗಾಗಿ ಮಾತ್ರ.",
   "destiny.letItDrift": "ಅದನ್ನು ತೇಲಿಬಿಡಿ",
   "destiny.reply": "ಉತ್ತರಿಸಿ",
   "destiny.drifted": "ನೀವು ಅದನ್ನು ತೇಲಿಬಿಟ್ಟಿರಿ.",
   "destiny.noneAvailable": "ಇಂದು ಯಾವುದೇ ಹಣೆಬರಹ ಆಲೋಚನೆ ಲಭ್ಯವಿಲ್ಲ.",
-
   "common.translate": "ಅನುವಾದಿಸಿ",
   "common.showOriginal": "ಮೂಲವನ್ನು ತೋರಿಸಿ",
   "common.translating": "ಅನುವಾದಿಸಲಾಗುತ್ತಿದೆ…",
   "common.back": "ಹಿಂದೆ",
   "common.anonymous": "ಅನಾಮಧೇಯ",
   "common.close": "ಮುಚ್ಚಿ",
-
   "compose.title": "ಒಂದು ಆಲೋಚನೆಯನ್ನು ಹಂಚಿಕೊಳ್ಳಿ",
   "compose.subtitle": "ನಿಮ್ಮ ಆಲೋಚನೆಯನ್ನು ವಿಶ್ವದಲ್ಲಿ ತೇಲಲು ಬಿಡಿ.",
   "compose.placeholder": "ನಿಮ್ಮ ಮನಸ್ಸಿನಲ್ಲಿ ಏನಿದೆ?",
@@ -65,7 +59,6 @@
   "mood.random": "ಯಾದೃಚ್ಛಿಕ",
   "mood.lonely": "ಏಕಾಂಗಿ",
   "mood.curious": "ಕುತೂಹಲಕಾರಿ",
-
   "profile.title": "ಪ್ರೊಫೈಲ್",
   "profile.loading": "ಪ್ರೊಫೈಲ್ ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
   "profile.changePhoto": "ಫೋಟೋ ಬದಲಾಯಿಸಿ",
@@ -93,7 +86,6 @@
   "profile.emailHint": "ಖಾಸಗಿ — ನಿಮ್ಮ ಇಮೇಲ್ ಅನ್ನು ನೀವು ಮಾತ್ರ ನೋಡಬಹುದು. ಇದನ್ನು ಬೇರೆ ಯಾರಿಗೂ ಎಂದಿಗೂ ತೋರಿಸಲಾಗುವುದಿಲ್ಲ.",
   "profile.createProfile": "ಪ್ರೊಫೈಲ್ ರಚಿಸಿ",
   "profile.usernameFieldHint": "ಸಣ್ಣ ಅಕ್ಷರಗಳು, ಸಂಖ್ಯೆಗಳು ಮತ್ತು ಅಂಡರ್‌ಸ್ಕೋರ್‌ಗಳು ಮಾತ್ರ.",
-
   "publicProfile.connectionRequestSent": "ಸಂಪರ್ಕ ವಿನಂತಿಯನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ.",
   "publicProfile.couldNotSendRequest": "ವಿನಂತಿಯನ್ನು ಕಳುಹಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
   "publicProfile.reportSent": "ವರದಿಯನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "ಇನ್ನೂ ಯಾವುದೇ ಸಾರ್ವಜನಿಕ ಆಲೋಚನೆಗಳಿಲ್ಲ.",
   "publicProfile.connect": "ಸಂಪರ್ಕಿಸಿ",
   "publicProfile.mute": "ಮ್ಯೂಟ್ ಮಾಡಿ",
-  "publicProfile.report": "ವರದಿ ಮಾಡಿ"
+  "publicProfile.report": "ವರದಿ ಮಾಡಿ",
+  "connections.title": "ಸಂಪರ್ಕಗಳು",
+  "connections.subtitle": "ನೀವು ಸಂಪರ್ಕ ಹೊಂದಿದ ಜನರು.",
+  "connections.chats": "ಚಾಟ್‌ಗಳು",
+  "connections.requests": "ವಿನಂತಿಗಳು",
+  "connections.noRequests": "ಯಾವುದೇ ಒಳಬರುವ ವಿನಂತಿಗಳಿಲ್ಲ.",
+  "connections.accept": "ಸ್ವೀಕರಿಸಿ",
+  "connections.decline": "ತಿರಸ್ಕರಿಸಿ",
+  "connections.someone": "ಯಾರೋ",
+  "connections.noConnections": "ಇನ್ನೂ ಯಾವುದೇ ಸಂಪರ್ಕಗಳಿಲ್ಲ.",
+  "connections.loadingChats": "ಚಾಟ್‌ಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ...",
+  "connections.couldNotLoad": "ಸಂಪರ್ಕಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
+  "connections.unreadSuffix": "ಓದದ ಸಂದೇಶ ಅಧಿಸೂಚನೆಗಳು"
 }

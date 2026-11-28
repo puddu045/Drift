@@ -3,11 +3,9 @@
   "tabs.destiny": "Takdir",
   "tabs.create": "Buat",
   "tabs.connections": "Koneksi",
-
   "welcome.tagline": "Bab selanjutnya\nmungkin hanya berjarak satu orang asing.",
   "welcome.getStarted": "Mulai",
   "welcome.haveAccount": "Saya sudah punya akun",
-
   "auth.welcomeBack": "Selamat datang kembali",
   "auth.createAccount": "Buat akun",
   "auth.email": "Email",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Belum punya akun? Daftar",
   "auth.switchToSignIn": "Sudah punya akun? Masuk",
   "auth.back": "Kembali",
-
   "universe.greetingMorning": "Selamat pagi",
   "universe.greetingAfternoon": "Selamat siang",
   "universe.greetingEvening": "Selamat malam",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Belum ada yang bisa dilihat. Kembali lagi segera.",
   "universe.couldNotLoad": "Tidak dapat memuat pikiran.",
   "universe.createThought": "Buat pikiran",
-
   "destiny.title": "Takdir",
   "destiny.subtitle": "Pikiran dari orang asing, khusus untukmu hari ini.",
   "destiny.letItDrift": "Biarkan mengalir",
   "destiny.reply": "Balas",
   "destiny.drifted": "Kamu membiarkannya mengalir.",
   "destiny.noneAvailable": "Tidak ada pikiran Takdir yang tersedia hari ini.",
-
   "common.translate": "Terjemahkan",
   "common.showOriginal": "Tampilkan asli",
   "common.translating": "Menerjemahkan…",
   "common.back": "Kembali",
   "common.anonymous": "Anonim",
   "common.close": "Tutup",
-
   "compose.title": "Bagikan sebuah pikiran",
   "compose.subtitle": "Biarkan pikiranmu mengalir ke semesta.",
   "compose.placeholder": "Apa yang ada di pikiranmu?",
@@ -65,7 +59,6 @@
   "mood.random": "Acak",
   "mood.lonely": "Sendirian",
   "mood.curious": "Penasaran",
-
   "profile.title": "Profil",
   "profile.loading": "Memuat profil...",
   "profile.changePhoto": "Ganti foto",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Pribadi — hanya kamu yang bisa melihat emailmu. Tidak pernah ditampilkan ke siapa pun.",
   "profile.createProfile": "Buat profil",
   "profile.usernameFieldHint": "Hanya huruf kecil, angka, dan garis bawah.",
-
   "publicProfile.connectionRequestSent": "Permintaan koneksi terkirim.",
   "publicProfile.couldNotSendRequest": "Tidak dapat mengirim permintaan.",
   "publicProfile.reportSent": "Laporan terkirim.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Belum ada pikiran publik.",
   "publicProfile.connect": "Hubungkan",
   "publicProfile.mute": "Bisukan",
-  "publicProfile.report": "Laporkan"
+  "publicProfile.report": "Laporkan",
+  "connections.title": "Koneksi",
+  "connections.subtitle": "Orang-orang yang telah kamu hubungkan.",
+  "connections.chats": "Obrolan",
+  "connections.requests": "Permintaan",
+  "connections.noRequests": "Tidak ada permintaan masuk.",
+  "connections.accept": "Terima",
+  "connections.decline": "Tolak",
+  "connections.someone": "Seseorang",
+  "connections.noConnections": "Belum ada koneksi.",
+  "connections.loadingChats": "Memuat obrolan...",
+  "connections.couldNotLoad": "Tidak dapat memuat koneksi.",
+  "connections.unreadSuffix": "notifikasi pesan belum dibaca"
 }

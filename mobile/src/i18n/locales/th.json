@@ -3,11 +3,9 @@
   "tabs.destiny": "โชคชะตา",
   "tabs.create": "สร้าง",
   "tabs.connections": "การเชื่อมต่อ",
-
   "welcome.tagline": "บทต่อไป\nอาจอยู่ไม่ไกลไปกว่าคนแปลกหน้าคนหนึ่ง",
   "welcome.getStarted": "เริ่มต้นใช้งาน",
   "welcome.haveAccount": "ฉันมีบัญชีอยู่แล้ว",
-
   "auth.welcomeBack": "ยินดีต้อนรับกลับมา",
   "auth.createAccount": "สร้างบัญชี",
   "auth.email": "อีเมล",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "ยังไม่มีบัญชี? ลงทะเบียน",
   "auth.switchToSignIn": "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ",
   "auth.back": "กลับ",
-
   "universe.greetingMorning": "สวัสดีตอนเช้า",
   "universe.greetingAfternoon": "สวัสดีตอนบ่าย",
   "universe.greetingEvening": "สวัสดีตอนเย็น",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "ยังไม่มีอะไรให้ดู กลับมาดูใหม่เร็ว ๆ นี้",
   "universe.couldNotLoad": "ไม่สามารถโหลดความคิดได้",
   "universe.createThought": "สร้างความคิด",
-
   "destiny.title": "โชคชะตา",
   "destiny.subtitle": "ความคิดของคนแปลกหน้า เพื่อคุณเท่านั้นในวันนี้",
   "destiny.letItDrift": "ปล่อยให้ล่องลอยไป",
   "destiny.reply": "ตอบกลับ",
   "destiny.drifted": "คุณปล่อยให้มันล่องลอยไปแล้ว",
   "destiny.noneAvailable": "วันนี้ไม่มีความคิดโชคชะตาให้ใช้งาน",
-
   "common.translate": "แปล",
   "common.showOriginal": "แสดงต้นฉบับ",
   "common.translating": "กำลังแปล…",
   "common.back": "กลับ",
   "common.anonymous": "ไม่ระบุชื่อ",
   "common.close": "ปิด",
-
   "compose.title": "แบ่งปันความคิด",
   "compose.subtitle": "ปล่อยให้ความคิดของคุณล่องลอยไปในจักรวาล",
   "compose.placeholder": "คุณคิดอะไรอยู่?",
@@ -65,7 +59,6 @@
   "mood.random": "สุ่ม",
   "mood.lonely": "เหงา",
   "mood.curious": "อยากรู้อยากเห็น",
-
   "profile.title": "โปรไฟล์",
   "profile.loading": "กำลังโหลดโปรไฟล์...",
   "profile.changePhoto": "เปลี่ยนรูปภาพ",
@@ -93,7 +86,6 @@
   "profile.emailHint": "เป็นส่วนตัว — มีเพียงคุณเท่านั้นที่เห็นอีเมลของคุณ จะไม่แสดงให้ผู้อื่นเห็นเลย",
   "profile.createProfile": "สร้างโปรไฟล์",
   "profile.usernameFieldHint": "ใช้ได้เฉพาะตัวพิมพ์เล็ก ตัวเลข และเครื่องหมายขีดล่าง",
-
   "publicProfile.connectionRequestSent": "ส่งคำขอเชื่อมต่อแล้ว",
   "publicProfile.couldNotSendRequest": "ไม่สามารถส่งคำขอได้",
   "publicProfile.reportSent": "ส่งรายงานแล้ว",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "ยังไม่มีความคิดสาธารณะ",
   "publicProfile.connect": "เชื่อมต่อ",
   "publicProfile.mute": "ปิดเสียง",
-  "publicProfile.report": "รายงาน"
+  "publicProfile.report": "รายงาน",
+  "connections.title": "การเชื่อมต่อ",
+  "connections.subtitle": "ผู้คนที่คุณเชื่อมต่อด้วย",
+  "connections.chats": "แชท",
+  "connections.requests": "คำขอ",
+  "connections.noRequests": "ไม่มีคำขอเข้ามา",
+  "connections.accept": "ยอมรับ",
+  "connections.decline": "ปฏิเสธ",
+  "connections.someone": "บางคน",
+  "connections.noConnections": "ยังไม่มีการเชื่อมต่อ",
+  "connections.loadingChats": "กำลังโหลดแชท...",
+  "connections.couldNotLoad": "ไม่สามารถโหลดการเชื่อมต่อได้",
+  "connections.unreadSuffix": "การแจ้งเตือนข้อความที่ยังไม่ได้อ่าน"
 }

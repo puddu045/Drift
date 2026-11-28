@@ -8,6 +8,7 @@ import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ScreenContainer } from '@/components/ScreenContainer';
+import { useTranslation } from '@/i18n';
 import { ApiError } from '@/lib/api';
 import { colors, spacing, typography } from '@/theme';
 
@@ -17,7 +18,12 @@ import { useSession } from '@/features/auth/SessionProvider';
 
 export function ConnectionsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [segment, setSegment] = useState<'Chats' | 'Requests'>('Chats');
+  const segmentLabels: Record<'Chats' | 'Requests', string> = {
+    Chats: t('connections.chats'),
+    Requests: t('connections.requests'),
+  };
   const userId = useSession().session?.user.id;
   const [inbox, setInbox] = useState(() => userId ? cachedInbox(userId) : undefined);
   const { summaries = {}, badges = {}, requests = [], connections = [], profiles = {} } = inbox ?? {};
@@ -32,7 +38,7 @@ export function ConnectionsScreen() {
         setError(null);
       }
     }).catch((err: unknown) => {
-      if (version === generation.current) setError(err instanceof ApiError ? err.message : 'Could not load connections.');
+      if (version === generation.current) setError(err instanceof ApiError ? err.message : t('connections.couldNotLoad'));
     });
   }, [userId]);
   useFocusEffect(useCallback(() => {
@@ -54,8 +60,8 @@ export function ConnectionsScreen() {
     <ScreenContainer floatingTabBar background="haze">
       <View style={styles.header}>
         <Ionicons name="people-outline" size={38} color={colors.textPrimary} />
-        <Text style={styles.title}>Connections</Text>
-        <Text style={styles.subtitle}>People you&rsquo;ve connected with.</Text>
+        <Text style={styles.title}>{t('connections.title')}</Text>
+        <Text style={styles.subtitle}>{t('connections.subtitle')}</Text>
       </View>
       {error && <Text style={styles.error}>{error}</Text>}
 
@@ -65,14 +71,14 @@ export function ConnectionsScreen() {
             style={[styles.segment, tab === segment && styles.active]} onPress={() => setSegment(tab)}>
             {tab === segment && <PillGradient />}
             <Text style={{ color: tab === segment ? 'white' : colors.textPrimary, fontWeight: '600' }}>
-              {tab}{tab === 'Requests' && requests.length > 0 ? '  ' + requests.length : ''}
+              {segmentLabels[tab]}{tab === 'Requests' && requests.length > 0 ? '  ' + requests.length : ''}
             </Text>
           </Pressable>
         ))}
       </View>
       {segment === 'Requests' && (
         <ScrollView contentContainerStyle={styles.section}>
-          {requests.length === 0 && <Text style={styles.empty}>No incoming requests.</Text>}
+          {requests.length === 0 && <Text style={styles.empty}>{t('connections.noRequests')}</Text>}
           {requests.map((request) => (
             <Card key={request.id} style={styles.requestCard}>
               <View style={styles.authorRow}>
@@ -80,13 +86,13 @@ export function ConnectionsScreen() {
                   name={request.senderProfile?.displayName}
                   photoUrl={request.senderProfile?.photoUrl}
                 />
-                <Text style={styles.requestName}>{request.senderProfile?.displayName ?? 'Someone'}</Text>
+                <Text style={styles.requestName}>{request.senderProfile?.displayName ?? t('connections.someone')}</Text>
               </View>
               {request.introMessage && <Text style={styles.intro}>“{request.introMessage}”</Text>}
               <View style={styles.requestActions}>
-                <Button label="Accept" variant="accept" onPress={() => onAccept(request.id)} style={styles.actionButton} />
+                <Button label={t('connections.accept')} variant="accept" onPress={() => onAccept(request.id)} style={styles.actionButton} />
                 <Button
-                  label="Decline"
+                  label={t('connections.decline')}
                   variant="destructive"
                   onPress={() => onDecline(request.id)}
                   style={styles.actionButton}
@@ -101,7 +107,7 @@ export function ConnectionsScreen() {
         <FlatList
           data={connections}
           keyExtractor={(item) => item.id}
-          ListEmptyComponent={<Text style={styles.empty}>{inbox ? 'No connections yet.' : error ? '' : 'Loading chats...'}</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>{inbox ? t('connections.noConnections') : error ? '' : t('connections.loadingChats')}</Text>}
           renderItem={({ item }) => {
             const message = summaries[item.conversationId ?? '']?.lastMessage;
             const unread = badges[item.conversationId ?? ''] ?? 0;
@@ -121,12 +127,12 @@ export function ConnectionsScreen() {
                   photoUrl={profiles[item.otherUserId]?.photoUrl}
                 />
                 <View style={{ flex: 1 }}>
-                <Text style={styles.connectionLabel}>{profiles[item.otherUserId]?.displayName ?? 'Someone'}</Text>
+                <Text style={styles.connectionLabel}>{profiles[item.otherUserId]?.displayName ?? t('connections.someone')}</Text>
                 {message && <Text numberOfLines={1} style={styles.meta}>{message.text}</Text>}
                 </View>
                 <View style={{ alignItems: 'flex-end', gap: 4 }}>
                   {message && <Text style={styles.meta}>{new Date(message.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</Text>}
-                  {unread > 0 && <Text accessibilityLabel={unread + ' unread message notifications'} style={styles.badge}>{unread}</Text>}
+                  {unread > 0 && <Text accessibilityLabel={`${unread} ${t('connections.unreadSuffix')}`} style={styles.badge}>{unread}</Text>}
                 </View>
               </Card>
             </Pressable>

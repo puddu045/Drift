@@ -3,11 +3,9 @@
   "tabs.destiny": "Destini",
   "tabs.create": "Cipta",
   "tabs.connections": "Sambungan",
-
   "welcome.tagline": "Bab seterusnya\nmungkin hanya sejauh seorang orang asing.",
   "welcome.getStarted": "Mulakan",
   "welcome.haveAccount": "Saya sudah ada akaun",
-
   "auth.welcomeBack": "Selamat kembali",
   "auth.createAccount": "Cipta akaun",
   "auth.email": "E-mel",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Tiada akaun? Daftar",
   "auth.switchToSignIn": "Sudah ada akaun? Log masuk",
   "auth.back": "Kembali",
-
   "universe.greetingMorning": "Selamat pagi",
   "universe.greetingAfternoon": "Selamat tengah hari",
   "universe.greetingEvening": "Selamat petang",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Belum ada apa-apa untuk dilihat. Datang semula tidak lama lagi.",
   "universe.couldNotLoad": "Tidak dapat memuatkan fikiran.",
   "universe.createThought": "Cipta satu fikiran",
-
   "destiny.title": "Destini",
   "destiny.subtitle": "Fikiran seorang asing, hanya untuk anda hari ini.",
   "destiny.letItDrift": "Biarkan ia terapung",
   "destiny.reply": "Balas",
   "destiny.drifted": "Anda membiarkannya terapung.",
   "destiny.noneAvailable": "Tiada fikiran Destini tersedia hari ini.",
-
   "common.translate": "Terjemah",
   "common.showOriginal": "Tunjukkan asal",
   "common.translating": "Menterjemah…",
   "common.back": "Kembali",
   "common.anonymous": "Tanpa nama",
   "common.close": "Tutup",
-
   "compose.title": "Kongsi satu fikiran",
   "compose.subtitle": "Biarkan fikiran anda terapung ke alam semesta.",
   "compose.placeholder": "Apa yang anda fikirkan?",
@@ -65,7 +59,6 @@
   "mood.random": "Rawak",
   "mood.lonely": "Sunyi",
   "mood.curious": "Ingin tahu",
-
   "profile.title": "Profil",
   "profile.loading": "Memuatkan profil...",
   "profile.changePhoto": "Tukar foto",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Peribadi — hanya anda boleh melihat e-mel anda. Ia tidak pernah ditunjukkan kepada sesiapa pun.",
   "profile.createProfile": "Cipta profil",
   "profile.usernameFieldHint": "Hanya huruf kecil, nombor dan garis bawah.",
-
   "publicProfile.connectionRequestSent": "Permintaan sambungan dihantar.",
   "publicProfile.couldNotSendRequest": "Tidak dapat menghantar permintaan.",
   "publicProfile.reportSent": "Laporan dihantar.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Belum ada fikiran awam.",
   "publicProfile.connect": "Sambung",
   "publicProfile.mute": "Senyapkan",
-  "publicProfile.report": "Lapor"
+  "publicProfile.report": "Lapor",
+  "connections.title": "Sambungan",
+  "connections.subtitle": "Orang yang anda telah berhubung dengan.",
+  "connections.chats": "Sembang",
+  "connections.requests": "Permintaan",
+  "connections.noRequests": "Tiada permintaan masuk.",
+  "connections.accept": "Terima",
+  "connections.decline": "Tolak",
+  "connections.someone": "Seseorang",
+  "connections.noConnections": "Belum ada sambungan.",
+  "connections.loadingChats": "Memuatkan sembang...",
+  "connections.couldNotLoad": "Tidak dapat memuatkan sambungan.",
+  "connections.unreadSuffix": "pemberitahuan mesej belum dibaca"
 }

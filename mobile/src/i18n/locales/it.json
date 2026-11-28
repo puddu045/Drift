@@ -3,11 +3,9 @@
   "tabs.destiny": "Destino",
   "tabs.create": "Crea",
   "tabs.connections": "Connessioni",
-
   "welcome.tagline": "Il prossimo capitolo\npotrebbe essere a un estraneo di distanza.",
   "welcome.getStarted": "Inizia",
   "welcome.haveAccount": "Ho già un account",
-
   "auth.welcomeBack": "Bentornato",
   "auth.createAccount": "Crea un account",
   "auth.email": "E-mail",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Non hai un account? Registrati",
   "auth.switchToSignIn": "Hai già un account? Accedi",
   "auth.back": "Indietro",
-
   "universe.greetingMorning": "Buongiorno",
   "universe.greetingAfternoon": "Buon pomeriggio",
   "universe.greetingEvening": "Buonasera",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Ancora nulla da vedere. Torna presto.",
   "universe.couldNotLoad": "Impossibile caricare i pensieri.",
   "universe.createThought": "Crea un pensiero",
-
   "destiny.title": "Destino",
   "destiny.subtitle": "Il pensiero di uno sconosciuto, solo per te oggi.",
   "destiny.letItDrift": "Lascialo andare",
   "destiny.reply": "Rispondi",
   "destiny.drifted": "L'hai lasciato andare.",
   "destiny.noneAvailable": "Nessun pensiero Destino disponibile oggi.",
-
   "common.translate": "Traduci",
   "common.showOriginal": "Mostra originale",
   "common.translating": "Traduzione in corso…",
   "common.back": "Indietro",
   "common.anonymous": "Anonimo",
   "common.close": "Chiudi",
-
   "compose.title": "Condividi un pensiero",
   "compose.subtitle": "Lascia che il tuo pensiero vada alla deriva nell'universo.",
   "compose.placeholder": "Cosa hai in mente?",
@@ -65,7 +59,6 @@
   "mood.random": "Casuale",
   "mood.lonely": "Solitario",
   "mood.curious": "Curioso",
-
   "profile.title": "Profilo",
   "profile.loading": "Caricamento profilo...",
   "profile.changePhoto": "Cambia foto",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Privato — solo tu puoi vedere la tua e-mail. Non viene mai mostrata a nessun altro.",
   "profile.createProfile": "Crea profilo",
   "profile.usernameFieldHint": "Solo lettere minuscole, numeri e trattini bassi.",
-
   "publicProfile.connectionRequestSent": "Richiesta di connessione inviata.",
   "publicProfile.couldNotSendRequest": "Impossibile inviare la richiesta.",
   "publicProfile.reportSent": "Segnalazione inviata.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Ancora nessun pensiero pubblico.",
   "publicProfile.connect": "Connetti",
   "publicProfile.mute": "Silenzia",
-  "publicProfile.report": "Segnala"
+  "publicProfile.report": "Segnala",
+  "connections.title": "Connessioni",
+  "connections.subtitle": "Persone con cui ti sei connesso.",
+  "connections.chats": "Chat",
+  "connections.requests": "Richieste",
+  "connections.noRequests": "Nessuna richiesta in arrivo.",
+  "connections.accept": "Accetta",
+  "connections.decline": "Rifiuta",
+  "connections.someone": "Qualcuno",
+  "connections.noConnections": "Nessuna connessione ancora.",
+  "connections.loadingChats": "Caricamento chat...",
+  "connections.couldNotLoad": "Impossibile caricare le connessioni.",
+  "connections.unreadSuffix": "notifiche di messaggi non letti"
 }

@@ -3,11 +3,9 @@
   "tabs.destiny": "Destino",
   "tabs.create": "Crear",
   "tabs.connections": "Conexiones",
-
   "welcome.tagline": "El próximo capítulo\npodría estar a un desconocido de distancia.",
   "welcome.getStarted": "Comenzar",
   "welcome.haveAccount": "Ya tengo una cuenta",
-
   "auth.welcomeBack": "Bienvenido de nuevo",
   "auth.createAccount": "Crear una cuenta",
   "auth.email": "Correo electrónico",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "¿No tienes una cuenta? Regístrate",
   "auth.switchToSignIn": "¿Ya tienes una cuenta? Inicia sesión",
   "auth.back": "Atrás",
-
   "universe.greetingMorning": "Buenos días",
   "universe.greetingAfternoon": "Buenas tardes",
   "universe.greetingEvening": "Buenas noches",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Nada que ver todavía. Vuelve pronto.",
   "universe.couldNotLoad": "No se pudieron cargar los pensamientos.",
   "universe.createThought": "Crear un pensamiento",
-
   "destiny.title": "Destino",
   "destiny.subtitle": "El pensamiento de un desconocido, solo para ti hoy.",
   "destiny.letItDrift": "Déjalo ir",
   "destiny.reply": "Responder",
   "destiny.drifted": "Lo dejaste ir.",
   "destiny.noneAvailable": "No hay un pensamiento de Destino disponible hoy.",
-
   "common.translate": "Traducir",
   "common.showOriginal": "Mostrar original",
   "common.translating": "Traduciendo…",
   "common.back": "Atrás",
   "common.anonymous": "Anónimo",
   "common.close": "Cerrar",
-
   "compose.title": "Comparte un pensamiento",
   "compose.subtitle": "Deja que tu pensamiento viaje a la deriva por el universo.",
   "compose.placeholder": "¿Qué tienes en mente?",
@@ -65,7 +59,6 @@
   "mood.random": "Aleatorio",
   "mood.lonely": "Solitario",
   "mood.curious": "Curioso",
-
   "profile.title": "Perfil",
   "profile.loading": "Cargando perfil...",
   "profile.changePhoto": "Cambiar foto",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Privado — solo tú puedes ver tu correo. Nunca se muestra a nadie más.",
   "profile.createProfile": "Crear perfil",
   "profile.usernameFieldHint": "Solo letras minúsculas, números y guiones bajos.",
-
   "publicProfile.connectionRequestSent": "Solicitud de conexión enviada.",
   "publicProfile.couldNotSendRequest": "No se pudo enviar la solicitud.",
   "publicProfile.reportSent": "Informe enviado.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Aún no hay pensamientos públicos.",
   "publicProfile.connect": "Conectar",
   "publicProfile.mute": "Silenciar",
-  "publicProfile.report": "Reportar"
+  "publicProfile.report": "Reportar",
+  "connections.title": "Conexiones",
+  "connections.subtitle": "Personas con las que te has conectado.",
+  "connections.chats": "Chats",
+  "connections.requests": "Solicitudes",
+  "connections.noRequests": "No hay solicitudes entrantes.",
+  "connections.accept": "Aceptar",
+  "connections.decline": "Rechazar",
+  "connections.someone": "Alguien",
+  "connections.noConnections": "Aún no tienes conexiones.",
+  "connections.loadingChats": "Cargando chats...",
+  "connections.couldNotLoad": "No se pudieron cargar las conexiones.",
+  "connections.unreadSuffix": "notificaciones de mensajes no leídos"
 }

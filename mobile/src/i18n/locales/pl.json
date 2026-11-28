@@ -3,11 +3,9 @@
   "tabs.destiny": "Przeznaczenie",
   "tabs.create": "Utwórz",
   "tabs.connections": "Połączenia",
-
   "welcome.tagline": "Następny rozdział\nmoże być oddalony o jednego nieznajomego.",
   "welcome.getStarted": "Zaczynajmy",
   "welcome.haveAccount": "Mam już konto",
-
   "auth.welcomeBack": "Witaj z powrotem",
   "auth.createAccount": "Utwórz konto",
   "auth.email": "E-mail",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Nie masz konta? Zarejestruj się",
   "auth.switchToSignIn": "Masz już konto? Zaloguj się",
   "auth.back": "Wstecz",
-
   "universe.greetingMorning": "Dzień dobry",
   "universe.greetingAfternoon": "Dzień dobry",
   "universe.greetingEvening": "Dobry wieczór",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Jeszcze nic do zobaczenia. Zajrzyj tu wkrótce.",
   "universe.couldNotLoad": "Nie udało się wczytać myśli.",
   "universe.createThought": "Utwórz myśl",
-
   "destiny.title": "Przeznaczenie",
   "destiny.subtitle": "Myśl nieznajomego, dziś tylko dla Ciebie.",
   "destiny.letItDrift": "Puść ją na fali",
   "destiny.reply": "Odpowiedz",
   "destiny.drifted": "Puściłeś ją na fali.",
   "destiny.noneAvailable": "Dziś brak dostępnej myśli Przeznaczenia.",
-
   "common.translate": "Przetłumacz",
   "common.showOriginal": "Pokaż oryginał",
   "common.translating": "Tłumaczenie…",
   "common.back": "Wstecz",
   "common.anonymous": "Anonimowy",
   "common.close": "Zamknij",
-
   "compose.title": "Udostępnij myśl",
   "compose.subtitle": "Puść swoją myśl na fali wszechświata.",
   "compose.placeholder": "O czym myślisz?",
@@ -65,7 +59,6 @@
   "mood.random": "Losowe",
   "mood.lonely": "Samotne",
   "mood.curious": "Pełne ciekawości",
-
   "profile.title": "Profil",
   "profile.loading": "Wczytywanie profilu...",
   "profile.changePhoto": "Zmień zdjęcie",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Prywatne — tylko Ty widzisz swój e-mail. Nigdy nie jest pokazywany nikomu innemu.",
   "profile.createProfile": "Utwórz profil",
   "profile.usernameFieldHint": "Tylko małe litery, cyfry i podkreślenia.",
-
   "publicProfile.connectionRequestSent": "Wysłano zaproszenie do połączenia.",
   "publicProfile.couldNotSendRequest": "Nie udało się wysłać zaproszenia.",
   "publicProfile.reportSent": "Zgłoszenie wysłane.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Jeszcze brak publicznych myśli.",
   "publicProfile.connect": "Połącz",
   "publicProfile.mute": "Wycisz",
-  "publicProfile.report": "Zgłoś"
+  "publicProfile.report": "Zgłoś",
+  "connections.title": "Połączenia",
+  "connections.subtitle": "Osoby, z którymi się połączyłeś.",
+  "connections.chats": "Czaty",
+  "connections.requests": "Zaproszenia",
+  "connections.noRequests": "Brak przychodzących zaproszeń.",
+  "connections.accept": "Akceptuj",
+  "connections.decline": "Odrzuć",
+  "connections.someone": "Ktoś",
+  "connections.noConnections": "Brak połączeń.",
+  "connections.loadingChats": "Wczytywanie czatów...",
+  "connections.couldNotLoad": "Nie udało się wczytać połączeń.",
+  "connections.unreadSuffix": "powiadomień o nieprzeczytanych wiadomościach"
 }

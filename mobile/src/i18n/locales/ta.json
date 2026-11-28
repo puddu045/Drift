@@ -3,11 +3,9 @@
   "tabs.destiny": "விதி",
   "tabs.create": "உருவாக்கு",
   "tabs.connections": "தொடர்புகள்",
-
   "welcome.tagline": "அடுத்த அத்தியாயம்\nஒரு அறிமுகமில்லாதவர் தூரத்தில் இருக்கலாம்.",
   "welcome.getStarted": "தொடங்குங்கள்",
   "welcome.haveAccount": "எனக்கு ஏற்கனவே கணக்கு உள்ளது",
-
   "auth.welcomeBack": "மீண்டும் வருக",
   "auth.createAccount": "கணக்கை உருவாக்கு",
   "auth.email": "மின்னஞ்சல்",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "கணக்கு இல்லையா? பதிவு செய்யுங்கள்",
   "auth.switchToSignIn": "ஏற்கனவே கணக்கு உள்ளதா? உள்நுழைக",
   "auth.back": "பின்",
-
   "universe.greetingMorning": "காலை வணக்கம்",
   "universe.greetingAfternoon": "மதிய வணக்கம்",
   "universe.greetingEvening": "மாலை வணக்கம்",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "காண இன்னும் எதுவும் இல்லை. மீண்டும் வாருங்கள்.",
   "universe.couldNotLoad": "எண்ணங்களை ஏற்ற முடியவில்லை.",
   "universe.createThought": "ஒரு எண்ணத்தை உருவாக்கு",
-
   "destiny.title": "விதி",
   "destiny.subtitle": "ஒரு அறிமுகமில்லாதவரின் எண்ணம், இன்று உங்களுக்காக மட்டும்.",
   "destiny.letItDrift": "அதை மிதக்க விடுங்கள்",
   "destiny.reply": "பதிலளி",
   "destiny.drifted": "நீங்கள் அதை மிதக்க விட்டீர்கள்.",
   "destiny.noneAvailable": "இன்று விதி எண்ணம் எதுவும் கிடைக்கவில்லை.",
-
   "common.translate": "மொழிபெயர்",
   "common.showOriginal": "மூலத்தைக் காட்டு",
   "common.translating": "மொழிபெயர்க்கப்படுகிறது…",
   "common.back": "பின்",
   "common.anonymous": "அநாமதேயம்",
   "common.close": "மூடு",
-
   "compose.title": "ஒரு எண்ணத்தைப் பகிரவும்",
   "compose.subtitle": "உங்கள் எண்ணத்தை பிரபஞ்சத்தில் மிதக்க விடுங்கள்.",
   "compose.placeholder": "உங்கள் மனதில் என்ன இருக்கிறது?",
@@ -65,7 +59,6 @@
   "mood.random": "சீரற்ற",
   "mood.lonely": "தனிமையான",
   "mood.curious": "ஆர்வமுள்ள",
-
   "profile.title": "சுயவிவரம்",
   "profile.loading": "சுயவிவரம் ஏற்றப்படுகிறது...",
   "profile.changePhoto": "புகைப்படத்தை மாற்று",
@@ -93,7 +86,6 @@
   "profile.emailHint": "தனிப்பட்டது — உங்கள் மின்னஞ்சலை நீங்கள் மட்டுமே பார்க்க முடியும். இது மற்றவர்களுக்கு ஒருபோதும் காட்டப்படாது.",
   "profile.createProfile": "சுயவிவரத்தை உருவாக்கு",
   "profile.usernameFieldHint": "சிறிய எழுத்துகள், எண்கள் மற்றும் அடிக்கோடுகள் மட்டும்.",
-
   "publicProfile.connectionRequestSent": "இணைப்பு கோரிக்கை அனுப்பப்பட்டது.",
   "publicProfile.couldNotSendRequest": "கோரிக்கையை அனுப்ப முடியவில்லை.",
   "publicProfile.reportSent": "புகார் அனுப்பப்பட்டது.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "இன்னும் பொது எண்ணங்கள் இல்லை.",
   "publicProfile.connect": "இணை",
   "publicProfile.mute": "முடக்கு",
-  "publicProfile.report": "புகாரளி"
+  "publicProfile.report": "புகாரளி",
+  "connections.title": "தொடர்புகள்",
+  "connections.subtitle": "நீங்கள் இணைந்த நபர்கள்.",
+  "connections.chats": "அரட்டைகள்",
+  "connections.requests": "கோரிக்கைகள்",
+  "connections.noRequests": "வரும் கோரிக்கைகள் இல்லை.",
+  "connections.accept": "ஏற்கவும்",
+  "connections.decline": "நிராகரிக்கவும்",
+  "connections.someone": "யாரோ",
+  "connections.noConnections": "இன்னும் தொடர்புகள் இல்லை.",
+  "connections.loadingChats": "அரட்டைகள் ஏற்றப்படுகின்றன...",
+  "connections.couldNotLoad": "தொடர்புகளை ஏற்ற முடியவில்லை.",
+  "connections.unreadSuffix": "படிக்காத செய்தி அறிவிப்புகள்"
 }

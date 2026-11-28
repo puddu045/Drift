@@ -3,11 +3,9 @@
   "tabs.destiny": "Судьба",
   "tabs.create": "Создать",
   "tabs.connections": "Связи",
-
   "welcome.tagline": "Следующая глава\nможет быть всего в одном незнакомце от тебя.",
   "welcome.getStarted": "Начать",
   "welcome.haveAccount": "У меня уже есть аккаунт",
-
   "auth.welcomeBack": "С возвращением",
   "auth.createAccount": "Создать аккаунт",
   "auth.email": "Эл. почта",
@@ -17,7 +15,6 @@
   "auth.switchToSignUp": "Нет аккаунта? Зарегистрироваться",
   "auth.switchToSignIn": "Уже есть аккаунт? Войти",
   "auth.back": "Назад",
-
   "universe.greetingMorning": "Доброе утро",
   "universe.greetingAfternoon": "Добрый день",
   "universe.greetingEvening": "Добрый вечер",
@@ -35,21 +32,18 @@
   "universe.emptyWorld": "Пока нечего смотреть. Загляни позже.",
   "universe.couldNotLoad": "Не удалось загрузить мысли.",
   "universe.createThought": "Создать мысль",
-
   "destiny.title": "Судьба",
   "destiny.subtitle": "Мысль незнакомца, сегодня только для тебя.",
   "destiny.letItDrift": "Отпустить в дрейф",
   "destiny.reply": "Ответить",
   "destiny.drifted": "Ты отпустил её в дрейф.",
   "destiny.noneAvailable": "Сегодня нет доступной мысли Судьбы.",
-
   "common.translate": "Перевести",
   "common.showOriginal": "Показать оригинал",
   "common.translating": "Перевод…",
   "common.back": "Назад",
   "common.anonymous": "Аноним",
   "common.close": "Закрыть",
-
   "compose.title": "Поделись мыслью",
   "compose.subtitle": "Отпусти свою мысль в дрейф по вселенной.",
   "compose.placeholder": "О чём ты думаешь?",
@@ -65,7 +59,6 @@
   "mood.random": "Случайное",
   "mood.lonely": "Одинокое",
   "mood.curious": "Любопытное",
-
   "profile.title": "Профиль",
   "profile.loading": "Загрузка профиля...",
   "profile.changePhoto": "Изменить фото",
@@ -93,7 +86,6 @@
   "profile.emailHint": "Конфиденциально — только ты видишь свою почту. Она никогда не показывается никому другому.",
   "profile.createProfile": "Создать профиль",
   "profile.usernameFieldHint": "Только строчные буквы, цифры и подчёркивания.",
-
   "publicProfile.connectionRequestSent": "Запрос на соединение отправлен.",
   "publicProfile.couldNotSendRequest": "Не удалось отправить запрос.",
   "publicProfile.reportSent": "Жалоба отправлена.",
@@ -101,5 +93,17 @@
   "publicProfile.noThoughtsYet": "Пока нет публичных мыслей.",
   "publicProfile.connect": "Соединиться",
   "publicProfile.mute": "Отключить звук",
-  "publicProfile.report": "Пожаловаться"
+  "publicProfile.report": "Пожаловаться",
+  "connections.title": "Связи",
+  "connections.subtitle": "Люди, с которыми ты связан.",
+  "connections.chats": "Чаты",
+  "connections.requests": "Запросы",
+  "connections.noRequests": "Нет входящих запросов.",
+  "connections.accept": "Принять",
+  "connections.decline": "Отклонить",
+  "connections.someone": "Кто-то",
+  "connections.noConnections": "Пока нет связей.",
+  "connections.loadingChats": "Загрузка чатов...",
+  "connections.couldNotLoad": "Не удалось загрузить связи.",
+  "connections.unreadSuffix": "непрочитанных уведомлений о сообщениях"
 }
