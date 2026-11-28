@@ -1,11 +1,11 @@
-import { Controller, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Patch } from '@nestjs/common';
 import { CurrentUser } from '@nestjs/authentication';
 import { z } from 'zod';
 
 import type { AuthenticatedUser } from '../auth/current-user.js';
 import { NotificationsService } from './notifications.service.js';
 
-const idParamSchema = z.uuid();
+const markReadSchema = z.object({ ids: z.array(z.uuid()).min(1).max(50) });
 
 @Controller('notifications')
 export class NotificationsController {
@@ -16,8 +16,8 @@ export class NotificationsController {
     return this.notifications.list(user.id);
   }
 
-  @Patch(':id/read')
-  markRead(@CurrentUser() user: AuthenticatedUser, @Param('id', { schema: idParamSchema }) id: string) {
-    return this.notifications.markRead(user.id, id);
+  @Patch('read')
+  markRead(@CurrentUser() user: AuthenticatedUser, @Body({ schema: markReadSchema }) body: { ids: string[] }) {
+    return this.notifications.markRead(user.id, body.ids);
   }
 }

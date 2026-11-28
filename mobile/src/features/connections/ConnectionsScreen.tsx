@@ -1,8 +1,8 @@
 import { PillGradient } from '@/components/PillGradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { FlatList, ScrollView, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
@@ -19,6 +19,7 @@ import { useSession } from '@/features/auth/SessionProvider';
 export function ConnectionsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const params = useLocalSearchParams<{ segment?: string }>();
   const [segment, setSegment] = useState<'Chats' | 'Requests'>('Chats');
   const segmentLabels: Record<'Chats' | 'Requests', string> = {
     Chats: t('connections.chats'),
@@ -45,6 +46,27 @@ export function ConnectionsScreen() {
     refresh();
     return () => { generation.current++; };
   }, [refresh]));
+
+  // One-shot signal from a notification tap (?segment=Requests) — apply it,
+  // then clear it so it doesn't keep overriding a segment the user later
+  // picks by hand.
+  useFocusEffect(
+    useCallback(() => {
+      if (params.segment === 'Chats' || params.segment === 'Requests') {
+        setSegment(params.segment);
+        router.setParams({ segment: undefined });
+      }
+    }, [params.segment, router]),
+  );
+
+  // Most recently messaged first — the backend orders connections by when
+  // they were created, not by chat activity, so re-sort here using the
+  // per-conversation summaries already fetched for the preview text.
+  const sortedConnections = useMemo(() => {
+    const lastActivity = (c: (typeof connections)[number]) =>
+      summaries[c.conversationId ?? '']?.lastMessage?.createdAt ?? c.createdAt;
+    return [...connections].sort((a, b) => +new Date(lastActivity(b)) - +new Date(lastActivity(a)));
+  }, [connections, summaries]);
 
   const onAccept = async (id: string) => {
     await acceptRequest(id);
@@ -105,7 +127,7 @@ export function ConnectionsScreen() {
 
       {segment === 'Chats' && <View style={[styles.section, { flex: 1 }]}>
         <FlatList
-          data={connections}
+          data={sortedConnections}
           keyExtractor={(item) => item.id}
           ListEmptyComponent={<Text style={styles.empty}>{inbox ? t('connections.noConnections') : error ? '' : t('connections.loadingChats')}</Text>}
           renderItem={({ item }) => {

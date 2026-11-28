@@ -29,6 +29,11 @@ export function sendMessage(conversationId: string, text: string) {
   return api.post<Message>(`/conversations/${conversationId}/messages`, { text });
 }
 
+/** Clears this conversation's unread-messages badge. */
+export function markConversationRead(conversationId: string) {
+  return api.patch<void>(`/conversations/${conversationId}/messages/read`);
+}
+
 export type Translation = { translatedText: string; language: string };
 
 /** On-demand only — never called automatically, just from a "Translate" tap. */

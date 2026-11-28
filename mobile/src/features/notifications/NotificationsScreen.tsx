@@ -7,16 +7,32 @@ import { Card } from '@/components/Card';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { colors, spacing, typography } from '@/theme';
 
-import { listNotifications, markNotificationRead, Notification } from './api';
+import { listNotifications, markNotificationsRead, Notification } from './api';
 
-const LABELS: Record<Notification['type'], string> = {
-  reaction: 'Someone reacted to your thought',
-  reply: 'Someone replied to your thought',
-  connection_request: 'You have a new connection request',
-  connection_accepted: 'Your connection request was accepted',
-  message: 'You have a new message',
-  destiny_ready: 'Your daily Destiny thought is ready',
-};
+// Only these types show in the tray — chat messages have their own badge on
+// the Connections tab instead (see (tabs)/_layout.tsx) and would otherwise
+// double up as both a tray item and a chat badge.
+const TRAY_TYPES: Notification['type'][] = [
+  'reaction',
+  'reply',
+  'connection_request',
+  'connection_accepted',
+  'destiny_ready',
+];
+
+function labelFor(item: Notification): string {
+  if (item.type === 'reaction') {
+    const who = item.lastActorName ?? 'Someone';
+    return item.extraCount > 0 ? `${who} and others reacted to your thought` : `${who} reacted to your thought`;
+  }
+  if (item.type === 'reply') {
+    const who = item.lastActorName ?? 'Someone';
+    return item.extraCount > 0 ? `${who} and others replied to your thought` : `${who} replied to your thought`;
+  }
+  if (item.type === 'connection_request') return 'You have a new connection request';
+  if (item.type === 'connection_accepted') return 'Your connection request was accepted';
+  return 'Your daily Destiny thought is ready';
+}
 
 const icons: Record<Notification['type'], keyof typeof Ionicons.glyphMap> = {
   reaction: 'heart-outline', reply: 'chatbubble-outline', message: 'mail-outline',
@@ -28,13 +44,37 @@ export function NotificationsScreen() {
   const [items, setItems] = useState<Notification[]>([]);
 
   useEffect(() => {
-    listNotifications().then(setItems);
+    listNotifications().then((all) => setItems(all.filter((n) => TRAY_TYPES.includes(n.type))));
   }, []);
 
   const onPress = async (item: Notification) => {
     if (!item.readAt) {
-      await markNotificationRead(item.id);
+      await markNotificationsRead(item.groupIds);
       setItems((prev) => prev.map((n) => (n.id === item.id ? { ...n, readAt: new Date().toISOString() } : n)));
+    }
+
+    if (item.type === 'reaction' || item.type === 'reply') {
+      const thoughtId = item.payload.thoughtId;
+      if (typeof thoughtId === 'string') {
+        router.push({ pathname: '/thoughts/[thoughtId]', params: { thoughtId } });
+      }
+      return;
+    }
+    if (item.type === 'connection_request') {
+      router.push({ pathname: '/(tabs)/connections', params: { segment: 'Requests' } });
+      return;
+    }
+    if (item.type === 'connection_accepted') {
+      const conversationId = item.payload.conversationId;
+      if (typeof conversationId === 'string') {
+        router.push({ pathname: '/(tabs)/connections/[conversationId]', params: { conversationId } });
+      } else {
+        router.push({ pathname: '/(tabs)/connections', params: { segment: 'Chats' } });
+      }
+      return;
+    }
+    if (item.type === 'destiny_ready') {
+      router.push('/(tabs)/destiny');
     }
   };
 
@@ -56,7 +96,7 @@ export function NotificationsScreen() {
             <Card style={[styles.card, !item.readAt && styles.unread]}>
               <View style={styles.icon}><Ionicons name={icons[item.type]} size={21} color="#30496D" /></View>
               <View style={{ flex: 1, gap: 3 }}>
-                <Text style={styles.label}>{LABELS[item.type]}</Text>
+                <Text style={styles.label}>{labelFor(item)}</Text>
                 <Text style={styles.time}>{new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</Text>
               </View>
               {!item.readAt && <View accessibilityLabel="Unread" style={styles.dot} />}

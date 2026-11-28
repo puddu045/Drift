@@ -257,7 +257,7 @@ export class ThoughtsService {
     }
     await this.prisma.thoughtReaction.create({ data: { thoughtId, userId, type } });
     if (thought.authorId !== userId) {
-      await this.notifications.create(thought.authorId, 'reaction', { thoughtId, type });
+      await this.notifications.create(thought.authorId, 'reaction', { thoughtId, type, actorId: userId });
     }
     return { reacted: true };
   }
@@ -273,7 +273,7 @@ export class ThoughtsService {
       data: { thoughtId, authorId: userId, text: data.text },
     });
     if (thought.authorId !== userId) {
-      await this.notifications.create(thought.authorId, 'reply', { thoughtId, replyId: reply.id });
+      await this.notifications.create(thought.authorId, 'reply', { thoughtId, replyId: reply.id, actorId: userId });
     }
     const identities = await this.identityMap([userId]);
     return { ...reply, author: identities.get(userId) ?? null };

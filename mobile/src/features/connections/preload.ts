@@ -9,6 +9,16 @@ function warmPhoto(url?: string | null) {
   if (url) void Image.prefetch(url).catch(() => {});
 }
 
+// Lets the tab bar's unread-messages badge (see (tabs)/_layout.tsx) react to
+// a freshly fetched inbox without polling — the same small external-store
+// pattern as i18n/localeStore.ts.
+type Listener = () => void;
+const listeners = new Set<Listener>();
+export function subscribeInbox(listener: Listener): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
 async function fetchInbox(userId: string) {
   const previous = cachedInbox(userId);
   const [requests, people, conversations, notifications] = await Promise.all([
@@ -55,7 +65,10 @@ export function preloadInbox(userId: string, force = false): Promise<Inbox> {
   const running = pending.get(userId);
   if (running && !force) return running;
   const request = fetchInbox(userId).then(data => {
-    if (pending.get(userId) === request) setCached('inbox:' + userId, data);
+    if (pending.get(userId) === request) {
+      setCached('inbox:' + userId, data);
+      listeners.forEach(listener => listener());
+    }
     return data;
   }).finally(() => {
     if (pending.get(userId) === request) pending.delete(userId);

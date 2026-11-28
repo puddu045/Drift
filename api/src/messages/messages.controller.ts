@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import { CurrentUser } from '@nestjs/authentication';
 import { Throttle } from '@nestjs/throttler';
 
@@ -23,6 +23,11 @@ export class MessagesController {
     @Query({ schema: messagesQuerySchema }) query: MessagesQuery,
   ) {
     return this.messages.listMessages(user.id, id, query);
+  }
+
+  @Patch('conversations/:id/messages/read')
+  markRead(@CurrentUser() user: AuthenticatedUser, @Param('id', { schema: idParamSchema }) id: string) {
+    return this.messages.markRead(user.id, id);
   }
 
   @Post('conversations/:id/messages')

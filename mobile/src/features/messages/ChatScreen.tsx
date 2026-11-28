@@ -18,7 +18,7 @@ import { ApiError } from '@/lib/api';
 import { useTranslatable } from '@/lib/useTranslatable';
 import { colors, spacing, typography } from '@/theme';
 
-import { listMessages, Message, sendMessage, translateMessage } from './api';
+import { listMessages, markConversationRead, Message, sendMessage, translateMessage } from './api';
 
 export function ChatScreen({ conversationId }: { conversationId: string }) {
   const router = useRouter();
@@ -60,7 +60,12 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
   useFocusEffect(
     useCallback(() => {
       refresh();
-    }, [refresh]),
+      // Clears this chat's unread badge, then refreshes the cached inbox so
+      // the Connections tab bar badge drops immediately rather than waiting
+      // for its own next fetch.
+      markConversationRead(conversationId).catch(() => {});
+      if (userId) void preloadInbox(userId, true).catch(() => {});
+    }, [refresh, conversationId, userId]),
   );
 
   // A conversation is immersive — hide the floating tab bar from the parent

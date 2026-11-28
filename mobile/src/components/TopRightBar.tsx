@@ -26,7 +26,9 @@ export function TopRightBar() {
       let cancelled = false;
       listNotifications()
         .then((items) => {
-          if (!cancelled) setUnread(items.filter((n) => !n.readAt).length);
+          // Chat messages have their own badge on the Connections tab
+          // instead of counting toward this bell.
+          if (!cancelled) setUnread(items.filter((n) => n.type !== 'message' && !n.readAt).length);
         })
         .catch(() => {});
       getOwnProfile()

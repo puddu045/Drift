@@ -10,6 +10,7 @@ import { MoodTag } from '@/components/MoodTag';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { useSession } from '@/features/auth/SessionProvider';
 import { sendConnectionRequest } from '@/features/connections/api';
+import { confirmIdentityReveal } from '@/features/connections/confirmIdentityReveal';
 import { muteUser } from '@/features/mutes/api';
 import { reportTarget } from '@/features/thoughts/api';
 import { REPORT_REASONS } from '@/features/thoughts/reportReasons';
@@ -56,6 +57,9 @@ export function PublicProfileScreen({ userId }: Props) {
   }, [userId]);
 
   const onConnect = async () => {
+    if (!session) return;
+    const proceed = await confirmIdentityReveal(session.user.id);
+    if (!proceed) return;
     try {
       await sendConnectionRequest(userId);
       setActionMessage(t('publicProfile.connectionRequestSent'));

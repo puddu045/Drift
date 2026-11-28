@@ -1,10 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useSegments } from 'expo-router';
+import { useSyncExternalStore } from 'react';
 import { ColorValue, StyleSheet, View } from 'react-native';
 
 import { TopRightBar } from '@/components/TopRightBar';
+import { useSession } from '@/features/auth/SessionProvider';
+import { cachedInbox, subscribeInbox } from '@/features/connections/preload';
 import { useTranslation } from '@/i18n';
 import { colors, palette, spacing, typography } from '@/theme';
+
+function useUnreadMessageCount(userId: string | undefined) {
+  return useSyncExternalStore(subscribeInbox, () => {
+    if (!userId) return 0;
+    const badges = cachedInbox(userId)?.badges ?? {};
+    return Object.values(badges).reduce((total, count) => total + count, 0);
+  });
+}
 
 type IconName = keyof typeof Ionicons.glyphMap;
 type TabIconProps = { focused: boolean; color: ColorValue; size: number };
@@ -34,6 +45,8 @@ function tabIcon(outlineName: IconName, filledName: IconName) {
 export default function TabLayout() {
   const segments = useSegments();
   const { t } = useTranslation();
+  const userId = useSession().session?.user.id;
+  const unreadMessages = useUnreadMessageCount(userId);
   return (
     <View style={{ flex: 1 }}>
       <Tabs
@@ -80,7 +93,11 @@ export default function TabLayout() {
         />
         <Tabs.Screen
           name="connections"
-          options={{ title: t('tabs.connections'), tabBarIcon: tabIcon('people-outline', 'people') }}
+          options={{
+            title: t('tabs.connections'),
+            tabBarIcon: tabIcon('people-outline', 'people'),
+            tabBarBadge: unreadMessages > 0 ? unreadMessages : undefined,
+          }}
         />
       </Tabs>
       {segments[segments.length - 1] !== '[conversationId]' && <TopRightBar />}

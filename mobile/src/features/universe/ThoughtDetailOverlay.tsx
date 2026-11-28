@@ -10,8 +10,10 @@ import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { LanguagePickerModal } from '@/components/LanguagePickerModal';
 import { MoodTag } from '@/components/MoodTag';
+import { useSession } from '@/features/auth/SessionProvider';
 import { blockUser } from '@/features/blocks/api';
 import { sendConnectionRequest } from '@/features/connections/api';
+import { confirmIdentityReveal } from '@/features/connections/confirmIdentityReveal';
 import { muteUser } from '@/features/mutes/api';
 import {
   deleteThought,
@@ -89,6 +91,7 @@ export function ThoughtDetailOverlay({
 }: Props) {
   const router = useRouter();
   const { t } = useTranslation();
+  const { session } = useSession();
   const [detail, setDetail] = useState<ThoughtDetail | null>(null);
   const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
   const [replyText, setReplyText] = useState('');
@@ -146,6 +149,9 @@ export function ThoughtDetailOverlay({
       setActionMessage(t('thought.anonymousAuthor'));
       return;
     }
+    if (!session) return;
+    const proceed = await confirmIdentityReveal(session.user.id);
+    if (!proceed) return;
     try {
       await sendConnectionRequest(detail.authorId);
       setActionMessage(t('publicProfile.connectionRequestSent'));

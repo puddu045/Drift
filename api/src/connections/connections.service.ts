@@ -89,7 +89,7 @@ export class ConnectionsService {
     const request = await this.getPendingRequest(requestId);
     if (request.recipientId !== userId) throw new ForbiddenException('Not your request to accept');
 
-    const connection = await this.prisma.$transaction(async (tx) => {
+    const { connection, conversation } = await this.prisma.$transaction(async (tx) => {
       await tx.connectionRequest.update({
         where: { id: requestId },
         data: { status: 'accepted', respondedAt: new Date() },
@@ -97,17 +97,20 @@ export class ConnectionsService {
       const newConnection = await tx.connection.create({
         data: { userAId: request.senderId, userBId: request.recipientId },
       });
-      const conversation = await tx.conversation.create({ data: { connectionId: newConnection.id } });
+      const newConversation = await tx.conversation.create({ data: { connectionId: newConnection.id } });
       await tx.conversationParticipant.createMany({
         data: [
-          { conversationId: conversation.id, userId: request.senderId },
-          { conversationId: conversation.id, userId: request.recipientId },
+          { conversationId: newConversation.id, userId: request.senderId },
+          { conversationId: newConversation.id, userId: request.recipientId },
         ],
       });
-      return newConnection;
+      return { connection: newConnection, conversation: newConversation };
     });
 
-    await this.notifications.create(request.senderId, 'connection_accepted', { connectionId: connection.id });
+    await this.notifications.create(request.senderId, 'connection_accepted', {
+      connectionId: connection.id,
+      conversationId: conversation.id,
+    });
     return connection;
   }
 

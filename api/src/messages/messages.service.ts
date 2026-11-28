@@ -56,6 +56,13 @@ export class MessagesService {
     return { messages, nextCursor };
   }
 
+  /** Clears this conversation's unread-messages badge — called once the
+   * viewer has actually opened it, not on every poll/refresh. */
+  async markRead(userId: string, conversationId: string) {
+    await this.requireActiveParticipant(userId, conversationId);
+    await this.notifications.markConversationRead(userId, conversationId);
+  }
+
   async sendMessage(userId: string, conversationId: string, text: string) {
     await this.requireActiveParticipant(userId, conversationId);
     const message = await this.prisma.message.create({
