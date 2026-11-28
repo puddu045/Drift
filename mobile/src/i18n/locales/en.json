@@ -114,5 +114,32 @@
   "connections.noConnections": "No connections yet.",
   "connections.loadingChats": "Loading chats...",
   "connections.couldNotLoad": "Could not load connections.",
-  "connections.unreadSuffix": "unread message notifications"
+  "connections.unreadSuffix": "unread message notifications",
+
+  "thought.closeThought": "Close thought",
+  "thought.reportThought": "Report this thought",
+  "thought.report": "Report",
+  "thought.reactionsLabel": "reactions",
+  "thought.repliesLabel": "replies",
+  "thought.repliesTitle": "Replies",
+  "thought.noReplies": "No replies yet.",
+  "thought.anonymousAuthor": "This person has chosen to stay anonymous.",
+  "thought.delete": "Delete",
+  "thought.connect": "Connect",
+  "thought.mute": "Mute",
+  "thought.block": "Block",
+  "thought.replyPlaceholder": "Write a reply...",
+  "thought.viewProfile": "View profile",
+  "common.send": "Send",
+
+  "reaction.heart": "Heart",
+  "reaction.relate": "Relate",
+  "reaction.beautiful": "Beautiful",
+  "reaction.thoughtful": "Thoughtful",
+  "reaction.hug": "Hug",
+
+  "reportReason.spam": "Spam",
+  "reportReason.harassment": "Harassment",
+  "reportReason.harmfulContent": "Harmful content",
+  "reportReason.other": "Other"
 }

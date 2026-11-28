@@ -21,6 +21,15 @@ import { colors, radius, spacing, typography } from '@/theme';
 
 import { AuthoredThought, getPublicProfile, getPublicThoughtsByAuthor, PublicProfile, translateBio } from './api';
 
+// REPORT_REASONS values are sent to the backend as-is (English) — only the
+// displayed label is translated.
+const REPORT_REASON_KEYS: Record<string, 'reportReason.spam' | 'reportReason.harassment' | 'reportReason.harmfulContent' | 'reportReason.other'> = {
+  Spam: 'reportReason.spam',
+  Harassment: 'reportReason.harassment',
+  'Harmful content': 'reportReason.harmfulContent',
+  Other: 'reportReason.other',
+};
+
 type Props = {
   userId: string;
 };
@@ -142,7 +151,7 @@ export function PublicProfileScreen({ userId }: Props) {
                 <View style={styles.reportReasons}>
                   {REPORT_REASONS.map((reason) => (
                     <Pressable key={reason} style={styles.reportReasonPill} onPress={() => onReport(reason)}>
-                      <Text style={styles.reportReasonLabel}>{reason}</Text>
+                      <Text style={styles.reportReasonLabel}>{t(REPORT_REASON_KEYS[reason])}</Text>
                     </Pressable>
                   ))}
                 </View>

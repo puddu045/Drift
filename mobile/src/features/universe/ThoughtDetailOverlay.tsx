@@ -24,17 +24,35 @@ import {
   translateThought,
 } from '@/features/thoughts/api';
 import { REPORT_REASONS } from '@/features/thoughts/reportReasons';
+import { useTranslation } from '@/i18n';
 import { ApiError } from '@/lib/api';
 import { useTranslatable } from '@/lib/useTranslatable';
 import { colors, radius, spacing, typography } from '@/theme';
 
-const REACTIONS: { type: Parameters<typeof toggleReaction>[1]; label: string }[] = [
-  { type: 'heart', label: 'Heart' },
-  { type: 'relate', label: 'Relate' },
-  { type: 'beautiful', label: 'Beautiful' },
-  { type: 'thoughtful', label: 'Thoughtful' },
-  { type: 'hug', label: 'Hug' },
+const REACTION_KEYS = {
+  heart: 'reaction.heart',
+  relate: 'reaction.relate',
+  beautiful: 'reaction.beautiful',
+  thoughtful: 'reaction.thoughtful',
+  hug: 'reaction.hug',
+} as const;
+
+const REACTIONS: { type: Parameters<typeof toggleReaction>[1] }[] = [
+  { type: 'heart' },
+  { type: 'relate' },
+  { type: 'beautiful' },
+  { type: 'thoughtful' },
+  { type: 'hug' },
 ];
+
+// REPORT_REASONS values are sent to the backend as-is (English) — only the
+// displayed label is translated.
+const REPORT_REASON_KEYS: Record<string, 'reportReason.spam' | 'reportReason.harassment' | 'reportReason.harmfulContent' | 'reportReason.other'> = {
+  Spam: 'reportReason.spam',
+  Harassment: 'reportReason.harassment',
+  'Harmful content': 'reportReason.harmfulContent',
+  Other: 'reportReason.other',
+};
 
 type AuthorIdentity = { displayName: string; photoUrl: string | null };
 
@@ -68,6 +86,7 @@ export function ThoughtDetailOverlay({
   initialShowTranslation,
 }: Props) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [detail, setDetail] = useState<ThoughtDetail | null>(null);
   const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
   const [replyText, setReplyText] = useState('');
@@ -122,20 +141,20 @@ export function ThoughtDetailOverlay({
 
   const onConnect = async () => {
     if (!detail?.authorId) {
-      setActionMessage('This person has chosen to stay anonymous.');
+      setActionMessage(t('thought.anonymousAuthor'));
       return;
     }
     try {
       await sendConnectionRequest(detail.authorId);
-      setActionMessage('Connection request sent.');
+      setActionMessage(t('publicProfile.connectionRequestSent'));
     } catch (err) {
-      setActionMessage(err instanceof ApiError ? err.message : 'Could not send a request.');
+      setActionMessage(err instanceof ApiError ? err.message : t('publicProfile.couldNotSendRequest'));
     }
   };
 
   const onBlock = async () => {
     if (!detail?.authorId) {
-      setActionMessage('This person has chosen to stay anonymous.');
+      setActionMessage(t('thought.anonymousAuthor'));
       return;
     }
     await blockUser(detail.authorId);
@@ -144,11 +163,11 @@ export function ThoughtDetailOverlay({
 
   const onMute = async () => {
     if (!detail?.authorId) {
-      setActionMessage('This person has chosen to stay anonymous.');
+      setActionMessage(t('thought.anonymousAuthor'));
       return;
     }
     await muteUser(detail.authorId);
-    setActionMessage('Muted — you won’t see their thoughts anymore.');
+    setActionMessage(t('publicProfile.mutedConfirm'));
   };
 
   // Only viewable when the author opted to reveal identity — an anonymous
@@ -156,7 +175,7 @@ export function ThoughtDetailOverlay({
   // an anonymous avatar still gives feedback rather than silently doing nothing.
   const onViewAuthor = (authorId: string | undefined, author: AuthorIdentity | null) => {
     if (!author || !authorId) {
-      setActionMessage('This person has chosen to stay anonymous.');
+      setActionMessage(t('thought.anonymousAuthor'));
       return;
     }
     setPreviewAuthor({ id: authorId, ...author });
@@ -174,7 +193,7 @@ export function ThoughtDetailOverlay({
       <ScreenContainer background="none">
       <View style={styles.card}>
         <View style={styles.topRow}>
-          <Pressable onPress={onClose} accessibilityLabel="Close thought" style={styles.back}>
+          <Pressable onPress={onClose} accessibilityLabel={t('thought.closeThought')} style={styles.back}>
             <Ionicons name="chevron-back" size={25} color={colors.textPrimary} />
           </Pressable>
           <View style={styles.topRowActions}>
@@ -182,9 +201,9 @@ export function ThoughtDetailOverlay({
               <Pressable
                 style={styles.quickReportButton}
                 onPress={() => setReporting(true)}
-                accessibilityLabel="Report this thought"
+                accessibilityLabel={t('thought.reportThought')}
               >
-                <Text style={styles.quickReportLabel}>⚑ Report</Text>
+                <Text style={styles.quickReportLabel}>⚑ {t('thought.report')}</Text>
               </Pressable>
             )}
           </View>
@@ -200,12 +219,12 @@ export function ThoughtDetailOverlay({
             detail.authorId === viewerContextUserId ? (
               <View style={styles.authorRow}>
                 <Avatar name={detail.author?.displayName} photoUrl={detail.author?.photoUrl} size={40} />
-                <Text style={styles.authorName}>{detail.author?.displayName ?? 'Anonymous'}</Text>
+                <Text style={styles.authorName}>{detail.author?.displayName ?? t('common.anonymous')}</Text>
               </View>
             ) : (
               <Pressable style={styles.authorRow} onPress={() => onViewAuthor(detail.authorId, detail.author)}>
                 <Avatar name={detail.author?.displayName} photoUrl={detail.author?.photoUrl} size={40} />
-                <Text style={styles.authorName}>{detail.author?.displayName ?? 'Anonymous'}</Text>
+                <Text style={styles.authorName}>{detail.author?.displayName ?? t('common.anonymous')}</Text>
               </Pressable>
             )
           ) : (
@@ -216,24 +235,24 @@ export function ThoughtDetailOverlay({
             <Pressable onPress={translation.toggle} disabled={translation.loading}>
               <Text style={styles.translateLink}>
                 {translation.loading
-                  ? 'Translating…'
+                  ? t('common.translating')
                   : translation.showingTranslation
-                    ? 'Show original'
-                    : 'Translate'}
+                    ? t('common.showOriginal')
+                    : t('common.translate')}
               </Text>
             </Pressable>
             {translation.error && <Text style={styles.actionMessage}>{translation.error}</Text>}
 
-            {detail && <Text style={styles.engagement}>{detail._count.reactions} reactions   /   {detail.replies.length} replies</Text>}
+            {detail && <Text style={styles.engagement}>{detail._count.reactions} {t('thought.reactionsLabel')}   /   {detail.replies.length} {t('thought.repliesLabel')}</Text>}
             <View style={styles.reactionRow}>
               {REACTIONS.map((reaction) => (
                 <Pressable
                   key={reaction.type}
                   style={[styles.reactionPill, myReactions.has(reaction.type) && styles.reactionPillActive]}
                   onPress={() => onReact(reaction.type)}
-                  accessibilityLabel={reaction.label}
+                  accessibilityLabel={t(REACTION_KEYS[reaction.type])}
                 >
-                  <Text style={styles.reactionLabel}>{reaction.label}</Text>
+                  <Text style={styles.reactionLabel}>{t(REACTION_KEYS[reaction.type])}</Text>
                 </Pressable>
               ))}
             </View>
@@ -243,9 +262,9 @@ export function ThoughtDetailOverlay({
             <ActivityIndicator color={colors.accent} />
           ) : (
             <View style={styles.replies}>
-              <Text style={styles.repliesTitle}>Replies ({detail.replies.length})</Text>
+              <Text style={styles.repliesTitle}>{t('thought.repliesTitle')} ({detail.replies.length})</Text>
               {detail.replies.length === 0 ? (
-                <Text style={styles.emptyReplies}>No replies yet.</Text>
+                <Text style={styles.emptyReplies}>{t('thought.noReplies')}</Text>
               ) : (
                 detail.replies.map((reply) => (
                   <ReplyRow
@@ -265,19 +284,19 @@ export function ThoughtDetailOverlay({
             <View style={styles.reportReasons}>
               {REPORT_REASONS.map((reason) => (
                 <Pressable key={reason} style={styles.reportReasonPill} onPress={() => onReport(reason)}>
-                  <Text style={styles.reactionLabel}>{reason}</Text>
+                  <Text style={styles.reactionLabel}>{t(REPORT_REASON_KEYS[reason])}</Text>
                 </Pressable>
               ))}
             </View>
           ) : (
             <View style={styles.actions}>
               {isOwnThought ? (
-                <Button label="Delete" variant="destructive" onPress={onDelete} style={styles.actionButton} />
+                <Button label={t('thought.delete')} variant="destructive" onPress={onDelete} style={styles.actionButton} />
               ) : (
                 <>
-                  <Button label="Connect" onPress={onConnect} style={styles.actionButton} />
-                  <Button label="Mute" variant="ghost" onPress={onMute} style={styles.actionButton} />
-                  <Button label="Block" variant="ghost" onPress={onBlock} style={styles.actionButton} />
+                  <Button label={t('thought.connect')} onPress={onConnect} style={styles.actionButton} />
+                  <Button label={t('thought.mute')} variant="ghost" onPress={onMute} style={styles.actionButton} />
+                  <Button label={t('thought.block')} variant="ghost" onPress={onBlock} style={styles.actionButton} />
                 </>
               )}
             </View>
@@ -289,12 +308,12 @@ export function ThoughtDetailOverlay({
             style={styles.replyInput}
             value={replyText}
             onChangeText={setReplyText}
-            placeholder="Write a reply..."
+            placeholder={t('thought.replyPlaceholder')}
             placeholderTextColor={colors.textSecondary}
             maxLength={280}
             autoFocus={autoFocusReply}
           />
-          <Button label="Send" labelColor="white" style={{ backgroundColor: '#19345A', borderColor: '#19345A' }} onPress={onSendReply} disabled={sendingReply || !replyText.trim()} />
+          <Button label={t('common.send')} labelColor="white" style={{ backgroundColor: '#19345A', borderColor: '#19345A' }} onPress={onSendReply} disabled={sendingReply || !replyText.trim()} />
         </View>
 
 
@@ -314,14 +333,14 @@ export function ThoughtDetailOverlay({
             <Pressable
               style={StyleSheet.absoluteFill}
               onPress={() => setPreviewAuthor(null)}
-              accessibilityLabel="Close"
+              accessibilityLabel={t('common.close')}
             />
             <View style={styles.previewCard}>
               <Avatar name={previewAuthor.displayName} photoUrl={previewAuthor.photoUrl} size={72} />
               <Text style={styles.previewName}>{previewAuthor.displayName}</Text>
-              <Button label="View profile" onPress={onOpenFullProfile} style={styles.previewButton} />
+              <Button label={t('thought.viewProfile')} onPress={onOpenFullProfile} style={styles.previewButton} />
               <Pressable onPress={() => setPreviewAuthor(null)}>
-                <Text style={styles.close}>Close</Text>
+                <Text style={styles.close}>{t('common.close')}</Text>
               </Pressable>
             </View>
           </View>
@@ -341,6 +360,7 @@ function ReplyRow({
   isContextAuthor: boolean;
   onViewAuthor: (authorId: string | undefined, author: AuthorIdentity | null) => void;
 }) {
+  const { t } = useTranslation();
   const translation = useTranslatable(() => translateReply(reply.thoughtId, reply.id));
 
   return (
@@ -353,15 +373,15 @@ function ReplyRow({
         </Pressable>
       )}
       <View style={styles.replyTextCol}>
-        <Text style={styles.authorName}>{reply.author?.displayName ?? 'Anonymous'}</Text>
+        <Text style={styles.authorName}>{reply.author?.displayName ?? t('common.anonymous')}</Text>
         <Text style={styles.reply}>{translation.text ?? reply.text}</Text>
         <Pressable onPress={translation.toggle} disabled={translation.loading}>
           <Text style={styles.translateLink}>
             {translation.loading
-              ? 'Translating…'
+              ? t('common.translating')
               : translation.showingTranslation
-                ? 'Show original'
-                : 'Translate'}
+                ? t('common.showOriginal')
+                : t('common.translate')}
           </Text>
         </Pressable>
         {translation.error && <Text style={styles.actionMessage}>{translation.error}</Text>}
