@@ -53,6 +53,10 @@ type Props = {
    * from Destiny's "Reply" choice, which skips its own inline reply UI in
    * favor of this same overlay everything else uses. */
   autoFocusReply?: boolean;
+  /** Opens already showing the translation — e.g. the caller's own compact
+   * card was already showing one for this same thought, and this overlay
+   * is a second, independent view of it. */
+  initialShowTranslation?: boolean;
 };
 
 export function ThoughtDetailOverlay({
@@ -61,6 +65,7 @@ export function ThoughtDetailOverlay({
   onDeleted,
   viewerContextUserId,
   autoFocusReply,
+  initialShowTranslation,
 }: Props) {
   const router = useRouter();
   const [detail, setDetail] = useState<ThoughtDetail | null>(null);
@@ -71,7 +76,7 @@ export function ThoughtDetailOverlay({
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [previewAuthor, setPreviewAuthor] = useState<{ id: string } & AuthorIdentity | null>(null);
   const focused = useIsFocused();
-  const translation = useTranslatable(() => translateThought(thought.id));
+  const translation = useTranslatable(() => translateThought(thought.id), { autoStart: initialShowTranslation });
 
   useEffect(() => {
     let cancelled = false;

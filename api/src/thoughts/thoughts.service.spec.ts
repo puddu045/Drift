@@ -23,6 +23,7 @@ describe('ThoughtsService', () => {
     report: { create: vi.fn() },
     userPreferences: { findMany: vi.fn() },
     userProfile: { findMany: vi.fn() },
+    thoughtTranslationQuota: { findUnique: vi.fn(), count: vi.fn(), create: vi.fn() },
   };
   const notifications = { create: vi.fn() };
   const mutes = { mutedAuthorIds: vi.fn() };
@@ -42,6 +43,8 @@ describe('ThoughtsService', () => {
     mutes.mutedAuthorIds.mockResolvedValue([]);
     translation.getPreferredLanguage.mockResolvedValue(null);
     blocks.isBlockedEitherWay.mockResolvedValue(false);
+    prisma.thoughtTranslationQuota.findUnique.mockResolvedValue(null);
+    prisma.thoughtTranslationQuota.count.mockResolvedValue(0);
     const moduleRef = await Test.createTestingModule({
       providers: [
         ThoughtsService,
@@ -169,6 +172,43 @@ describe('ThoughtsService', () => {
         language: 'en',
       });
       expect(translation.translateBatch).toHaveBeenCalledWith(['hola'], 'en', [{ type: 'thought', id: 't1' }]);
+    });
+
+    it('refuses once the daily translate quota for distinct thoughts is used up', async () => {
+      prisma.thought.findUnique.mockResolvedValue({
+        id: 't1',
+        text: 'hola',
+        authorId: 'author-1',
+        isPublic: true,
+        deletedAt: null,
+      });
+      translation.getPreferredLanguage.mockResolvedValue('en');
+      prisma.thoughtTranslationQuota.findUnique.mockResolvedValue(null); // not translated yet today
+      prisma.thoughtTranslationQuota.count.mockResolvedValue(5); // already at the limit
+
+      await expect(service.translateOne('viewer', 't1')).rejects.toThrow(ForbiddenException);
+      expect(translation.translateBatch).not.toHaveBeenCalled();
+    });
+
+    it('does not spend a new quota slot re-translating a thought already translated today', async () => {
+      prisma.thought.findUnique.mockResolvedValue({
+        id: 't1',
+        text: 'hola',
+        authorId: 'author-1',
+        isPublic: true,
+        deletedAt: null,
+      });
+      translation.getPreferredLanguage.mockResolvedValue('en');
+      translation.translateBatch.mockResolvedValue(['hello']);
+      // Already recorded as translated today — count would otherwise block.
+      prisma.thoughtTranslationQuota.findUnique.mockResolvedValue({ userId: 'viewer', thoughtId: 't1', day: '2024-01-01' });
+      prisma.thoughtTranslationQuota.count.mockResolvedValue(5);
+
+      await expect(service.translateOne('viewer', 't1')).resolves.toEqual({
+        translatedText: 'hello',
+        language: 'en',
+      });
+      expect(prisma.thoughtTranslationQuota.create).not.toHaveBeenCalled();
     });
   });
 

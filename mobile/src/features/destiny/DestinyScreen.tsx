@@ -106,6 +106,7 @@ export function DestinyScreen() {
         <ThoughtDetailOverlay
           thought={thought}
           autoFocusReply
+          initialShowTranslation={translation.showingTranslation}
           onClose={() => setShowReply(false)}
           onDeleted={() => setShowReply(false)}
         />

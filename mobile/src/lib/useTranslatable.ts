@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { updatePreferences } from '@/features/profile/api';
 import { ApiError } from '@/lib/api';
@@ -15,8 +15,19 @@ type TranslateFn = () => Promise<{ translatedText: string; language: string }>;
  * the request with a 400 — `needsLanguage` turns on so the caller can show
  * a language picker, and `onLanguageChosen` saves it and retries this same
  * translation automatically.
+ *
+ * `autoStart`: starts already translated — for a screen that opens into a
+ * second view of the *same* content (e.g. Destiny's compact card handing
+ * off to ThoughtDetailOverlay). Each is its own independent instance of
+ * this hook, so without this the second view would silently fall back to
+ * the original-language text even though the first was showing a
+ * translation. Fires once, on mount, via the backend's translation cache
+ * (same text+language never re-calls Google) rather than carrying the
+ * translated string across as a prop — simpler, and correct even if the
+ * two views ask for different source text (e.g. a thought vs. one of its
+ * replies) since each independently resolves its own translation.
  */
-export function useTranslatable(translateFn: TranslateFn) {
+export function useTranslatable(translateFn: TranslateFn, options?: { autoStart?: boolean }) {
   const [translatedText, setTranslatedText] = useState<string | null>(null);
   const [showingTranslation, setShowingTranslation] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -54,6 +65,18 @@ export function useTranslatable(translateFn: TranslateFn) {
     await updatePreferences({ preferredLanguage: code });
     await attempt();
   };
+
+  // Deliberately fires at most once per mount (empty deps) — a flag to seed
+  // the initial view, not something that should re-fire if `autoStart`
+  // itself changes later.
+  const didAutoStart = useRef(false);
+  useEffect(() => {
+    if (options?.autoStart && !didAutoStart.current) {
+      didAutoStart.current = true;
+      attempt();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     text: showingTranslation ? translatedText : null,

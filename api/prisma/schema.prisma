@@ -478,3 +478,19 @@ model TranslationUsage {
 
   @@map("translation_usage")
 }
+
+// One row per (user, thought, day) the user has translated — lets
+// ThoughtsService cap each user at a fixed number of *distinct* thoughts
+// translated per day without penalizing re-toggling a thought already
+// unlocked today. See ThoughtsService.reserveDailyTranslateQuota.
+model ThoughtTranslationQuota {
+  id        String   @id @default(uuid())
+  userId    String   @db.Uuid
+  thoughtId String
+  day       String   @db.VarChar(10)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, thoughtId, day])
+  @@index([userId, day])
+  @@map("thought_translation_quota")
+}
