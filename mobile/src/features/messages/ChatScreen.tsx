@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 
 import { Avatar } from '@/components/Avatar';
@@ -172,18 +173,39 @@ function MessageBubble({
 }) {
   const translation = useTranslatable(() => translateMessage(conversationId, message.id));
 
+  if (isMine) {
+    return (
+      <View style={[styles.bubble, styles.bubbleMine]}>
+        <Text style={[styles.bubbleText, styles.myText]}>{message.text}</Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={[styles.bubble, isMine ? styles.bubbleMine : styles.bubbleTheirs]}>
-      <Text style={[styles.bubbleText, isMine && styles.myText]}>{translation.text ?? message.text}</Text>
-      <Pressable onPress={translation.toggle} disabled={translation.loading}>
-        <Text style={[styles.translateLink, isMine && styles.translateLinkMine]}>
-          {translation.loading
-            ? 'Translating…'
-            : translation.showingTranslation
-              ? 'Show original'
-              : 'Translate'}
-        </Text>
-      </Pressable>
+    <View style={styles.theirsWrap}>
+      <View style={styles.theirsRow}>
+        <View style={[styles.bubble, styles.bubbleTheirs]}>
+          <Text style={styles.bubbleText}>{translation.text ?? message.text}</Text>
+        </View>
+        <Pressable
+          style={styles.translateIconButton}
+          onPress={translation.toggle}
+          disabled={translation.loading}
+          accessibilityLabel={
+            translation.loading
+              ? 'Translating…'
+              : translation.showingTranslation
+                ? 'Show original'
+                : 'Translate'
+          }
+        >
+          {translation.loading ? (
+            <ActivityIndicator size="small" color={colors.textSecondary} />
+          ) : (
+            <MaterialIcons name="translate" size={16} color="#234A74" />
+          )}
+        </Pressable>
+      </View>
       {translation.error && <Text style={styles.translateError}>{translation.error}</Text>}
 
       {translation.needsLanguage && (
@@ -274,7 +296,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 6,
   },
   bubbleTheirs: {
-    alignSelf: 'flex-start',
+    marginBottom: 0,
     backgroundColor: '#FFFCFA',
     borderBottomLeftRadius: 6,
     borderWidth: 1,
@@ -286,15 +308,17 @@ const styles = StyleSheet.create({
     fontSize: typography.size.md,
     color: colors.textPrimary,
   },
-  translateLink: {
-    fontFamily: typography.fontFamily,
-    fontSize: 10,
-    fontWeight: typography.weight.semibold,
-    color: '#234A74',
-    marginTop: 2,
+  theirsWrap: {
+    alignSelf: 'flex-start',
+    marginBottom: spacing.xs,
   },
-  translateLinkMine: {
-    color: 'rgba(255, 255, 255, 0.85)',
+  theirsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  translateIconButton: {
+    padding: 4,
   },
   translateError: {
     fontFamily: typography.fontFamily,

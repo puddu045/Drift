@@ -202,6 +202,7 @@ export class ThoughtsService {
         return {
           ...replyRest,
           authorId: replyAuthor || isOwnReply ? replyAuthorId : undefined,
+          isOwnReply,
           author: replyAuthor,
         };
       }),

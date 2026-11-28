@@ -18,6 +18,7 @@ export type Reply = {
   // directly to the viewer's id; use the sibling isOwnReply-style checks
   // the backend already resolves, or treat a missing author as "not mine".
   authorId?: string;
+  isOwnReply: boolean;
   text: string;
   createdAt: string;
   author: AuthorIdentity;

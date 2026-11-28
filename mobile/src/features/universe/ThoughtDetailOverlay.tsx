@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useIsFocused, useRouter } from 'expo-router';
 import { ScreenContainer } from '@/components/ScreenContainer';
 
@@ -234,7 +234,7 @@ export function ThoughtDetailOverlay({
           )}
             <MoodTag mood={thought.mood} />
             <Text style={styles.text}>{translation.text ?? thought.text}</Text>
-            <Pressable onPress={translation.toggle} disabled={translation.loading}>
+            <Pressable style={styles.translateRow} onPress={translation.toggle} disabled={translation.loading}>
               <Text style={styles.translateLink}>
                 {translation.loading
                   ? t('common.translating')
@@ -242,6 +242,7 @@ export function ThoughtDetailOverlay({
                     ? t('common.showOriginal')
                     : t('common.translate')}
               </Text>
+              <MaterialIcons name="translate" size={14} color="#234A74" />
             </Pressable>
             {translation.error && <Text style={styles.actionMessage}>{translation.error}</Text>}
 
@@ -377,16 +378,25 @@ function ReplyRow({
       )}
       <View style={styles.replyTextCol}>
         <Text style={styles.authorName}>{reply.author?.displayName ?? t('common.anonymous')}</Text>
-        <Text style={styles.reply}>{translation.text ?? reply.text}</Text>
-        <Pressable onPress={translation.toggle} disabled={translation.loading}>
-          <Text style={styles.translateLink}>
-            {translation.loading
-              ? t('common.translating')
-              : translation.showingTranslation
-                ? t('common.showOriginal')
-                : t('common.translate')}
-          </Text>
-        </Pressable>
+        <View style={styles.replyTextRow}>
+          <Text style={styles.reply}>{translation.text ?? reply.text}</Text>
+          {!reply.isOwnReply && (
+            <Pressable
+              style={styles.replyTranslateIcon}
+              onPress={translation.toggle}
+              disabled={translation.loading}
+              accessibilityLabel={
+                translation.loading
+                  ? t('common.translating')
+                  : translation.showingTranslation
+                    ? t('common.showOriginal')
+                    : t('common.translate')
+              }
+            >
+              <MaterialIcons name="translate" size={14} color="#234A74" />
+            </Pressable>
+          )}
+        </View>
         {translation.error && <Text style={styles.actionMessage}>{translation.error}</Text>}
       </View>
 
@@ -510,16 +520,30 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   reply: {
+    flexShrink: 1,
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
     color: colors.textPrimary,
     paddingTop: 4,
+  },
+  translateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   translateLink: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
     color: '#234A74',
+  },
+  replyTextRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  replyTranslateIcon: {
+    paddingBottom: 2,
   },
   replyRow: {
     flexDirection: 'row',
