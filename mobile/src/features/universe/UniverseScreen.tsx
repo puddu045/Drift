@@ -16,7 +16,7 @@ import { listInteractions, listMyThoughts, listThoughts, Thought } from '@/featu
 import { ApiError } from '@/lib/api';
 import { getCached, setCached } from '@/lib/prefetchCache';
 import { PREFETCH_KEYS } from '@/lib/usePrefetchTabs';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, floatingTabBarSpace, radius, spacing, typography } from '@/theme';
 
 import { ThoughtDetailOverlay } from './ThoughtDetailOverlay';
 
@@ -196,6 +196,7 @@ export function UniverseScreen() {
         )}
         {!loading && !error && thoughts.length === 0 && (
           <View style={styles.centered}>
+            {mode === 'mine' && <FlyingPlane />}
             <Text style={styles.subtitle}>
               {mode === 'mine'
                 ? 'You haven’t posted anything yet.'
@@ -331,10 +332,11 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: spacing.lg,
-    // ScreenContainer's floatingTabBar paddingBottom already reserves space
-    // for the tab bar below the content box, so this only needs a small gap
-    // above that — not the tab bar's own height on top of it again.
-    bottom: spacing.lg,
+    // Absolute positioning here is relative to the screen's full height,
+    // not the content box shrunk by floatingTabBar's paddingBottom — so this
+    // needs the tab bar's own reserved space plus a visible gap above it,
+    // or the FAB sits low enough to render under/behind the tab bar.
+    bottom: floatingTabBarSpace + spacing.sm,
     width: 56,
     height: 56,
     borderRadius: radius.pill,

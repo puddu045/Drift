@@ -35,7 +35,16 @@
       ],
       "expo-notifications",
       "expo-secure-store",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-wordmark.png",
+          "imageWidth": 240,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFBF7"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
