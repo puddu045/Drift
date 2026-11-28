@@ -73,7 +73,7 @@ export default function TabLayout() {
         />
         <Tabs.Screen
           name="create"
-          options={{ title: 'Create', tabBarButton: () => null }}
+          options={{ title: 'Create', tabBarButton: () => null, tabBarStyle: { display: 'none' } }}
         />
         <Tabs.Screen
           name="connections"
