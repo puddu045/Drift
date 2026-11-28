@@ -241,7 +241,7 @@ export function UniverseScreen() {
         </ScrollView>
       </View>
 
-      {mode !== 'interactions' && (
+      {mode === 'mine' && (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('universe.createThought')}

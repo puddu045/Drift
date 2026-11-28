@@ -2,27 +2,53 @@ import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 
-import { Button } from '@/components/Button';
+import { Avatar } from '@/components/Avatar';
 import { LanguagePickerModal } from '@/components/LanguagePickerModal';
 import { ScreenContainer } from '@/components/ScreenContainer';
-import { blockUser } from '@/features/blocks/api';
+import { SendButton } from '@/components/SendButton';
 import { useSession } from '@/features/auth/SessionProvider';
+import { blockUser } from '@/features/blocks/api';
+import { cachedInbox, preloadInbox } from '@/features/connections/preload';
+import { getPublicProfile, PublicProfile } from '@/features/profile/api';
 import { reportTarget } from '@/features/thoughts/api';
 import { REPORT_REASONS } from '@/features/thoughts/reportReasons';
+import { useTranslation } from '@/i18n';
 import { ApiError } from '@/lib/api';
 import { useTranslatable } from '@/lib/useTranslatable';
 import { colors, spacing, typography } from '@/theme';
 
-import { listConversations, listMessages, Message, sendMessage, translateMessage } from './api';
+import { listMessages, Message, sendMessage, translateMessage } from './api';
 
 export function ChatScreen({ conversationId }: { conversationId: string }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const { session } = useSession();
+  const userId = session?.user.id;
+  const inbox = userId ? cachedInbox(userId) : undefined;
+  const peerId = inbox?.connections.find(c => c.conversationId === conversationId)?.otherUserId;
+  const cachedPeer = peerId ? inbox?.profiles[peerId] : undefined;
+  const [resolved, setResolved] = useState<{ key: string; profile: PublicProfile }>();
+  const key = userId + '/' + conversationId;
+  const peer = cachedPeer ?? (resolved?.key === key ? resolved.profile : undefined);
+  const otherUserId = peerId ?? null;
+  useEffect(() => {
+    if (!userId || cachedPeer) return;
+    let active = true;
+    async function load(id: string) {
+      const data = await preloadInbox(id);
+      const other = data.connections.find(c => c.conversationId === conversationId)?.otherUserId
+        ?? data.summaries[conversationId]?.otherUserId;
+      if (!other) return;
+      const profile = data.profiles[other] ?? await getPublicProfile(other);
+      if (active) setResolved({ key, profile });
+    }
+    void load(userId).catch(() => {});
+    return () => { active = false; };
+  }, [userId, conversationId, cachedPeer, key]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
-  const [otherUserId, setOtherUserId] = useState<string | null>(null);
   const [reporting, setReporting] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
@@ -35,15 +61,6 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
       refresh();
     }, [refresh]),
   );
-
-  useEffect(() => {
-    listConversations()
-      .then((list) => {
-        const match = list.find((c) => c.conversationId === conversationId);
-        setOtherUserId(match?.otherUserId ?? null);
-      })
-      .catch(() => {});
-  }, [conversationId]);
 
   // A conversation is immersive — hide the floating tab bar from the parent
   // Tabs navigator while this screen has focus, restoring it on the way out.
@@ -86,11 +103,13 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
   };
 
   return (
-    <ScreenContainer floatingTabBar>
+    <ScreenContainer background="haze">
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} accessibilityLabel="Back">
-          <Text style={styles.back}>‹ Back</Text>
+        <Pressable onPress={() => router.back()} accessibilityLabel={t('common.back')}>
+          <Text style={styles.back}>‹ {t('common.back')}</Text>
         </Pressable>
+        <Avatar name={peer?.displayName} photoUrl={peer?.photoUrl} size={38} />
+        <Text numberOfLines={1} style={styles.peerName}>{peer?.displayName ?? t('connections.someone')}</Text>
         {otherUserId && (
           <View style={styles.headerActions}>
             <Pressable onPress={() => setReporting((v) => !v)} accessibilityLabel="Report this chat">
@@ -136,7 +155,7 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
           placeholder="Message..."
           placeholderTextColor={colors.textSecondary}
         />
-        <Button label="Send" onPress={onSend} disabled={sending || !text.trim()} />
+        <SendButton onPress={onSend} disabled={sending || !text.trim()} />
       </View>
     </ScreenContainer>
   );
@@ -155,9 +174,9 @@ function MessageBubble({
 
   return (
     <View style={[styles.bubble, isMine ? styles.bubbleMine : styles.bubbleTheirs]}>
-      <Text style={styles.bubbleText}>{translation.text ?? message.text}</Text>
+      <Text style={[styles.bubbleText, isMine && styles.myText]}>{translation.text ?? message.text}</Text>
       <Pressable onPress={translation.toggle} disabled={translation.loading}>
-        <Text style={styles.translateLink}>
+        <Text style={[styles.translateLink, isMine && styles.translateLinkMine]}>
           {translation.loading
             ? 'Translating…'
             : translation.showingTranslation
@@ -182,15 +201,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: spacing.sm,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.sm,
-    // Leave enough headroom to clear the notification/profile icons, which
-    // float above every tab screen (TopRightBar) and aren't part of this
-    // screen's own layout, so they don't reserve space automatically.
     minHeight: 56,
   },
+  peerName: { flex: 1, fontSize: typography.size.md, color: colors.textPrimary, fontWeight: '600' },
   back: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.md,
@@ -253,16 +270,17 @@ const styles = StyleSheet.create({
   },
   bubbleMine: {
     alignSelf: 'flex-end',
-    backgroundColor: `${colors.accent}80`,
-    borderWidth: 1,
-    borderColor: `${colors.accent}b0`,
+    backgroundColor: '#354E76',
+    borderBottomRightRadius: 6,
   },
   bubbleTheirs: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255, 255, 255, 0.55)',
+    backgroundColor: '#FFFCFA',
+    borderBottomLeftRadius: 6,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.7)',
   },
+  myText: { color: 'white' },
   bubbleText: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.md,
@@ -275,6 +293,9 @@ const styles = StyleSheet.create({
     color: '#234A74',
     marginTop: 2,
   },
+  translateLinkMine: {
+    color: 'rgba(255, 255, 255, 0.85)',
+  },
   translateError: {
     fontFamily: typography.fontFamily,
     fontSize: 10,
@@ -283,12 +304,14 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     gap: spacing.sm,
-    padding: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     alignItems: 'center',
   },
   input: {
     flex: 1,
     minHeight: 44,
+    backgroundColor: '#FFFCFA',
     borderRadius: 22,
     borderWidth: 1.5,
     borderColor: 'rgba(21, 33, 59, 0.3)',
