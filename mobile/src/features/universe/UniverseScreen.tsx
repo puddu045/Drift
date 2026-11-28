@@ -6,7 +6,7 @@ import type { MoodId } from '@/theme';
 import { UnwrittenWordmark } from '@/components/UnwrittenWordmark';
 import { useCallback, useMemo, useState } from 'react';
 import { ScrollView, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { getOwnProfile } from '@/features/profile/api';
 import { useFonts, PlayfairDisplay_500Medium } from '@expo-google-fonts/playfair-display';
@@ -65,6 +65,7 @@ const MODE_CACHE_KEYS: Record<Mode, string> = {
 
 export function UniverseScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ mode?: string }>();
   const [mode, setMode] = useState<Mode>('world');
   const [name, setName] = useState('');
   const [fontsLoaded] = useFonts({ PlayfairDisplay_500Medium });
@@ -77,6 +78,18 @@ export function UniverseScreen() {
     }).catch(() => {});
     return () => { active = false; };
   }, []));
+
+  // One-shot signal from ComposeScreen ("?mode=mine" after posting) — apply
+  // it, then clear it so it doesn't keep overriding a mode the user later
+  // picks by hand.
+  useFocusEffect(
+    useCallback(() => {
+      if (params.mode === 'world' || params.mode === 'mine' || params.mode === 'interactions') {
+        setMode(params.mode);
+        router.setParams({ mode: undefined });
+      }
+    }, [params.mode, router]),
+  );
   const [selected, setSelected] = useState<Thought | null>(null);
   const initialData = getCached<ModeData>(MODE_CACHE_KEYS.world);
   const [thoughts, setThoughts] = useState<Thought[]>(() => initialData?.thoughts ?? []);

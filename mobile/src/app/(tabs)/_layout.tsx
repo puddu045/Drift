@@ -73,7 +73,14 @@ export default function TabLayout() {
         />
         <Tabs.Screen
           name="create"
-          options={{ title: 'Create', tabBarButton: () => null, tabBarStyle: { display: 'none' } }}
+          options={{
+            title: 'Create',
+            tabBarButton: () => null,
+            // Hides its layout slot too — tabBarButton alone still reserves
+            // an equal-width gap between Destiny and Connections.
+            tabBarItemStyle: { display: 'none' },
+            tabBarStyle: { display: 'none' },
+          }}
         />
         <Tabs.Screen
           name="connections"

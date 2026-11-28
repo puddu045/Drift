@@ -49,9 +49,19 @@ type Props = {
    * → profile → ... loop. Any *other* author (e.g. someone else's reply)
    * stays tappable as usual. */
   viewerContextUserId?: string;
+  /** Opens straight into the reply box, focused and ready to type — e.g.
+   * from Destiny's "Reply" choice, which skips its own inline reply UI in
+   * favor of this same overlay everything else uses. */
+  autoFocusReply?: boolean;
 };
 
-export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContextUserId }: Props) {
+export function ThoughtDetailOverlay({
+  thought,
+  onClose,
+  onDeleted,
+  viewerContextUserId,
+  autoFocusReply,
+}: Props) {
   const router = useRouter();
   const [detail, setDetail] = useState<ThoughtDetail | null>(null);
   const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
@@ -276,6 +286,7 @@ export function ThoughtDetailOverlay({ thought, onClose, onDeleted, viewerContex
             placeholder="Write a reply..."
             placeholderTextColor={colors.textSecondary}
             maxLength={280}
+            autoFocus={autoFocusReply}
           />
           <Button label="Send" labelColor="white" style={{ backgroundColor: '#19345A', borderColor: '#19345A' }} onPress={onSendReply} disabled={sendingReply || !replyText.trim()} />
         </View>

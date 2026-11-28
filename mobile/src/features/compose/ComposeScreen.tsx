@@ -42,7 +42,8 @@ export function ComposeScreen() {
       await createThought({ text: text.trim(), mood, isPublic });
       setText('');
       setMood(null);
-      router.navigate('/(tabs)');
+      // Land on My Thoughts, not whatever mode Universe was last showing.
+      router.navigate({ pathname: '/(tabs)', params: { mode: 'mine' } });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not release this thought.');
     } finally {
