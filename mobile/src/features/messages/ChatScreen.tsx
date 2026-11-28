@@ -8,13 +8,14 @@ import { LanguagePickerModal } from '@/components/LanguagePickerModal';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { SendButton } from '@/components/SendButton';
 import { useSession } from '@/features/auth/SessionProvider';
-import { blockUser } from '@/features/blocks/api';
+import { blockUser, unblockUser } from '@/features/blocks/api';
 import { cachedInbox, preloadInbox } from '@/features/connections/preload';
 import { getPublicProfile, PublicProfile } from '@/features/profile/api';
 import { reportTarget } from '@/features/thoughts/api';
 import { REPORT_REASONS } from '@/features/thoughts/reportReasons';
 import { useTranslation } from '@/i18n';
 import { ApiError } from '@/lib/api';
+import { confirmAction } from '@/lib/confirm';
 import { useTranslatable } from '@/lib/useTranslatable';
 import { colors, spacing, typography } from '@/theme';
 
@@ -33,6 +34,9 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
   const key = userId + '/' + conversationId;
   const peer = cachedPeer ?? (resolved?.key === key ? resolved.profile : undefined);
   const otherUserId = peerId ?? null;
+  const [isBlocked, setIsBlocked] = useState(
+    () => inbox?.connections.find(c => c.conversationId === conversationId)?.isBlocked ?? false,
+  );
   useEffect(() => {
     if (!userId || cachedPeer) return;
     let active = true;
@@ -61,10 +65,16 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
     useCallback(() => {
       refresh();
       // Clears this chat's unread badge, then refreshes the cached inbox so
-      // the Connections tab bar badge drops immediately rather than waiting
-      // for its own next fetch.
+      // the Connections tab bar badge — and this screen's own blocked-status
+      // check below — don't rely on stale data.
       markConversationRead(conversationId).catch(() => {});
-      if (userId) void preloadInbox(userId, true).catch(() => {});
+      if (userId) {
+        preloadInbox(userId, true)
+          .then((data) => {
+            setIsBlocked(data.connections.find((c) => c.conversationId === conversationId)?.isBlocked ?? false);
+          })
+          .catch(() => {});
+      }
     }, [refresh, conversationId, userId]),
   );
 
@@ -92,20 +102,35 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
 
   const onReportChat = async (reason: string) => {
     if (!otherUserId) return;
+    setReporting(false);
+    const confirmed = await confirmAction('Report this chat?', `Reason: ${reason}. This can't be undone.`, 'Report');
+    if (!confirmed) return;
     try {
       await reportTarget('profile', otherUserId, reason);
       setActionMessage('Report sent.');
     } catch (err) {
       setActionMessage(err instanceof ApiError ? err.message : 'Could not send the report.');
-    } finally {
-      setReporting(false);
     }
   };
 
   const onBlockUser = async () => {
     if (!otherUserId) return;
+    const confirmed = await confirmAction(
+      'Block this user?',
+      'You won’t be able to message each other until you unblock them. You can still see this conversation, and unblock them later from your profile.',
+      'Block',
+    );
+    if (!confirmed) return;
     await blockUser(otherUserId);
-    router.back();
+    setIsBlocked(true);
+    if (userId) void preloadInbox(userId, true).catch(() => {});
+  };
+
+  const onUnblockUser = async () => {
+    if (!otherUserId) return;
+    await unblockUser(otherUserId);
+    setIsBlocked(false);
+    if (userId) void preloadInbox(userId, true).catch(() => {});
   };
 
   return (
@@ -121,12 +146,19 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
             <Pressable onPress={() => setReporting((v) => !v)} accessibilityLabel="Report this chat">
               <Text style={styles.headerActionLabel}>Report</Text>
             </Pressable>
-            <Pressable onPress={onBlockUser} accessibilityLabel="Block this user">
-              <Text style={[styles.headerActionLabel, styles.headerActionDanger]}>Block</Text>
-            </Pressable>
+            {isBlocked ? (
+              <Pressable onPress={onUnblockUser} accessibilityLabel="Unblock this user">
+                <Text style={styles.headerActionLabel}>Unblock</Text>
+              </Pressable>
+            ) : (
+              <Pressable onPress={onBlockUser} accessibilityLabel="Block this user">
+                <Text style={[styles.headerActionLabel, styles.headerActionDanger]}>Block</Text>
+              </Pressable>
+            )}
           </View>
         )}
       </View>
+      {isBlocked && <Text style={styles.blockedNote}>You can’t message each other right now.</Text>}
 
       {reporting && (
         <View style={styles.reportReasons}>
@@ -158,10 +190,11 @@ export function ChatScreen({ conversationId }: { conversationId: string }) {
           style={styles.input}
           value={text}
           onChangeText={setText}
-          placeholder="Message..."
+          placeholder={isBlocked ? 'Messaging is unavailable' : 'Message...'}
           placeholderTextColor={colors.textSecondary}
+          editable={!isBlocked}
         />
-        <SendButton onPress={onSend} disabled={sending || !text.trim()} />
+        <SendButton onPress={onSend} disabled={isBlocked || sending || !text.trim()} />
       </View>
     </ScreenContainer>
   );
@@ -272,6 +305,13 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily,
     fontSize: typography.size.xs,
     color: colors.textSecondary,
+  },
+  blockedNote: {
+    fontFamily: typography.fontFamily,
+    fontSize: typography.size.xs,
+    color: colors.danger,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
   },
   actionMessage: {
     fontFamily: typography.fontFamily,

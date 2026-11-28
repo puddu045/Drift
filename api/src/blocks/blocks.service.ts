@@ -8,24 +8,16 @@ export class BlocksService {
 
   async block(blockerId: string, blockedId: string) {
     if (blockerId === blockedId) throw new BadRequestException('Cannot block yourself');
-    await this.prisma.$transaction([
-      this.prisma.block.upsert({
-        where: { blockerId_blockedId: { blockerId, blockedId } },
-        update: {},
-        create: { blockerId, blockedId },
-      }),
-      // Blocking severs any existing connection/messaging too, not just future contact.
-      this.prisma.connection.updateMany({
-        where: {
-          removedAt: null,
-          OR: [
-            { userAId: blockerId, userBId: blockedId },
-            { userAId: blockedId, userBId: blockerId },
-          ],
-        },
-        data: { removedAt: new Date() },
-      }),
-    ]);
+    // Deliberately does NOT remove any existing Connection — a blocked
+    // connection stays visible (greyed out, pushed to the bottom) to whoever
+    // blocked, with its message history intact, same as the person they
+    // blocked. Only sending new messages is disallowed (MessagesService
+    // checks isBlockedEitherWay), not viewing what's already there.
+    await this.prisma.block.upsert({
+      where: { blockerId_blockedId: { blockerId, blockedId } },
+      update: {},
+      create: { blockerId, blockedId },
+    });
   }
 
   async unblock(blockerId: string, blockedId: string) {

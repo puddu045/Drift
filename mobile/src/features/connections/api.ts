@@ -17,6 +17,7 @@ export type Connection = {
   otherUserId: string;
   conversationId: string | null;
   createdAt: string;
+  isBlocked: boolean;
 };
 
 export function sendConnectionRequest(recipientId: string, introMessage?: string) {

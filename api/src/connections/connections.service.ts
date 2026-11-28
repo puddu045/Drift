@@ -138,12 +138,32 @@ export class ConnectionsService {
       include: { conversation: { select: { id: true } } },
       orderBy: { createdAt: 'desc' },
     });
-    return connections.map((c) => ({
-      id: c.id,
-      otherUserId: c.userAId === userId ? c.userBId : c.userAId,
-      conversationId: c.conversation?.id ?? null,
-      createdAt: c.createdAt,
-    }));
+    const otherIds = connections.map((c) => (c.userAId === userId ? c.userBId : c.userAId));
+    const blockRows = otherIds.length
+      ? await this.prisma.block.findMany({
+          where: {
+            OR: [
+              { blockerId: userId, blockedId: { in: otherIds } },
+              { blockerId: { in: otherIds }, blockedId: userId },
+            ],
+          },
+          select: { blockerId: true, blockedId: true },
+        })
+      : [];
+    const blockedOtherIds = new Set(blockRows.map((b) => (b.blockerId === userId ? b.blockedId : b.blockerId)));
+    return connections.map((c) => {
+      const otherUserId = c.userAId === userId ? c.userBId : c.userAId;
+      return {
+        id: c.id,
+        otherUserId,
+        conversationId: c.conversation?.id ?? null,
+        createdAt: c.createdAt,
+        // Either direction — a blocked chat stays visible (see
+        // BlocksService.block) but greyed out and pushed to the bottom on
+        // both ends, with sending disabled until unblocked.
+        isBlocked: blockedOtherIds.has(otherUserId),
+      };
+    });
   }
 
   async removeConnection(userId: string, connectionId: string) {

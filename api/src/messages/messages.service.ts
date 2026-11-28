@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
+import { BlocksService } from '../blocks/blocks.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { dailyTranslateLimit, TranslationService } from '../translation/translation.service.js';
@@ -11,6 +12,7 @@ export class MessagesService {
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
     private readonly translation: TranslationService,
+    private readonly blocks: BlocksService,
   ) {}
 
   private async requireActiveParticipant(userId: string, conversationId: string) {
@@ -65,14 +67,18 @@ export class MessagesService {
 
   async sendMessage(userId: string, conversationId: string, text: string) {
     await this.requireActiveParticipant(userId, conversationId);
-    const message = await this.prisma.message.create({
-      data: { conversationId, senderId: userId, text, deliveredAt: new Date() },
-    });
-
     const other = await this.prisma.conversationParticipant.findFirst({
       where: { conversationId, userId: { not: userId } },
       select: { userId: true },
     });
+    if (other && (await this.blocks.isBlockedEitherWay(userId, other.userId))) {
+      throw new ForbiddenException("You can't message this person right now.");
+    }
+
+    const message = await this.prisma.message.create({
+      data: { conversationId, senderId: userId, text, deliveredAt: new Date() },
+    });
+
     if (other) {
       await this.notifications.create(other.userId, 'message', { conversationId, messageId: message.id });
     }

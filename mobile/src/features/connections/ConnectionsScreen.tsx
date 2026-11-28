@@ -59,13 +59,18 @@ export function ConnectionsScreen() {
     }, [params.segment, router]),
   );
 
-  // Most recently messaged first — the backend orders connections by when
-  // they were created, not by chat activity, so re-sort here using the
-  // per-conversation summaries already fetched for the preview text.
+  // Most recently messaged first within each group — the backend orders
+  // connections by when they were created, not by chat activity, so re-sort
+  // here using the per-conversation summaries already fetched for the
+  // preview text. Blocked chats (either direction) sink to the bottom,
+  // greyed out, regardless of recency — still visible, just out of the way.
   const sortedConnections = useMemo(() => {
     const lastActivity = (c: (typeof connections)[number]) =>
       summaries[c.conversationId ?? '']?.lastMessage?.createdAt ?? c.createdAt;
-    return [...connections].sort((a, b) => +new Date(lastActivity(b)) - +new Date(lastActivity(a)));
+    return [...connections].sort((a, b) => {
+      if (a.isBlocked !== b.isBlocked) return a.isBlocked ? 1 : -1;
+      return +new Date(lastActivity(b)) - +new Date(lastActivity(a));
+    });
   }, [connections, summaries]);
 
   const onAccept = async (id: string) => {
@@ -99,7 +104,7 @@ export function ConnectionsScreen() {
         ))}
       </View>
       {segment === 'Requests' && (
-        <ScrollView contentContainerStyle={styles.section}>
+        <ScrollView contentContainerStyle={[styles.section, requests.length === 0 && styles.sectionEmpty]}>
           {requests.length === 0 && <Text style={styles.empty}>{t('connections.noRequests')}</Text>}
           {requests.map((request) => (
             <Card key={request.id} style={styles.requestCard}>
@@ -129,6 +134,7 @@ export function ConnectionsScreen() {
         <FlatList
           data={sortedConnections}
           keyExtractor={(item) => item.id}
+          contentContainerStyle={sortedConnections.length === 0 && styles.sectionEmpty}
           ListEmptyComponent={<Text style={styles.empty}>{inbox ? t('connections.noConnections') : error ? '' : t('connections.loadingChats')}</Text>}
           renderItem={({ item }) => {
             const message = summaries[item.conversationId ?? '']?.lastMessage;
@@ -143,14 +149,18 @@ export function ConnectionsScreen() {
                 })
               }
             >
-              <Card style={[styles.connectionCard, styles.authorRow]}>
+              <Card style={[styles.connectionCard, styles.authorRow, item.isBlocked && styles.connectionCardBlocked]}>
                 <Avatar
                   name={profiles[item.otherUserId]?.displayName}
                   photoUrl={profiles[item.otherUserId]?.photoUrl}
                 />
                 <View style={{ flex: 1 }}>
-                <Text style={styles.connectionLabel}>{profiles[item.otherUserId]?.displayName ?? t('connections.someone')}</Text>
-                {message && <Text numberOfLines={1} style={styles.meta}>{message.text}</Text>}
+                <Text style={[styles.connectionLabel, item.isBlocked && styles.textBlocked]}>{profiles[item.otherUserId]?.displayName ?? t('connections.someone')}</Text>
+                {item.isBlocked ? (
+                  <Text style={[styles.meta, styles.textBlocked]}>Blocked</Text>
+                ) : (
+                  message && <Text numberOfLines={1} style={styles.meta}>{message.text}</Text>
+                )}
                 </View>
                 <View style={{ alignItems: 'flex-end', gap: 4 }}>
                   {message && <Text style={styles.meta}>{new Date(message.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</Text>}
@@ -194,6 +204,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.md,
   },
+  sectionEmpty: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   sectionLabel: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.sm,
@@ -236,10 +251,17 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: spacing.sm,
   },
+  connectionCardBlocked: {
+    backgroundColor: '#EFEFEF',
+    opacity: 0.6,
+  },
   connectionLabel: {
     fontFamily: typography.fontFamily,
     fontSize: typography.size.md,
     color: colors.textPrimary,
+  },
+  textBlocked: {
+    color: colors.textSecondary,
   },
   empty: {
     fontFamily: typography.fontFamily,

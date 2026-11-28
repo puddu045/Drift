@@ -17,6 +17,7 @@ import { REPORT_REASONS } from '@/features/thoughts/reportReasons';
 import { ThoughtDetailOverlay } from '@/features/universe/ThoughtDetailOverlay';
 import { useTranslation } from '@/i18n';
 import { ApiError } from '@/lib/api';
+import { confirmAction } from '@/lib/confirm';
 import { useTranslatable } from '@/lib/useTranslatable';
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -69,8 +70,10 @@ export function PublicProfileScreen({ userId }: Props) {
   };
 
   const onReport = async (reason: string) => {
-    await reportTarget('profile', userId, reason);
     setReporting(false);
+    const confirmed = await confirmAction('Report this profile?', `Reason: ${reason}. This can't be undone.`, 'Report');
+    if (!confirmed) return;
+    await reportTarget('profile', userId, reason);
     setActionMessage(t('publicProfile.reportSent'));
   };
 

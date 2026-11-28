@@ -14,6 +14,7 @@ import { LanguagePickerModal } from '@/components/LanguagePickerModal';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { TextField } from '@/components/TextField';
 import { useSession } from '@/features/auth/SessionProvider';
+import { listBlocked, unblockUser } from '@/features/blocks/api';
 import { listMuted, unmuteUser } from '@/features/mutes/api';
 import {
   getMyInterestIds,
@@ -79,6 +80,7 @@ export function ProfileScreen() {
   const [myInterestIds, setMyInterestIds] = useState<string[]>([]);
   const [editingInterests, setEditingInterests] = useState(false);
   const [mutedUsers, setMutedUsers] = useState<{ userId: string; name: string }[]>([]);
+  const [blockedUsers, setBlockedUsers] = useState<{ userId: string; name: string }[]>([]);
   const [translationUsage, setTranslationUsage] = useState<TranslationUsage | null>(null);
 
   // First-time setup fields — a profile can't be created without these three.
@@ -121,11 +123,30 @@ export function ProfileScreen() {
         });
       })
       .catch(() => {});
+    listBlocked()
+      .then((blocks) => {
+        setBlockedUsers(blocks.map((b) => ({ userId: b.blockedId, name: 'Blocked user' })));
+        blocks.forEach((b) => {
+          getPublicProfile(b.blockedId)
+            .then((profile) =>
+              setBlockedUsers((prev) =>
+                prev.map((u) => (u.userId === b.blockedId ? { ...u, name: profile.displayName } : u)),
+              ),
+            )
+            .catch(() => {});
+        });
+      })
+      .catch(() => {});
   }, []);
 
   const onUnmute = async (userId: string) => {
     setMutedUsers((prev) => prev.filter((u) => u.userId !== userId));
     await unmuteUser(userId);
+  };
+
+  const onUnblock = async (userId: string) => {
+    setBlockedUsers((prev) => prev.filter((u) => u.userId !== userId));
+    await unblockUser(userId);
   };
 
   const onCreateProfile = async () => {
@@ -372,6 +393,20 @@ export function ProfileScreen() {
                 <Text style={styles.fieldValue}>{u.name}</Text>
                 <Pressable onPress={() => onUnmute(u.userId)} accessibilityLabel={`${t('profile.unmute')} ${u.name}`}>
                   <Text style={styles.editLink}>{t('profile.unmute')}</Text>
+                </Pressable>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {blockedUsers.length > 0 && (
+          <View style={styles.mutedSection}>
+            <Text style={styles.fieldLabel}>Blocked</Text>
+            {blockedUsers.map((u) => (
+              <View key={u.userId} style={styles.fieldRow}>
+                <Text style={styles.fieldValue}>{u.name}</Text>
+                <Pressable onPress={() => onUnblock(u.userId)} accessibilityLabel={`Unblock ${u.name}`}>
+                  <Text style={styles.editLink}>Unblock</Text>
                 </Pressable>
               </View>
             ))}

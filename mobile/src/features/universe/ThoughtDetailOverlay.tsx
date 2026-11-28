@@ -30,6 +30,7 @@ import {
 import { REPORT_REASONS } from '@/features/thoughts/reportReasons';
 import { useTranslation } from '@/i18n';
 import { ApiError } from '@/lib/api';
+import { confirmAction } from '@/lib/confirm';
 import { useTranslatable } from '@/lib/useTranslatable';
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -135,8 +136,10 @@ export function ThoughtDetailOverlay({
   };
 
   const onReport = async (reason: string) => {
-    await reportTarget('thought', thought.id, reason);
     setReporting(false);
+    const confirmed = await confirmAction('Report this thought?', `Reason: ${reason}. This can't be undone.`, 'Report');
+    if (!confirmed) return;
+    await reportTarget('thought', thought.id, reason);
   };
 
   const onDelete = async () => {
@@ -165,6 +168,12 @@ export function ThoughtDetailOverlay({
       setActionMessage(t('thought.anonymousAuthor'));
       return;
     }
+    const confirmed = await confirmAction(
+      'Block this person?',
+      'You won’t see their thoughts anymore, and you won’t be able to message each other until you unblock them. You can unblock them later from your profile.',
+      'Block',
+    );
+    if (!confirmed) return;
     await blockUser(detail.authorId);
     onDeleted(); // Reuse the same "remove from view and close" behavior as delete.
   };
